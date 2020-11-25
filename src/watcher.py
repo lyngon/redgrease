@@ -145,7 +145,9 @@ def register_script(script_path, unblocking=False):
         ret = f"with return code '{exec_res}'."
         post_reg = redis.execute_command('RG.DUMPREGISTRATIONS')
         pre_reg = set([reg[1] for reg in pre_reg])
+        log.debug(f"Pre regs: {list(pre_reg)}")
         post_reg = set([reg[1] for reg in post_reg])
+        log.debug(f"Post regs: {list(post_reg)}")
         diff_reg: set = post_reg-pre_reg
         if len(diff_reg) > 0:
             reg_id = diff_reg.pop()
@@ -208,7 +210,7 @@ def update_dependencies(requirements_file_path):
     """
     log.debug(f"Updating dependecies as per '{requirements_file_path}'")
     try:
-        requirements_list = requirements.from_file(requirements_file_path)
+        requirements_list = requirements.read(requirements_file_path)
         redis.execute_command(
             "RG.PYEXECUTE", "GB().run()", "REQUIREMENTS", *requirements_list
         )

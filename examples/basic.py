@@ -1,3 +1,4 @@
+
 from redgrease.runtime import log, GearsBuilder
 
 
@@ -11,9 +12,11 @@ def bar(x):
     return x
 
 
+log("hello!")
+
 try:
     rg = GearsBuilder('CommandReader')
     rg.map(bar).map(foo)
-    rg.register(trigger='async')
+    rg.register(trigger='HOO')
 except Exception as ex:
     print(ex)

@@ -1,3 +1,4 @@
+twine
 black
 flake8
 isort

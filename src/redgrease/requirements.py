@@ -8,6 +8,8 @@ def read(*requirements_file_paths: str):
     Returns:
         [set[str]]: Individual requirements.
     """
+    # TODO: Error "descriptor 'union' for 'set' objects
+    # doesn't apply to a 'filter' object"
     return set.union(
         *[
             filter(

@@ -47,11 +47,11 @@ except NameError:
 try:
     GearsBuilder
 except NameError:
-    from redgrease import (
+    from redgrease.typing import (
         Key, Callback, Processor, Filterer, Accumulator,
         Reducer, BatchReducer, Extractor, Mapper, Expander
     )
-    from redgrease import Reader, TriggerMode, LogLevel
+    from redgrease.sugar import Reader, TriggerMode, LogLevel
     from redgrease.typing import T
     import redgrease.operations as gearop
 

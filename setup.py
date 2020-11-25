@@ -1,32 +1,29 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-import io
+
 import setuptools
-import os.path
-# from redgrease import requirements
+import pathlib
+
+here = pathlib.Path(__file__).parent.resolve()
 
 
-def read(*names, encoding='utf8'):
-    with io.open(
-        os.path.join(os.path.dirname(__file__), *names),
-        encoding=encoding
-    ) as fh:
-        return fh.read()
+def text(*names, encoding='utf8'):
+    return here.joinpath(*names).read_text(encoding=encoding)
 
 
 setuptools.setup(
     name="redgrease",
-    version="0.0.2",
+    version="0.0.5",
     license="MIT License",
     description="RedisGears helper package",
-    long_description=read("README.md"),
+    long_description=text("README.md"),
     long_description_content_type="text/markdown",
 
     author="Anders Åström",
     author_email="anders@lyngon.com",
     url="https://github.com/lyngon/redgrease",
 
-    packages=setuptools.find_packages('src'),
+    packages=setuptools.find_packages(where='src'),
     package_dir={'': 'src'},
 
     classifiers=[  # https://pypi.org/classifiers/
@@ -48,5 +45,5 @@ setuptools.setup(
     extras_requires=[],
     setup_requires=[],
     python_requires='>=3.6',
-    keywords="Redis Gears Helper"
+    keywords="Redis, Gears, development"
 )
