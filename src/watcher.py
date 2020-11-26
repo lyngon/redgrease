@@ -14,6 +14,7 @@ from hysteresis import HysteresisHandlerIndex
 from redgrease import client
 from redgrease import requirements
 
+
 # Config Parameters
 # TODO: Make these command-line arguments and env-var configurable
 scripts_index_prefix = "/redgrease/scripts"

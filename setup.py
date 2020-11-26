@@ -13,7 +13,7 @@ def text(*names, encoding='utf8'):
 
 setuptools.setup(
     name="redgrease",
-    version="0.0.5",
+    version="0.0.12",
     license="MIT License",
     description="RedisGears helper package",
     long_description=text("README.md"),

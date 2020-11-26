@@ -1,5 +1,5 @@
-
-from redgrease.runtime import log, GearsBuilder
+import redgrease
+from redgrease.runtime import log, GB
 
 
 def foo(x):
@@ -12,11 +12,12 @@ def bar(x):
     return x
 
 
-log("hello!")
+log(str(redgrease.Reader.PythonReader), level='warning')
 
 try:
-    rg = GearsBuilder('CommandReader')
-    rg.map(bar).map(foo)
+    rg = GB("CommandReader")
+    rg.map(bar).map(foo).map(bar)
     rg.register(trigger='HOO')
+    log("Done")
 except Exception as ex:
-    print(ex)
+    log(str(ex))
