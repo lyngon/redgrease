@@ -29,7 +29,7 @@ def hashtag() -> str:
 
 
 def log(message: str, level: str = LogLevel.Notice):
-    logger.log(level=int(level), msg=message)
+    logger.log(level=LogLevel.to_logging_level(level), msg=message)
 
 
 def configGet(key: str):

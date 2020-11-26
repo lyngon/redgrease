@@ -1,21 +1,9 @@
-from enum import Enum
 import logging
 
 # Various Helper enums, instead of "magic" strings.
 
 
-class StrEnum(Enum):
-    """
-    Enumeration for which its string representatin is the enumeration value
-    """
-    def __str__(self):
-        return str(self.value)
-
-    def __eq__(self, other):
-        return str(self) == str(other)
-
-
-class Reader(StrEnum):
+class Reader:
     """Redis Gears Reader Types"""
     KeysReader = "KeysReader"
     KeysOnlyReader = "KeysOnlyReader"
@@ -25,26 +13,29 @@ class Reader(StrEnum):
     CommandReader = "CommandReader"
 
 
-class TriggerMode(StrEnum):
+class TriggerMode:
     """Redis Geears Trigger modes for registered actions"""
     Async = 'async'
     AsyncLocal = 'async_local'
     Sync = 'sync'
 
 
-class LogLevel(StrEnum):
+class LogLevel:
     """Redis Gears log levels"""
     Debug = 'debug'
     Verbose = 'verbose'
     Notice = 'notice'
     Warning = 'warninig'
 
-    def __int__(self):
-        if self == LogLevel.Debug:
+    @staticmethod
+    def to_logging_level(rg_log_level):
+        if rg_log_level == LogLevel.Debug:
             return logging.DEBUG
-        if self == LogLevel.Verbose:
+        elif rg_log_level == LogLevel.Verbose:
             return logging.INFO
-        if self == LogLevel.Notice:
+        elif rg_log_level == LogLevel.Notice:
             return logging.WARNING
-        if self == LogLevel.Warning:
+        elif rg_log_level == LogLevel.Warning:
             return logging.ERROR  # Maybe a little unintuitive ;)
+        else:
+            return logging.INFO
