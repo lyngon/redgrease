@@ -1,16 +1,17 @@
 # RedGrease
 Simple package to facilitate development of Redis Gears Python scripts.
 
-RedGrease currently consists of the followinig:
+RedGrease consists of the followinig:
 - A helper package `redgrease.runtime` that contains the standard redisgears script functions (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc), but that provide auto completion and type hints during development, and does not clash with the actual runtime.
 - Syntactic sugar for various things like 'magic' values and strings, like the different reader names (e.g `redgrease.Reader.CommandReader`), trigger modes (e.g. `redgrease.TriggerMode.AsyncLocal`) and log levels (e.g. `redgrease.LogLevel.Notice`). 
 - **[Coming Soon]** A simple Redis client `redgrease.client.Redis` extended with pythonic functions, mapping closely (1-to-1) to the Redis Gears command set (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc)
 - **[Comming Later]** A remote GearsBuilder, inspired by the official [redisgears-py](https://github.com/RedisGears/redisgears-py) client, but with some differences.
 - **[Maybe Sometime]** Other useful functions. Suggestions appriciated. 
 
-Note that the RedGrease package is primarily intended to aid development of Gears scripts, and can be useful even if it is not installed in the Redis Gears Runtime, although it may be the most convenient approach.
+Note that the RedGrease package is primarily intended to aid development of Gears scripts, and can be useful even if it is not installed in the Redis Gears runtime environment, although it may be the most convenient approach.
 
-There is also **[soon]** a 'watcher' script / Docker container that continously monitors a set of directories containing Redis Gears scripts and automatically 'executes' them on a Redis Gear instance if it detects modifications. The purpose is to streamline development of 'trigger-style' Gear scripts by providing a form of hot-reloading functionality. The watcher
+There is also **[soon]** a 'watcher' script / Docker container providing a simple form of 'hot-reloading' of Redis Gears scripts, by continously monitoring directories containing Redis Gears scripts and automatically 'pyexecute' them on a Redis Gear instance if it detects modifications. 
+The purpose is mainly to streamline development of 'trigger-style' Gear scripts by providing a form of hot-reloading functionality.
 
 ## Installation
 ### Development Environment
@@ -30,7 +31,7 @@ In this case, you would simply load the scripts with 'redgrease' as a requiremen
 ```
 redis-cli RG.PYEXCUTE "$(cat yourscript.py)" REQUIRE redgrease
 ```
-Alternative you can use the RedGrease watcher or loader to automate loading requirements from a normal'requirements.txt' file, as outlined [here](https://github.com/lyngon/redgrease) 
+Alternative you can use the RedGrease watcher or loader to automate loading your scripts as well as requirements from a normal 'requirements.txt' files, as outlined [here](https://github.com/lyngon/redgrease) 
 
 ## Usage
 ### Basic Development 
