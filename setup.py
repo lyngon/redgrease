@@ -40,7 +40,8 @@ setuptools.setup(
         "Topic :: Software Development :: Libraries :: Application Frameworks",
     ],
     install_requires=[
-        'redis'
+        'redis',
+        'attrs',
     ],
     extras_requires=[],
     setup_requires=[],

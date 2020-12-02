@@ -1,4 +1,4 @@
-from typing import Callable, Any, Iterable, TypeVar
+from typing import Callable, Any, Iterable, TypeVar, Union
 
 # Type aliases for type hints
 

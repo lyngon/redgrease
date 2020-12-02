@@ -4,7 +4,7 @@ Simple package to facilitate development of Redis Gears Python scripts.
 RedGrease consists of the followinig:
 - A helper package `redgrease.runtime` that contains the standard redisgears script functions (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc), but that provide auto completion and type hints during development, and does not clash with the actual runtime.
 - Syntactic sugar for various things like 'magic' values and strings, like the different reader names (e.g `redgrease.Reader.CommandReader`), trigger modes (e.g. `redgrease.TriggerMode.AsyncLocal`) and log levels (e.g. `redgrease.LogLevel.Notice`). 
-- **[Coming Soon]** A simple Redis client `redgrease.client.Redis` extended with pythonic functions, mapping closely (1-to-1) to the Redis Gears command set (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc)
+- **[WIP]** A simple Redis client `redgrease.client.Redis` extended with pythonic functions, mapping closely (1-to-1) to the Redis Gears command set (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc)
 - **[Comming Later]** A remote GearsBuilder, inspired by the official [redisgears-py](https://github.com/RedisGears/redisgears-py) client, but with some differences.
 - **[Maybe Sometime]** Other useful functions. Suggestions appriciated. 
 
