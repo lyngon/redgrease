@@ -1,7 +1,5 @@
 from redis import Redis
 from typing import Optional, Union, List, Iterable, Mapping
-# from dataclasses import dataclass
-# from pydantic import Field
 import attr
 from enum import Enum
 import redgrease
@@ -32,6 +30,7 @@ def to_bytes(input):
         f"Value {input} :: {type(input)} is not a valid '{attr}' as bytes."
     )
 
+
 def to_str(input):
     return input.decode() if isinstance(input, bytes) else str(input)
 
@@ -53,50 +52,34 @@ def to_dict(
     valuename: str = None,
     valuetype=lambda x: x
 ):
-    print("Dictifying")
     kwargs = {}
     iterator = iter(items)
     key_is_set = False
     value_is_set = False
     for item in iterator:
-        print(f"Got item '{item}'")
         if not key_is_set:
-            print("Key is not set, finding key")
             if keyname is None:
-                print("No key name is specified, then the item '{item}' is our key")
                 key = keytype(item)
                 key_is_set = True
             else:
-                print(f"A key name '{keyname}' is specified")
                 if to_str(item) == to_str(keyname):
-                    print(f"Current item '{item}' matches the specified key name '{keyname}', so the next item is our key")
                     item = next(iterator)
-                    print(f"... Got item '{item}'. Settting as key")
                     key = keytype(item)
                     key_is_set = True
         elif not value_is_set:
-            print("Value not set, finding value")
             if valuename is None:
-                print(f"No value name is specified, the item '{item}' is our value")
                 value = valuetype(item)
                 value_is_set = True
             else:
-                print(f"A value name '{valuename}' is specified")
                 if to_str(item) == to_str(valuename):
-                    print(f"Current item '{item}' matches, the specified value name '{valuename}, so the next item is our value.")
                     item = next(iterator)
-                    print(f"... Got item '{item}'. Setting as value")
                     value = valuetype(item)
                     value_is_set = True
 
         if key_is_set and value_is_set:
-            print(f"Setting kwargs[{key}] to {value}")
-            print("##########################")
             kwargs[key] = value
             key_is_set, value_is_set = False, False
 
-        print("Next!")
-    print("Nothing more to process! Done!")
     return kwargs
 
 
@@ -127,7 +110,9 @@ class ExecID:
 
     def __repr__(self):
         class_name = self.__class__.__name__
-        return f"{class_name}(shard_id={self.shard_id},sequence={self.sequence})"
+        return f"{class_name}(" \
+            f"shard_id={self.shard_id}," \
+            f"sequence={self.sequence})"
 
     @staticmethod
     def parse(value):
@@ -222,7 +207,9 @@ class ExecutionPlan(RedisObject):
     errors: int
     total_duration: int
     read_duration: int
-    steps: List[ExecutionStep] = attr.ib(converter=list_parser(ExecutionStep.from_redis))
+    steps: List[ExecutionStep] = attr.ib(
+        converter=list_parser(ExecutionStep.from_redis)
+    )
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -537,7 +524,7 @@ class RedisGears(Redis):
         Args:
             trigger_name (str): The registered 'trigger' name of the function
 
-            *args (Any): Any additional arguments to the trigger 
+            *args (Any): Any additional arguments to the trigger
 
         Returns:
             List: A list of the functions output records.
