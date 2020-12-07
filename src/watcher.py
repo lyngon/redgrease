@@ -4,6 +4,7 @@ from fnmatch import fnmatch
 from datetime import datetime
 from os.path import isfile
 from pathlib import Path
+# from glob import iglob
 
 from redis.exceptions import ResponseError
 
@@ -451,10 +452,14 @@ observer = Observer()
 for directory in config.directories:
     log.info(f"Adding event handlers for {directory}")
 
-    
+    # select either recursive or non-recursive glob function for the dir
+    globber = directory.rglob if config.recursive else directory.glob
 
-    # TODO: Iterate through all the files in the watch directories
-    # and ensure they are loaded
+    # find and run/register all requirements files in the watch directories
+    [update_dependencies(f) for f in globber(config.requirements_pattern)]
+
+    # find and run/register all script files in the watch directory
+    [register_script(f) for f in globber(config.script_pattern)]
 
     observer.schedule(event_handler, directory, config.recursive)
 
