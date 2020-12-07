@@ -232,8 +232,6 @@ def register_script(script_path, unblocking=False):
     if not script_content:
         fail(IOError, general_failure_message, "File is empty")
 
-    unblocking = ['UNBLOCKING'] if unblocking else []
-
     # Unregister script if already present
     unregister_script(script_path)
     try:
@@ -243,17 +241,13 @@ def register_script(script_path, unblocking=False):
 
         # This is a quite unsafe way of checking for registrations
         # Probabls Ok for dev situations in non-shared environments
-        pre_reg = redis.execute_command('RG.DUMPREGISTRATIONS')
-        exec_res = redis.execute_command(
-            'RG.PYEXECUTE',
-            f'''{script_content}''',
-            *unblocking
-        )
+        pre_reg = redis.dumpregistrations()
+        exec_res = redis.pyexecute(script_content, unblocking=unblocking)
         ret = f"with return code '{exec_res}'."
-        post_reg = redis.execute_command('RG.DUMPREGISTRATIONS')
-        pre_reg = set([reg[1] for reg in pre_reg])
+        post_reg = redis.dumpregistrations()
+        pre_reg = set([reg.id for reg in pre_reg])
         log.debug(f"Pre regs: {list(pre_reg)}")
-        post_reg = set([reg[1] for reg in post_reg])
+        post_reg = set([reg.id for reg in post_reg])
         log.debug(f"Post regs: {list(post_reg)}")
         diff_reg: set = post_reg-pre_reg
         if len(diff_reg) > 0:
@@ -261,7 +255,7 @@ def register_script(script_path, unblocking=False):
             redis.hset(
                 f"{config.index_prefix}{script_path}",
                 mapping={
-                    'registration_id': reg_id,
+                    'registration_id': str(reg_id),
                     'last_updated': datetime.utcnow().strftime(iso8601_format),
                 }
             )
@@ -277,7 +271,7 @@ def register_script(script_path, unblocking=False):
             )
 
     except Exception as ex:
-        log.error(f"Someting went wrong: {ex}")
+        log.error(f"Something went wrong: {ex}")
 
 
 # TODO: Should be integrated into redgrease.RedisGears class
@@ -298,7 +292,7 @@ def unregister_script(script_path):
             "with id '{reg_id}'"
         )
         try:
-            redis.execute_command('RG.UNREGISTER', reg_id)
+            redis.unregister(reg_id)
         except ResponseError as err:
             log.warn(
                 "Unregistration failed. "
@@ -317,12 +311,11 @@ def update_dependencies(requirements_file_path):
     """
     log.debug(f"Updating dependecies as per '{requirements_file_path}'")
     try:
-        requirements_list = requirements.read(requirements_file_path)
-        redis.execute_command(
-            "RG.PYEXECUTE", "GB().run()", "REQUIREMENTS", *requirements_list
-        )
+        requirements_list = list(requirements.read(requirements_file_path))
+        log.debug(f"Requirements to load: {', '.join(requirements_list)}")
+        redis.pyexecute("GB().run()", requirements=requirements_list)
     except Exception as ex:
-        log.error(f"Someting went wrong: {ex}")
+        log.error(f"Something went wrong: {ex}")
 
 
 # File Event Handling

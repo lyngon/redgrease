@@ -3,7 +3,7 @@ from typing import Optional, Union, List, Iterable, Mapping
 import attr
 from enum import Enum
 import redgrease
-
+import logging
 
 def to_bool(input):
     if isinstance(input, bytes):
@@ -99,11 +99,11 @@ def ok(command_result):
 
 @attr.s(frozen=True, auto_attribs=True)
 class ExecID:
-    shard_id: bytes = 0
+    shard_id: str = "0000000000000000000000000000000000000000"
     sequence: int = 0
 
     def __str__(self):
-        return f"{self.shard_id:040}-{self.sequence}"
+        return f"{self.shard_id}-{self.sequence}"
 
     def __bytes__(self):
         return str(self).encode()
@@ -477,6 +477,7 @@ class RedisGears(Redis):
             params.append("UNBLOCKING")
 
         if requirements is not None:
+            params.append("REQUIREMENTS")
             params += requirements
 
         res = self.execute_command('RG.PYEXECUTE', function_string, *params)
