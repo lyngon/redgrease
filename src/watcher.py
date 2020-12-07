@@ -159,8 +159,7 @@ class UTC_ISO8601_Formatter(logging.Formatter):
         if datefmt:
             s = ct.strftime(datefmt)
         else:
-            t = ct.strftime(iso8601_format)
-            s = "%s,%03d" % (t, record.msecs)
+            s = ct.strftime(iso8601_format)
         return s
 
 
@@ -451,13 +450,17 @@ observer = Observer()
 
 for directory in config.directories:
     log.info(f"Adding event handlers for {directory}")
+
+    
+
+    # TODO: Iterate through all the files in the watch directories
+    # and ensure they are loaded
+
     observer.schedule(event_handler, directory, config.recursive)
 
 log.info("Starting watcher!")
 observer.start()
 
-# TODO: Iterate through all the files in the watch directories
-# and ensure they are loaded.
 
 try:
     while running:
