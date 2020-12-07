@@ -3,12 +3,13 @@ ARG app_name=redgrease
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt ./
-
-RUN apt update \
-&& apt get install -y netcat\
-&& pip install --no-cache-dir -r requirements.txt
-
 COPY . .
 
-CMD [ "python", "watcher.py"]
+RUN apt-get update \
+&& apt-get install -y \
+    apt-utils \
+    netcat \
+&& pip install --no-cache-dir -r requirements.txt \
+&& pip install --no-cache-dir -r redgrease/requirements.txt
+
+ENTRYPOINT [ "python3", "watcher.py"]

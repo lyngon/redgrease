@@ -100,9 +100,10 @@ args.add_argument(
     '-s',
     '--server',
     env_var="SERVER",
+    type=str,
     const='redis',
     default='localhost',
-    action='store_const',
+    nargs='?',
     help="Redis Gears host server IP or hostname."
 )
 args.add_argument(

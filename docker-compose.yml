@@ -8,14 +8,13 @@ services:
     
   redgrease:
     image: lyngon/redgrease
-    name: redgrease
     build:
       context: ./src
       dockerfile: Dockerfile
     volumes:
     - $PWD/examples:/redgrease/watch/examples
+    command: -r /redgrease/watch/examples 
     environment:
-    - TARGET=resdisgears
-    - REGIYSTRATIONS_KEY=/redgrease/regs
+    - SERVER=redisgears
     depends_on:
     - redisgears

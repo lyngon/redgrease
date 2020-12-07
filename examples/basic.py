@@ -1,3 +1,4 @@
+# Requirements files needs to be loaded first, or this will fail.
 import redgrease
 from redgrease.runtime import log, GB
 
