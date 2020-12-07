@@ -14,6 +14,7 @@ def bar(x):
 
 log(str(redgrease.Reader.PythonReader), level='warning')
 
+
 try:
     rg = GB("CommandReader")
     rg.map(bar).map(foo).map(bar)

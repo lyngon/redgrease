@@ -47,7 +47,7 @@ new_version = version.parse(f"{major}.{minor}.{patch}{pre_release}")
 print("")
 print(f"Current version : {current_version}")
 while True:
-    print("")    
+    print("")
     proceed = input(f"Is version {new_version} correct? [yN] : ")
     if proceed.lower() in ['y', 'yes']:
         break

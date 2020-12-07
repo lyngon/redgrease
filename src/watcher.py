@@ -3,6 +3,7 @@ from time import sleep
 from fnmatch import fnmatch
 from datetime import datetime
 from os.path import isfile
+from pathlib import Path
 
 from redis.exceptions import ResponseError
 
@@ -14,33 +15,138 @@ from hysteresis import HysteresisHandlerIndex
 from redgrease import client
 from redgrease import requirements
 
+import configargparse
 
-# Config Parameters
-# TODO: Make these command-line arguments and env-var configurable
-scripts_index_prefix = "/redgrease/scripts"
+args = configargparse.ArgParser(
+    description="Watches one or more directories for Redis Gears scripts, and "
+    "executes them in a Redis Gears instance or cluster, "
+    "whenever changed are detected.",
+    default_config_files=['./*.conf', '/etc/redgrease/conf.d/*.conf']
+)
 
-watch_directories = [
-    "./examples"
-]
-recursive = True
-script_pattern = "*.py"
-requirements_pattern = "*requirements*.txt"
-ignore_patterns = None
+args.add_argument(
+    'directories',
+    nargs='+',
+    type=Path,
+    help="One or more directories containing Redis Gears scripts to watch",
+    )
 
-hysteresis_duration = 3.0
+args.add_argument(
+    '-c',
+    '--config',
+    env_var='CONFIG_FILE',
+    metavar="PATH",
+    is_config_file=True,
+    help="Config file path",
+)
+args.add_argument(
+    '--index-prefix',
+    env_var='INDEX_PREFIX',
+    metavar="PREFIX",
+    required=False,
+    type=str,
+    default="/redgrease/scripts",
+    help="Redis key prefix added to the index of monitored/executed script "
+    "files.",
+    )
+args.add_argument(
+    '-r',
+    '--recursive',
+    env_var='RECURSIVE',
+    action='store_true',
+    help="Recursively watch subdirectories.",
+)
+args.add_argument(
+    '--script-pattern',
+    env_var='SCRIPT_PATTERN',
+    metavar="PATTERN",
+    required=False,
+    type=str,
+    default="*.py",
+    help="File name pattern that must be matched for scripts to be loaded.",
+)
+args.add_argument(
+    '--requirements-pattern',
+    env_var="REQUIREMENTS_PATTERN",
+    metavar="PATTERN",
+    required=False,
+    type=str,
+    default="*requirements*.txt",
+    help="File name pattern that must be matched for requirement files to be"
+    "loaded",
+)
+args.add_argument(
+    '-i',
+    '--ignore',
+    env_var="IGNORE",
+    metavar='PATTERN',
+    action='append',
+    required=False,
+    help="Ignore files matching this pattern.",
+)
+args.add_argument(
+    '-d',
+    '--hysteresis-duration',
+    env_var='HYSTERESIS_DURATION',
+    metavar="SECONDS",
+    required=False,
+    type=float,
+    default=5.0,
+    help="Duration, in seconds, to wait for further updates/modifications "
+    " to files, before executing. This is to prevent malformed scripts to be"
+    " unnecessarily loaded during coding."
+)
+args.add_argument(
+    '-s',
+    '--server',
+    env_var="SERVER",
+    const='redis',
+    default='localhost',
+    action='store_const',
+    help="Redis Gears host server IP or hostname."
+)
+args.add_argument(
+    '-p',
+    '--port',
+    env_var='PORT',
+    type=int,
+    default=6379,
+    help="Redis Gears host port number"
+)
+args.add_argument(
+    '-log-name',
+    env_var='LOG_NAME',
+    metavar="NAME",
+    type=str,
+    help="Log name. Default: '__main__'"
+)
+args.add_argument(
+    '--log-file',
+    env_var='LOG_FILE',
+    metavar="PATH",
+    type=str,
+    help="Log to this file name."
+)
+args.add_argument(
+    '--log-no-stdout',
+    env_var="LOG_NO_STDOUT",
+    dest='log_to_stdout',  # Note: arg is negative, but var is positive
+    action='store_false',
+    help="Do not log to stdout, if set"
+)
+args.add_argument(
+    '--log-level',
+    env_var='LOG_LEVEL',
+    metavar="LEVEL",
+    choices=['CRITICAL', 'ERROR', 'WARNINING', 'INFO', 'DEBUG', 'NOTSET'],
+    default='DEBUG',
+    help="Logging level",
+)
 
-redis_host = "localhost"
-redis_port = 6379
-
-log_name = None
-log_file_path = None
-log_to_stdout = True
-log_level = "DEBUG"
-# End Config Params
-
+config = args.parse_args()
+print(config)
 
 # Logging matters
-# TODO: break out to separate file.
 iso8601_format = "%Y-%m-%dT%H:%M:%S.%f"
 
 
@@ -57,31 +163,31 @@ class UTC_ISO8601_Formatter(logging.Formatter):
         return s
 
 
-if not log_name:
-    log_name = __name__
+if config.log_name:
+    config.log_name = __name__
 
 log_fmt = UTC_ISO8601_Formatter(
     fmt="%(asctime)s %(levelname)s %(name)s: %(message)s"
 )
-log = logging.getLogger(log_name)
-log.setLevel(log_level)
+log = logging.getLogger(config.log_name)
+log.setLevel(config.log_level)
 
-if log_to_stdout:
+if config.log_to_stdout:
     stdout_log = logging.StreamHandler()
-    stdout_log.setLevel(log_level)
+    stdout_log.setLevel(config.log_level)
     stdout_log.setFormatter(log_fmt)
     log.addHandler(stdout_log)
 
-if log_file_path:
-    file_log = logging.FileHandler(log_file_path)
-    file_log.setLevel(log_level)
+if config.log_file:
+    file_log = logging.FileHandler(config.log_file)
+    file_log.setLevel(config.log_level)
     file_log.setFormatter(log_fmt)
     log.addHandler(file_log)
 # End of Logging matters
 
 redis = client.RedisGears(
-    host=redis_host,
-    port=redis_port,
+    host=config.server,
+    port=config.port,
     # TODO: Add more redis options configurable parameters
 )
 
@@ -153,7 +259,7 @@ def register_script(script_path, unblocking=False):
         if len(diff_reg) > 0:
             reg_id = diff_reg.pop()
             redis.hset(
-                f"{scripts_index_prefix}{script_path}",
+                f"{config.index_prefix}{script_path}",
                 mapping={
                     'registration_id': reg_id,
                     'last_updated': datetime.utcnow().strftime(iso8601_format),
@@ -184,7 +290,7 @@ def unregister_script(script_path):
         script_path (str): Script path
     """
     log.debug(f"Unregistering script: '{script_path}'")
-    reg_key = f"{scripts_index_prefix}{script_path}"
+    reg_key = f"{config.index_prefix}{script_path}"
     reg_id = redis.hget(reg_key, 'registration_id')
     if reg_id is not None:
         log.debug(
@@ -222,7 +328,7 @@ def update_dependencies(requirements_file_path):
 # File Event Handling
 
 running = True
-file_index = HysteresisHandlerIndex(hysteresis_duration)
+file_index = HysteresisHandlerIndex(config.hysteresis_duration)
 
 
 def on_deleted(event):
@@ -236,7 +342,7 @@ def on_deleted(event):
         event (watchdog.FileDeletedEvent): Event data for deleted file
     """
     file = event.src_path
-    if fnmatch(file, script_pattern):
+    if fnmatch(file, config.script_pattern):
         log.debug(
             f"Gears script '{file}' deleted. "
             "Scheduling unregistration of script."
@@ -244,7 +350,7 @@ def on_deleted(event):
         # Apply hysteresis in case additional events shortly follow,
         # before we actually unregister
         file_index.signal(file, unregister_script, file)
-    elif fnmatch(file, requirements_pattern):
+    elif fnmatch(file, config.requirements_pattern):
         log.info(
             f"Gears requirements file '{file}' deleted. "
             "Requirement removal not Implemented. "
@@ -265,12 +371,12 @@ def on_modified(event):
         event ([type]): [description]
     """
     file = event.src_path
-    if fnmatch(file, script_pattern):
+    if fnmatch(file, config.script_pattern):
         log.debug(f"Gears script '{file}' modified. Regestering script.")
         # Apply hysteresis in case additional events shortly follow,
         # before we actually (re-)run/register the script.
         file_index.signal(file, register_script, file)
-    elif fnmatch(event.src_path, requirements_pattern):
+    elif fnmatch(event.src_path, config.requirements_pattern):
         log.debug(
             f"Gears requirements file '{file}' modified. "
             "Updating dependencies."
@@ -295,7 +401,7 @@ def on_moved(event):
     old_file = event.src_path
     new_file = event.dest_path
     # Handle, i.e. unregister, the old / source file.
-    if fnmatch(old_file, script_pattern):
+    if fnmatch(old_file, config.script_pattern):
         log.debug(
             f"Gears script '{old_file}' moved to '{new_file}'. "
             "Unregistering old script."
@@ -303,7 +409,7 @@ def on_moved(event):
         # Apply hysteresis in case additional events shortly follow,
         # before we actually unregister the script.
         file_index.signal(old_file, unregister_script, old_file)
-    elif fnmatch(old_file, requirements_pattern):
+    elif fnmatch(old_file, config.requirements_pattern):
         log.debug(
             f"Gears requirements file '{old_file}' moved to '{new_file}'. "
             "Requirement removal not Implemented. "
@@ -312,7 +418,7 @@ def on_moved(event):
 
     # TODO: Check that the new file is in the watch directory
     # Handle, i.e. run/register, the new / destination file
-    if fnmatch(new_file, script_pattern):
+    if fnmatch(new_file, config.script_pattern):
         log.debug(
             f"File '{old_file}' moved to Gears script '{new_file}'. "
             "Registering new script."
@@ -320,7 +426,7 @@ def on_moved(event):
         # Apply hysteresis in case additional events shortly follow,
         # before we actually (re-)run/register the script
         file_index.signal(new_file, register_script, new_file)
-    elif fnmatch(new_file, requirements_pattern):
+    elif fnmatch(new_file, config.requirements_pattern):
         log.debug(
             f"File '{old_file}' moved to requirements file '{new_file}'. "
             "Updating dependencies"
@@ -337,8 +443,8 @@ def on_moved(event):
 
 # Create the file change event listener
 event_handler = PatternMatchingEventHandler(
-    patterns=[script_pattern, requirements_pattern],
-    ignore_patterns=ignore_patterns,
+    patterns=[config.script_pattern, config.requirements_pattern],
+    ignore_patterns=config.ignore,
     ignore_directories=False,
     case_sensitive=False
 )
@@ -349,9 +455,9 @@ event_handler.on_moved = on_moved
 
 observer = Observer()
 
-for directory in watch_directories:
+for directory in config.directories:
     log.info(f"Adding event handlers for {directory}")
-    observer.schedule(event_handler, directory, recursive)
+    observer.schedule(event_handler, directory, config.recursive)
 
 log.info("Starting watcher!")
 observer.start()
