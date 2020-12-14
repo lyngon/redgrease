@@ -311,7 +311,7 @@ def unregister_script(script_path):
     if reg_id is not None:
         log.debug(
             f"Removing registration for script '{script_path}' "
-            "with id '{reg_id}'"
+            f"with id '{reg_id}'"
         )
         try:
             redis.unregister(reg_id)
