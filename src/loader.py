@@ -4,7 +4,7 @@ from fnmatch import fnmatch
 from datetime import datetime
 from os.path import isfile
 from pathlib import Path
-# from glob import iglob
+import re
 
 from redis.exceptions import ResponseError
 
@@ -64,7 +64,8 @@ args.add_argument(
     required=False,
     type=str,
     default="*.py",
-    help="File name pattern that must be matched for scripts to be loaded.",
+    help="File name pattern (glob-style) that must be matched for scripts to "
+    "be loaded.",
 )
 args.add_argument(
     '--requirements-pattern',
@@ -73,8 +74,18 @@ args.add_argument(
     required=False,
     type=str,
     default="*requirements*.txt",
-    help="File name pattern that must be matched for requirement files to be"
-    "loaded",
+    help="File name pattern (glob-style) that must be matched for requirement "
+    "files to be loaded.",
+)
+args.add_argument(
+    "--unblocking-pattern",
+    env_var="UNBLOCKING_PATTERT",
+    metavar="PATTERN",
+    required=False,
+    type=re.compile,
+    default="unblock",
+    help="Scripts with file paths that match this regular expression, "
+    "will be executed with the 'UNBLOCKING' modifier, i.e. async execution."
 )
 args.add_argument(
     '-i',
@@ -86,16 +97,22 @@ args.add_argument(
     help="Ignore files matching this pattern.",
 )
 args.add_argument(
-    '-d',
-    '--hysteresis-duration',
-    env_var='HYSTERESIS_DURATION',
+    '-w',
+    '--watch',
+    env_var='WATCH',
     metavar="SECONDS",
-    required=False,
+    nargs='?',
     type=float,
-    default=5.0,
-    help="Duration, in seconds, to wait for further updates/modifications "
-    " to files, before executing. This is to prevent malformed scripts to be"
-    " unnecessarily loaded during coding."
+    default=0.0,
+    const=5.0,
+    help="If set, the directories will be continously montiored for updates/"
+    "modifications to scripts and requirement files, and automatically loaded/"
+    "rerun. The flag takes an optional value specifying the  duration, "
+    "in seconds, to wait for further updates/modifications to files, before "
+    "executing. "
+    "This 'hysteresis' period is to prevent malformed scripts to be "
+    "unnecessarily loaded during coding. "
+    "If no value is supplied, the duration is defaulting to 5 seconds."
 )
 args.add_argument(
     '-s',
@@ -213,13 +230,14 @@ def fail(exception, *messages):
 # Execute / Register script in redis
 # TODO: Should be integrated into redgrease.RedisGears class
 # TODO: Handle multiple registrations per script.
-def register_script(script_path, unblocking=False):
+def register_script(script_path):
     """Execute / Register a gear script in redis using 'RG.PYEXECUTE'
 
     Args:
         script_path (str): Path to the script.
-        unblocking (bool, optional): Execute / Register as unblocking.
-        Defaults to False.
+
+        Note: paths that maches the 'unblocking-pattern', will be executed
+        with the 'UNBLOCKING' modifier.
     """
     log.debug(f"Registering script '{script_path}'")
     general_failure_message = f"Unable to register script file '{script_path}'"
@@ -235,6 +253,9 @@ def register_script(script_path, unblocking=False):
 
     # Unregister script if already present
     unregister_script(script_path)
+
+    unblocking = config.unblocking_pattern.match(str(script_path)) is not None
+
     try:
         log.debug(
             f"Running/registering Gear script '{script_path}' on Redis server"
@@ -321,8 +342,7 @@ def update_dependencies(requirements_file_path):
 
 # File Event Handling
 
-running = True
-file_index = HysteresisHandlerIndex(config.hysteresis_duration)
+file_index = HysteresisHandlerIndex(config.watch)
 
 
 def on_deleted(event):
@@ -463,15 +483,19 @@ for directory in config.directories:
 
     observer.schedule(event_handler, directory, config.recursive)
 
-log.info("Starting watcher!")
-observer.start()
 
+if config.watch > 0:
+    log.info("Starting watcher!")
+    observer.start()
+    running = True
 
-try:
-    while running:
-        sleep(1)
-except KeyboardInterrupt:
-    running = False
-    print("Interrupted by user. Ending!")
-finally:
-    redis.close()
+    try:
+        while running:
+            sleep(1)
+    except KeyboardInterrupt:
+        running = False
+        print("Interrupted by user. Ending!")
+    finally:
+        observer.stop()
+
+redis.close()

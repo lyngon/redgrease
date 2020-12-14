@@ -13,7 +13,7 @@ services:
       dockerfile: Dockerfile
     volumes:
     - $PWD/examples:/redgrease/watch/examples
-    command: -r /redgrease/watch/examples 
+    command: -w 1.2 -r /redgrease/watch/examples 
     environment:
     - SERVER=redisgears
     depends_on:

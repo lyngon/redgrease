@@ -12,4 +12,4 @@ RUN apt-get update \
 && pip install --no-cache-dir -r requirements.txt \
 && pip install --no-cache-dir -r redgrease/requirements.txt
 
-ENTRYPOINT [ "python3", "watcher.py"]
+ENTRYPOINT [ "python3", "loader.py"]
