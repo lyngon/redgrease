@@ -21,7 +21,8 @@ import configargparse
 args = configargparse.ArgParser(
     description="Scans one or more directories for Redis Gears scripts, and "
     "executes them in a Redis Gears instance or cluster, "
-    "potentially continiousl montoring and re-loading whenever changes are detected.",
+    "potentially continiousl montoring and re-loading whenever changes are "
+    "detected.",
     default_config_files=['./*.conf', '/etc/redgrease/conf.d/*.conf']
 )
 
@@ -179,6 +180,7 @@ class UTC_ISO8601_Formatter(logging.Formatter):
         else:
             s = ct.strftime(iso8601_format)
         return s
+
 
 log_fmt = UTC_ISO8601_Formatter(
     fmt="%(asctime)s %(levelname)s %(name)s: %(message)s"
