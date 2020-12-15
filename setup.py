@@ -33,7 +33,9 @@ setuptools.setup(
 
     packages=setuptools.find_packages(where='src'),
     package_dir={'': 'src'},
-
+    entry_points={
+        'console_scripts': ['redgrease=redgrease.cli'],
+    },
     classifiers=[  # https://pypi.org/classifiers/
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
@@ -50,6 +52,8 @@ setuptools.setup(
     install_requires=[
         'redis',
         'attrs',
+        'watchdog',
+        'ConfigArgParse'
     ],
     setup_requires=[],
     python_requires='>=3.6',
