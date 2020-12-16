@@ -1,4 +1,2 @@
-redis
-watchdog
-ConfigArgParse
 redgrease
+-r redgrease/requirements.txt

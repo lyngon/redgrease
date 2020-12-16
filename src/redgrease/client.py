@@ -5,6 +5,9 @@ from enum import Enum
 import redgrease
 import logging
 
+log = logging.getLogger(__name__)
+
+
 def to_bool(input):
     if isinstance(input, bytes):
         input = input.decode()

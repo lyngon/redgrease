@@ -13,8 +13,10 @@ services:
       dockerfile: Dockerfile
     volumes:
     - $PWD/examples:/redgrease/watch/examples
+    # - $PWD/logging.ini:/conf/logging.ini
     command: -w -r /redgrease/watch/examples 
     environment:
     - SERVER=redisgears
+    # - LOG_CONFIG=/conf/logging.ini
     depends_on:
     - redisgears

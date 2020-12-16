@@ -2,7 +2,8 @@ import time
 import configargparse
 import re
 from pathlib import Path
-import redgrease.logging
+import logging
+import redgrease.formatting
 import redgrease.loader
 
 args = configargparse.ArgParser(
@@ -10,7 +11,7 @@ args = configargparse.ArgParser(
     "executes them in a Redis Gears instance or cluster. "
     "Can optionally run continiously, montoring and re-loading scripts "
     "whenever changes are detected.",
-    default_config_files=['./*.conf', '/etc/redgrease/conf.d/*.conf']
+    default_config_files=['./*.conf', '/etc/redgrease/conf.d/*.conf'],
 )
 
 args.add_argument(
@@ -121,49 +122,19 @@ args.add_argument(
     default=6379,
     help="Redis Gears host port number"
 )
-# args.add_argument(
-#     '-log-name',
-#     env_var='LOG_NAME',
-#     metavar="NAME",
-#     type=str,
-#     help="Log name. Default: '__main__'"
-# )
 args.add_argument(
-    '--log-file',
-    env_var='LOG_FILE',
-    metavar="PATH",
+    '-l',
+    '--log-config',
+    env_var='LOG_CONFIG',
     type=str,
-    help="Log to this file name."
-)
-args.add_argument(
-    '--log-no-stdout',
-    env_var="LOG_NO_STDOUT",
-    dest='log_to_stdout',  # Note: arg is negative, but var is positive
-    action='store_false',
-    help="Do not log to stdout, if set"
-)
-args.add_argument(
-    '--log-level',
-    env_var='LOG_LEVEL',
-    metavar="LEVEL",
-    choices=['CRITICAL', 'ERROR', 'WARNINING', 'INFO', 'DEBUG', 'NOTSET'],
-    default='INFO',
-    help="Logging level",
+    help="",
 )
 
 config = args.parse_args()
-if not config.log_name:
-    config.log_name = __name__
 
-redgrease.logging.setLevel(config.log_level)
+redgrease.formatting.initialize_logger(config=config.log_config)
 
-if config.log_to_stdout:
-    redgrease.logging.enable_std_out_logging()
-
-if config.log_file:
-    redgrease.logging.enable_file_logging(config.log_file)
-
-log = redgrease.logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def main():
@@ -172,7 +143,7 @@ def main():
         script_pattern=config.script_pattern,
         requirements_pattern=config.requirements_pattern,
         unblocking_pattern=config.unblocking_pattern,
-        ignore_patterns=config.unblocking_patterns,
+        ignore_patterns=config.ignore,
         index_prefix=config.index_prefix,
         server=config.server,
         port=config.port,
@@ -185,7 +156,7 @@ def main():
         )
 
     if loader.observer:
-        log.info("Starting watcher!")
+        log.info("Starting directory observer!")
         loader.start()
         running = True
 
@@ -194,7 +165,7 @@ def main():
                 time.sleep(1)
         except KeyboardInterrupt:
             running = False
-            print("Interrupted by user. Ending!")
+            log.warning("Interrupted by user. Ending!")
         finally:
             loader.stop()
 

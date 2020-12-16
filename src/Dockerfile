@@ -9,7 +9,7 @@ RUN apt-get update \
 && apt-get install -y \
     apt-utils \
     netcat \
-&& pip install --no-cache-dir -r requirements.txt \
-&& pip install --no-cache-dir -r redgrease/requirements.txt
+&& python -m pip install --upgrade pip \
+&& pip install --no-cache-dir -r requirements.txt  
 
-ENTRYPOINT [ "python3", "loader.py"]
+ENTRYPOINT ["redgrease"]

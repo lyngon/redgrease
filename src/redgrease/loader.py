@@ -4,24 +4,21 @@ from os.path import isfile
 from typing import Union
 from pathlib import Path
 import re
+import logging
 
 from redis.exceptions import ResponseError
 
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
-from hysteresis import HysteresisHandlerIndex
+from redgrease import client, requirements, hysteresis, formatting
 
-import redgrease.logging
-from redgrease import client
-from redgrease import requirements
 
-# logging.getLogger() can also be used as normal
-log = redgrease.logging.getLogger()
+log = logging.getLogger(__name__)
 
 default_index_prefix = "/redgrease/scripts"
 default_script_pattern = "*.py"
-default_requirements_pattern = "*requirements*.txt",
+default_requirements_pattern = "*requirements*.txt"
 default_unblocking_pattern = "unblock"
 default_ignore_patterns = []
 
@@ -49,7 +46,7 @@ class GearsLoader:
         self,
         script_pattern: str = None,
         requirements_pattern: str = None,
-        unblocking_pattern: Union(str, re.Pattern) = None,
+        unblocking_pattern: Union[str, re.Pattern] = None,
         ignore_patterns: str = None,
         index_prefix: str = None,
         server: str = 'localhost',
@@ -57,9 +54,6 @@ class GearsLoader:
         observe: float = None,
         **redis_kwargs
     ):
-        global log
-        log = redgrease.logging.getLogger()
-
         self.directories = []
 
         self.script_pattern = script_pattern \
@@ -93,7 +87,7 @@ class GearsLoader:
 
         self.observer = Observer() if observe else None
 
-        self.file_index = HysteresisHandlerIndex(
+        self.file_index = hysteresis.HysteresisHandlerIndex(
             hysteresis_duration=observe
         )
 
@@ -205,7 +199,7 @@ class GearsLoader:
                     mapping={
                         'registration_id': str(reg_id),
                         'last_updated': datetime.utcnow().strftime(
-                            redgrease.logging.iso8601_format
+                            formatting.iso8601_datefmt
                         ),
                     }
                 )
