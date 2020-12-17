@@ -51,7 +51,7 @@ setuptools.setup(
         "Topic :: Software Development :: Libraries :: Application Frameworks",  # noqa: E501
     ],
     install_requires=[],  # Should remain empty for minimal runtime install.
-    extras_reqires={
+    extras_require={
         'all': all_extras,
         'client': client_extras,
         'cli':  cli_extras,
