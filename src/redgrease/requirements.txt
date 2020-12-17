@@ -1,5 +1,0 @@
-redis
-attrs
-watchdog
-ConfigArgParse
-pyyaml

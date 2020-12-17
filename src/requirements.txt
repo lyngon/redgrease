@@ -1,2 +1,6 @@
-redgrease
--r redgrease/requirements.txt
+redis
+attrs
+watchdog
+ConfigArgParse
+pyyaml
+redgrease[all]
