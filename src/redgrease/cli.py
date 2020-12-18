@@ -75,7 +75,9 @@ args.add_argument(
     type=re.compile,
     default=redgrease.loader.default_unblocking_pattern,
     help="Scripts with file paths that match this regular expression, "
-    "will be executed with the 'UNBLOCKING' modifier, i.e. async execution."
+    "will be executed with the 'UNBLOCKING' modifier, i.e. async execution. "
+    "Note that the pattern is a 'search' pattern and not anchored to the start "
+    "of the path string."
 )
 args.add_argument(
     '-i',

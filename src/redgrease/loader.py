@@ -168,7 +168,7 @@ class GearsLoader:
         # Unregister script if already present
         self.unregister_script(script_path)
 
-        unblocking = self.unblocking_pattern.match(
+        unblocking = self.unblocking_pattern.search(
             str(script_path)
         ) is not None
 
