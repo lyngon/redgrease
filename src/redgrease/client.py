@@ -214,6 +214,20 @@ class ExecutionPlan(RedisObject):
         converter=list_parser(ExecutionStep.from_redis)
     )
 
+    @classmethod
+    def parse(res):
+        executions = map(
+                lambda x: to_dict(
+                    x,
+                    keyname='shard_id',
+                    valuename='execution_plan',
+                    valuetype=ExecutionPlan.from_redis
+                ),
+                res
+            )
+        return {k: v for d in executions for k, v in d.items()}
+        }
+
 
 @attr.s(auto_attribs=True, frozen=True)
 class ShardInfo(RedisObject):
@@ -233,6 +247,17 @@ class ClusterInfo(RedisObject):
         converter=list_parser(ShardInfo.from_redis)
     )
 
+    @classmethod
+    def parse(res):        
+        if res is None or res == b'no cluster mode':
+            return None
+
+        cluster_info = ClusterInfo(
+            my_id=to_str(res[1]),
+            shards=res[2],  # list(map(ShardInfo.from_redis, res[2]))
+        )
+
+        return cluster_info
 
 @attr.s(auto_attribs=True, frozen=True)
 class PyStats(RedisObject):
@@ -268,7 +293,29 @@ class RedisGears(Redis):
         ExecutionThreads = b'ExecutionThreads'
         ExecutionMaxIdleTime = b'ExecutionMaxIdleTime'
         PythonInstallReqMaxIdleTime = b'PythonInstallReqMaxIdleTime'
-        SendMsgRetries = b'SendMsgRetries'
+        SendMsgRetries = b'SendMsgRetries' 
+
+    # TODO: Use callbacks from 'redis.utils' and/or 'redis.client' where applicable
+    RESPONSE_CALLBACKS = {
+        **Redis.RESPONSE_CALLBACKS,
+        **{
+            'RG.ABORTEXECUTION': ok,
+            # 'RG.CONFIGGET': None,
+            'RG.CONFIGSET': lambda res: all(map(ok, res)),
+            'RG.DROPEXECUTION': ok,
+            'RG.DUMPEXECUTIONS': lambda res: list(map(ExecutionInfo.from_redis, res)),
+            'RG.DUMPREGISTRATIONS': lambda res: list(map(Registration.from_redis, res)),
+            'RG.GETEXECUTION': ExecutionPlan.parse,
+            # 'RG.GETRESULTS': None, 
+            # 'RG.GETRESULTSBLOCKING': None,
+            'RG.INFOCLUSTER': ClusterInfo.parse, 
+            'RG.PYEXECUTE': lambda res: "OK" if res == b'OK' else res,
+            'RG.PYSTATS': PyStats.from_redis,
+            'RG.PYDUMPREQS': lambda res: list(map(PyRequirementInfo.from_redis, res)),
+            'RG.REFRESHCLUSTER': to_bool,
+            # 'RG.TRIGGER': None,
+            'RG.UNREGISTER': to_bool
+    }
 
     def abortexecution(self, id: Union[ExecID, bytes, str]) -> bool:
         """Abort the execution of a function mid-flight
@@ -280,7 +327,7 @@ class RedisGears(Redis):
             [bool]: True or an error if the execution does not exist or had
             already finished.
         """
-        return ok(self.execute_command("RG.ABORTEXECUTION", id))
+        return self.execute_command("RG.ABORTEXECUTION", id)
 
     # TODO: Problematic name, as it is very similar to Redis' config_get
     def configget(self, *config_name: Union[ExecID, bytes, str]) -> List:
@@ -307,9 +354,8 @@ class RedisGears(Redis):
         Returns:
             bool: True if all was successful, false oterwise
         """
-        res = self.execute_command('RG.CONFIGSET', *to_list(config_setting))
-        return all(map(ok, res))
-
+        return self.execute_command('RG.CONFIGSET', *to_list(config_setting))
+        
     def dropexecution(self, id: Union[ExecID, bytes, str]) -> bool:
         """
         Remove the execution of a function from the executions list.
@@ -321,7 +367,7 @@ class RedisGears(Redis):
             bool: True if successful, or an error if the execution
             does not exist or is still running.
         """
-        return ok(self.execute_command('RG.DROPEXECUTION', id))
+        return self.execute_command('RG.DROPEXECUTION', id)
 
     def dumpexecutions(self) -> List[ExecutionInfo]:
         """Get list of function executions.
@@ -332,8 +378,7 @@ class RedisGears(Redis):
             List[ExecutionInfo]: A list of ExecutionInfo,
             with an entry per execution.
         """
-        res = self.execute_command('RG.DUMPEXECUTIONS')
-        return list(map(ExecutionInfo.from_redis, res))
+        return self.execute_command('RG.DUMPEXECUTIONS')
 
     def dumpregistrations(self) -> List[Registration]:
         """Get list of function registrations.
@@ -342,8 +387,8 @@ class RedisGears(Redis):
             List[Registration]: A list of Registration,
             with one entry per registered function.
         """
-        res = self.execute_command('RG.DUMPREGISTRATIONS')
-        return list(map(Registration.from_redis, res))
+        return self.execute_command('RG.DUMPREGISTRATIONS')
+        
 
     def getexecution(
         self,
@@ -369,19 +414,7 @@ class RedisGears(Redis):
             id = id.executionId
 
         locality = [] if locality is None else [to_str(locality).upper()]
-        res = self.execute_command('RG.GETEXECUTION', to_bytes(id), *locality)
-
-        executions = map(
-                lambda x: to_dict(
-                    x,
-                    keyname='shard_id',
-                    valuename='execution_plan',
-                    valuetype=ExecutionPlan.from_redis
-                ),
-                res
-            )
-
-        return {k: v for d in executions for k, v in d.items()}
+        return self.execute_command('RG.GETEXECUTION', to_bytes(id), *locality)
 
     def getresults(
         self,
@@ -401,9 +434,7 @@ class RedisGears(Redis):
         if isinstance(id, ExecutionInfo):
             id = id.executionId
 
-        res = self.execute_command('RG.GETRESULTS', id)
-
-        return res
+        return self.execute_command('RG.GETRESULTS', id)
 
     def getresultsblocking(self, id: Union[ExecutionInfo, ExecID, str, bytes]):
         """Get the results and errors from the execution details of a function.
@@ -421,8 +452,7 @@ class RedisGears(Redis):
         if isinstance(id, ExecutionInfo):
             id = id.executionId
 
-        res = self.execute_command('RG.GETRESULTSBLOCKING', id)
-        return res
+        return self.execute_command('RG.GETRESULTSBLOCKING', id)
 
     def infocluster(self) -> ClusterInfo:
         """Gets information about the cluster and its shards.
@@ -430,17 +460,7 @@ class RedisGears(Redis):
         Returns:
             ClusterInfo: Cluster information or None if not ion cluster mode.
         """
-        res = self.execute_command('RG.INFOCLUSTER')
-
-        if res is None or res == b'no cluster mode':
-            return None
-
-        cluster_info = ClusterInfo(
-            my_id=to_str(res[1]),
-            shards=res[2],  # list(map(ShardInfo.from_redis, res[2]))
-        )
-
-        return cluster_info
+        return self.execute_command('RG.INFOCLUSTER')
 
     def pyexecute(
         self,
@@ -483,12 +503,7 @@ class RedisGears(Redis):
             params.append("REQUIREMENTS")
             params += requirements
 
-        res = self.execute_command('RG.PYEXECUTE', function_string, *params)
-
-        if res == b'OK':
-            res = to_str(res)
-
-        return res
+        return self.execute_command('RG.PYEXECUTE', function_string, *params)
 
     def pystats(self) -> PyStats:
         """Get memory usage statisticy from the Python interpreter
@@ -497,9 +512,7 @@ class RedisGears(Redis):
             PyStats: Python interpretere memory statistics, including total,
             peak and current amount of allocated memory, in bytes.
         """
-        res = self.execute_command('RG.PYSTATS')
-
-        return PyStats.from_redis(res)
+        return self.execute_command('RG.PYSTATS')
 
     def pydumpreqs(self) -> List[PyRequirementInfo]:
         """Gets all the python requirements available (with information about
@@ -509,9 +522,7 @@ class RedisGears(Redis):
             List[PyRequirementInfo]: List of Python requirement information
             objects.
         """
-        res = self.execute_command('RG.PYDUMPREQS')
-
-        return list(map(PyRequirementInfo.from_redis, res))
+        return self.execute_command('RG.PYDUMPREQS')
 
     def refreshcluster(self) -> bool:
         """Refreshes the local node's view of the cluster topology.
@@ -519,8 +530,7 @@ class RedisGears(Redis):
         Returns:
             bool: True if successful, raises an error othewise
         """
-        res = self.execute_command('RG.REFRESHCLUSTER')
-        return to_bool(res)
+        return self.execute_command('RG.REFRESHCLUSTER')
 
     def trigger(self, trigger_name: str, *args) -> List:
         """Trigger the execution of a registered 'CommandReader' function.
@@ -533,8 +543,7 @@ class RedisGears(Redis):
         Returns:
             List: A list of the functions output records.
         """
-        res = self.execute_command('RG.TRIGGER', to_str(trigger_name), *args)
-        return res
+        return self.execute_command('RG.TRIGGER', to_str(trigger_name), *args)
 
     def unregister(self, id: Union[ExecutionInfo, ExecID, str, bytes]) -> bool:
         """Removes the registration of a function
@@ -551,5 +560,4 @@ class RedisGears(Redis):
         if isinstance(id, ExecutionInfo):
             id = id.executionId
 
-        res = self.execute_command('RG.UNREGISTER', id)
-        return to_bool(res)
+        return self.execute_command('RG.UNREGISTER', id)
