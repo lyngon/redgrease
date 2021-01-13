@@ -1,4 +1,4 @@
-from redgrease.runtime import GearsBuilder
+from redgrease import GearsBuilder
 from redgrease import TriggerMode
 from redgrease.typing import Callback
 

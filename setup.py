@@ -18,7 +18,9 @@ except FileNotFoundError:
     print("Set the version on the first line of a '.version' file")
     sys.exit(404)
 
-client_extras = ['redis', 'attrs', ]
+
+runtime_extras = ['redis']
+client_extras = runtime_extras + ['attrs', ]
 cli_extras = client_extras + ['watchdog', 'ConfigArgParse', 'pyyaml', ]
 
 all_extras = cli_extras
@@ -55,6 +57,7 @@ setuptools.setup(
         'all': all_extras,
         'client': client_extras,
         'cli':  cli_extras,
+        'runtime': runtime_extras,
     },
     entry_points={
         'console_scripts': ['redgrease=redgrease.cli:main [cli]'],

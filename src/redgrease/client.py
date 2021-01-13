@@ -226,7 +226,7 @@ class ExecutionPlan(RedisObject):
                 res
             )
         return {k: v for d in executions for k, v in d.items()}
-        }
+
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -315,6 +315,7 @@ class RedisGears(Redis):
             'RG.REFRESHCLUSTER': to_bool,
             # 'RG.TRIGGER': None,
             'RG.UNREGISTER': to_bool
+        }
     }
 
     def abortexecution(self, id: Union[ExecID, bytes, str]) -> bool:
