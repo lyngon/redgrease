@@ -228,7 +228,6 @@ class ExecutionPlan(RedisObject):
         return {k: v for d in executions for k, v in d.items()}
 
 
-
 @attr.s(auto_attribs=True, frozen=True)
 class ShardInfo(RedisObject):
     id: str = attr.ib(converter=to_str)
@@ -248,7 +247,7 @@ class ClusterInfo(RedisObject):
     )
 
     @classmethod
-    def parse(res):        
+    def parse(res):
         if res is None or res == b'no cluster mode':
             return None
 
@@ -258,6 +257,7 @@ class ClusterInfo(RedisObject):
         )
 
         return cluster_info
+
 
 @attr.s(auto_attribs=True, frozen=True)
 class PyStats(RedisObject):
@@ -293,9 +293,10 @@ class RedisGears(Redis):
         ExecutionThreads = b'ExecutionThreads'
         ExecutionMaxIdleTime = b'ExecutionMaxIdleTime'
         PythonInstallReqMaxIdleTime = b'PythonInstallReqMaxIdleTime'
-        SendMsgRetries = b'SendMsgRetries' 
+        SendMsgRetries = b'SendMsgRetries'
 
-    # TODO: Use callbacks from 'redis.utils' and/or 'redis.client' where applicable
+    # TODO: Use callbacks from 'redis.utils'
+    # TODO: and/or 'redis.client' where applicable
     RESPONSE_CALLBACKS = {
         **Redis.RESPONSE_CALLBACKS,
         **{
@@ -303,15 +304,21 @@ class RedisGears(Redis):
             # 'RG.CONFIGGET': None,
             'RG.CONFIGSET': lambda res: all(map(ok, res)),
             'RG.DROPEXECUTION': ok,
-            'RG.DUMPEXECUTIONS': lambda res: list(map(ExecutionInfo.from_redis, res)),
-            'RG.DUMPREGISTRATIONS': lambda res: list(map(Registration.from_redis, res)),
+            'RG.DUMPEXECUTIONS': lambda res: list(
+                map(ExecutionInfo.from_redis, res)
+            ),
+            'RG.DUMPREGISTRATIONS': lambda res: list(
+                map(Registration.from_redis, res)
+            ),
             'RG.GETEXECUTION': ExecutionPlan.parse,
-            # 'RG.GETRESULTS': None, 
+            # 'RG.GETRESULTS': None,
             # 'RG.GETRESULTSBLOCKING': None,
-            'RG.INFOCLUSTER': ClusterInfo.parse, 
+            'RG.INFOCLUSTER': ClusterInfo.parse,
             'RG.PYEXECUTE': lambda res: "OK" if res == b'OK' else res,
             'RG.PYSTATS': PyStats.from_redis,
-            'RG.PYDUMPREQS': lambda res: list(map(PyRequirementInfo.from_redis, res)),
+            'RG.PYDUMPREQS': lambda res: list(
+                map(PyRequirementInfo.from_redis, res)
+            ),
             'RG.REFRESHCLUSTER': to_bool,
             # 'RG.TRIGGER': None,
             'RG.UNREGISTER': to_bool
@@ -356,7 +363,7 @@ class RedisGears(Redis):
             bool: True if all was successful, false oterwise
         """
         return self.execute_command('RG.CONFIGSET', *to_list(config_setting))
-        
+
     def dropexecution(self, id: Union[ExecID, bytes, str]) -> bool:
         """
         Remove the execution of a function from the executions list.
@@ -389,7 +396,6 @@ class RedisGears(Redis):
             with one entry per registered function.
         """
         return self.execute_command('RG.DUMPREGISTRATIONS')
-        
 
     def getexecution(
         self,

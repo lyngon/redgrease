@@ -25,4 +25,3 @@ def trigger(
                 **kargs
             )
     return gear
-

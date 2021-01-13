@@ -135,36 +135,3 @@ def initialize_logger(
         logging.getLogger(__name__).info(
             "Successfully loaded configuration"
         )
-
-
-
-# def enable_std_out_logging(
-#   log_name=None,
-#   log_level=None,
-#   log_formatter=None
-# ):
-#     log = logging.getLogger(log_name)
-
-#     log_level = log_level if log_level else log.level
-#     log_formatter = log_formatter if log_formatter else log_formatter
-
-#     stdout_log = logging.StreamHandler()
-#     stdout_log.setLevel(log_level)
-#     stdout_log.setFormatter(log_formatter)
-#     log.addHandler(stdout_log)
-
-
-# def enable_file_logging(
-#     log_file,
-#     log_name=None,
-#     log_level=None,
-#     log_formatter=None
-# ):
-#     log = logging.getLogger(log_name)
-#     log_level = log_level if log_level else log.level
-#     log_formatter = log_formatter if log_formatter else log_formatter
-
-#     file_log = logging.FileHandler(log_file)
-#     file_log.setLevel(log_level)
-#     file_log.setFormatter(log_formatter)
-#     log.addHandler(file_log)

@@ -1,9 +1,9 @@
 import sys
 from .sugar import TriggerMode, Reader, LogLevel  # noqa: F401
 
-# Use either the real or mock (placeholder) implementations of the 
+# Use either the real or mock (placeholder) implementations of the
 # Redis Gears Python environment top level builtin funvtions
-# Depending on if the module is loaded in a 'redisgears' environment 
+# Depending on if the module is loaded in a 'redisgears' environment
 # or not (e.g. dev or client)
 if 'redisgears' in sys.modules:
     # Server Gears runtime environment

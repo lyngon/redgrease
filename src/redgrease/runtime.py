@@ -1,6 +1,7 @@
-from redgrease import execute, log
+from redgrease import execute
 from redgrease.client import RedisGears
 from functools import lru_cache
+
 
 def runtime_execute_command(self, *args, **options):
     "Execute a command in local Gear runtime and return a parsed response"
@@ -10,14 +11,6 @@ def runtime_execute_command(self, *args, **options):
         return self.response_callbacks[command_name](response, **options)
     return response
 
-# No longer needed
-# Decorator for not yet implemented functions
-def not_implemented(func):
-    def raiser(*args, **kwargs):
-        msg = f"redgrease.runtime.command.{fun_name} is not yet implemented. Contact support@lyngon.com for more info or for feature request."
-        log(f"Error: {msg}")
-        raise NotImplementedError(msg)
-    return raiser
 
 @lru_cache
 def get_runtime_client():
@@ -26,11 +19,11 @@ def get_runtime_client():
     return runtime_client
 
 
-execute = get_runtime_client()
+execute = get_runtime_client()  # noqa: F811 - Used as exported var
 
 
-
-## Cluster
+# ## Redis v6 commands
+# # Cluster
 # Cluster AddSlots
 # Cluster BumpEpoch
 # Cluster Count-Failure-Reports
@@ -57,7 +50,7 @@ execute = get_runtime_client()
 # ReadWrite
 
 
-## Connection
+# # Connection
 # Auth
 # Client Caching
 # Client Id
@@ -77,7 +70,7 @@ execute = get_runtime_client()
 # Reset
 # Select
 
-## Geo
+# # Geo
 # GeoAdd
 # GeoHash
 # GeoPos
@@ -87,10 +80,10 @@ execute = get_runtime_client()
 # GeoSearch
 # GeoSearchStore
 
-## Hashes
+# # Hashes
 # HDel
 # HExists
-# HGet 
+# HGet
 # HGetAll
 # HIncrBy
 # HIncrByFloat
@@ -104,12 +97,12 @@ execute = get_runtime_client()
 # HVals
 # HScan
 
-## HyperLogLog
+# # HyperLogLog
 # PFAdd
 # PFCount
 # PFMerge
 
-## Keys
+# # Keys
 # Copy
 # Del
 # Dump
@@ -136,7 +129,7 @@ execute = get_runtime_client()
 # Wait
 # Scan
 
-## List
+# # List
 # BLPop
 # BRPop
 # BRPopLPush
@@ -158,7 +151,7 @@ execute = get_runtime_client()
 # RPush
 # RPushX
 
-## Pub/Sub
+# # Pub/Sub
 # PSubscribe
 # PubSub
 # Publish
@@ -166,7 +159,7 @@ execute = get_runtime_client()
 # Subcribe
 # Unsubscribe
 
-## Scripting
+# # Scripting
 # Eval
 # EvalSha
 # Script Debug
@@ -175,8 +168,7 @@ execute = get_runtime_client()
 # Script Kill
 # Script Load
 
-
-## Server
+# # Server
 # ACL Load
 # ACL Save
 # ACL List
@@ -194,7 +186,7 @@ execute = get_runtime_client()
 # Command
 # Command Count
 # Command GetKeys
-# Command Info 
+# Command Info
 # Config Get
 # Config Rewrite
 # Config Set
@@ -234,7 +226,7 @@ execute = get_runtime_client()
 # Latency Reset
 # Latency Help
 
-## Sets
+# # Sets
 # SAdd
 # SCard
 # SDiff
@@ -252,7 +244,7 @@ execute = get_runtime_client()
 # SUnionStore
 # SScan
 
-## Sorted Sets
+# # Sorted Sets
 # BZPopMin
 # BZPopMax
 # ZAdd
@@ -285,7 +277,7 @@ execute = get_runtime_client()
 # ZUnionStore
 # ZScan
 
-## Streams
+# # Streams
 # XInfo
 # XAdd
 # XTrim
@@ -302,7 +294,7 @@ execute = get_runtime_client()
 # XPending
 
 
-## Strings
+# # Strings
 # Append
 # Bitcount
 # Bitfield
@@ -330,7 +322,7 @@ execute = get_runtime_client()
 # StrLen
 
 
-## Transactions
+# # Transactions
 # Discard
 # Exec
 # Muli
