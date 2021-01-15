@@ -10,13 +10,12 @@ here = pathlib.Path(__file__).parent.resolve()
 def text(*names, encoding="utf8"):
     return here.joinpath(*names).read_text(encoding=encoding)
 
-
-try:
-    version = open(".version").readline()
-except FileNotFoundError:
-    print("Unable to determine version.")
-    print("Set the version on the first line of a '.version' file")
-    sys.exit(404)
+# try:
+#     version = open(".version").readline()
+# except FileNotFoundError:
+#     print("Unable to determine version.")
+#     print("Set the version on the first line of a '.version' file")
+#     sys.exit(404)
 
 
 runtime_extras = ["redis"]
@@ -33,7 +32,7 @@ all_extras = cli_extras
 
 setuptools.setup(
     name="redgrease",
-    version=version,
+    #    version=version,
     license="MIT License",
     description="RedisGears helper package",
     long_description=text("README.md"),

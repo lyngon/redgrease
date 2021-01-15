@@ -3,4 +3,4 @@ attrs
 watchdog
 ConfigArgParse
 pyyaml
-redgrease[all]
+# redgrease[all]

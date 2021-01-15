@@ -1,24 +1,16 @@
 #!/usr/bin/env python3
 
 import sys
-from os import path
-from packaging import version
+from packaging.version import Version
 from setuptools import sandbox
 import subprocess
+import configparser
 
 
-ver_file_path = ".version"
-current_version = None
-
-if path.isfile(ver_file_path):
-    with open(ver_file_path) as ver_file:
-        for line in ver_file:
-            current_version = version.parse(line)
-            if isinstance(current_version, version.Version):
-                break
-
-if current_version is None:
-    current_version = version.parse("0.0.0")
+config_file = "setup.cfg"
+config = configparser.ConfigParser()
+config.read(config_file)
+current_version = Version(config.get("metadata", "version", fallback="0.0.0"))
 
 major = current_version.major
 minor = current_version.minor
@@ -43,7 +35,7 @@ if not current_version.is_prerelease:
         patch = patch + 1
 
 
-new_version = version.parse(f"{major}.{minor}.{patch}{pre_release}")
+new_version = Version(f"{major}.{minor}.{patch}{pre_release}")
 
 print("")
 print(f"Current version : {current_version}")
@@ -52,11 +44,16 @@ while True:
     proceed = input(f"Is version {new_version} correct? [yN] : ")
     if proceed.lower() in ["y", "yes"]:
         break
-    new_version = input(
-        "Input desired version: ",
-    )
+    new_version = Version(input("Input desired version: "))
 
-open(ver_file_path, "w").write(str(new_version))
+if not config.has_section("metadata"):
+    config.add_section("metadata")
+
+config.set("metadata", "version", str(new_version))
+
+with open(config_file, "w") as cfg_file:
+    config.write(cfg_file)
+
 
 sandbox.run_setup("setup.py", ["sdist", "bdist_wheel"])
 

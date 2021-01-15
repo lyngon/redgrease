@@ -7,4 +7,5 @@ mypy
 pytest
 pytest-cov
 pytest-xdist
+wheel
 -r requirements.txt
