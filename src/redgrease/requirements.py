@@ -16,11 +16,8 @@ def read(*requirements_file_paths: str):
         *[
             set(
                 filter(
-                    lambda line: len(line) > 0 and not line.startswith('#'),
-                    map(
-                        str.strip,
-                        open(file_path).readlines()
-                    )
+                    lambda line: len(line) > 0 and not line.startswith("#"),
+                    map(str.strip, open(file_path).readlines()),
                 )
             )
             for file_path in requirements_file_paths

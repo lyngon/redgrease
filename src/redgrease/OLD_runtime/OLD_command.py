@@ -10,11 +10,12 @@ import hashlib
 from redgrease import runtime
 from redgrease import client
 
+
 def gear_execute_command(self, *args, **options):
     "Execute a command in local Gear Runtie and return a parsed response"
-    #TODO: FIXIT
+    # TODO: FIXIT
     command_name = args[0]
-    
+
     response = runtime.execute(*args)
 
     if command_name in self.response_callbacks:
@@ -28,8 +29,8 @@ def not_implemented(func):
         msg = f"redgrease.runtime.command.{fun_name} is not yet implemented. Contact support@lyngon.com for more info or for feature request."
         log(f"Error: {msg}")
         raise NotImplementedError(msg)
-    return raiser
 
+    return raiser
 
 
 _client_ = client.RedisGears(connection_pool=...)
@@ -96,7 +97,7 @@ _client_.execute_command = gear_execute_command
 ## Hashes
 # HDel
 # HExists
-# HGet 
+# HGet
 # HGetAll
 # HIncrBy
 # HIncrByFloat
@@ -200,7 +201,7 @@ _client_.execute_command = gear_execute_command
 # Command
 # Command Count
 # Command GetKeys
-# Command Info 
+# Command Info
 # Config Get
 # Config Rewrite
 # Config Set

@@ -49,55 +49,54 @@ class GearsLoader:
         unblocking_pattern: Union[str, re.Pattern] = None,
         ignore_patterns: str = None,
         index_prefix: str = None,
-        server: str = 'localhost',
+        server: str = "localhost",
         port: int = 6379,
         observe: float = None,
-        **redis_kwargs
+        **redis_kwargs,
     ):
         self.directories = []
 
-        self.script_pattern = script_pattern \
-            if script_pattern else default_script_pattern
+        self.script_pattern = (
+            script_pattern if script_pattern else default_script_pattern
+        )
 
-        self.requirements_pattern = requirements_pattern \
-            if requirements_pattern else default_requirements_pattern
+        self.requirements_pattern = (
+            requirements_pattern
+            if requirements_pattern
+            else default_requirements_pattern
+        )
 
         if unblocking_pattern is None:
             unblocking_pattern = default_unblocking_pattern
         if isinstance(unblocking_pattern, str):
             unblocking_pattern = re.compile(unblocking_pattern)
         if not isinstance(unblocking_pattern, re.Pattern):
-            fail(
-                ValueError,
-                f"Invalid unblocking pattern: {unblocking_pattern}"
-            )
+            fail(ValueError, f"Invalid unblocking pattern: {unblocking_pattern}")
         self.unblocking_pattern = unblocking_pattern
 
-        self.ignore_patterns = ignore_patterns \
-            if ignore_patterns else default_ignore_patterns
-
-        self.index_prefix = index_prefix \
-            if index_prefix else default_index_prefix
-
-        self.redis = client.RedisGears(
-            host=server,
-            port=port,
-            **redis_kwargs
+        self.ignore_patterns = (
+            ignore_patterns if ignore_patterns else default_ignore_patterns
         )
+
+        self.index_prefix = index_prefix if index_prefix else default_index_prefix
+
+        self.redis = client.RedisGears(host=server, port=port, **redis_kwargs)
 
         self.observer = Observer() if observe else None
 
-        self.file_index = hysteresis.HysteresisHandlerIndex(
-            hysteresis_duration=observe
-        )
+        self.file_index = hysteresis.HysteresisHandlerIndex(hysteresis_duration=observe)
 
         # Create the file change event listener
-        self.event_handler = PatternMatchingEventHandler(
-            patterns=[self.script_pattern, self.requirements_pattern],
-            ignore_patterns=self.ignore_patterns,
-            ignore_directories=False,
-            case_sensitive=False
-        ) if self.observer else None
+        self.event_handler = (
+            PatternMatchingEventHandler(
+                patterns=[self.script_pattern, self.requirements_pattern],
+                ignore_patterns=self.ignore_patterns,
+                ignore_directories=False,
+                case_sensitive=False,
+            )
+            if self.observer
+            else None
+        )
 
         if self.event_handler:
             self.event_handler.on_deleted = self.on_deleted
@@ -115,11 +114,7 @@ class GearsLoader:
         except Exception as ex:
             log.warn(f"Error stopping observer: {ex}")
 
-    def add_directory(
-        self,
-        directory: Union[Path, str],
-        recursive: bool = False
-    ):
+    def add_directory(self, directory: Union[Path, str], recursive: bool = False):
         if not isinstance(directory, Path):
             directory = Path(str(directory))
 
@@ -168,44 +163,36 @@ class GearsLoader:
         # Unregister script if already present
         self.unregister_script(script_path)
 
-        unblocking = self.unblocking_pattern.search(
-            str(script_path)
-        ) is not None
+        unblocking = self.unblocking_pattern.search(str(script_path)) is not None
 
         try:
             log.debug(
-                f"Running/registering Gear script '{script_path}' "
-                "on Redis server"
+                f"Running/registering Gear script '{script_path}' " "on Redis server"
             )
 
             # This is a quite unsafe way of checking for registrations
             # Probabls Ok for dev situations in non-shared environments
             pre_reg = self.redis.dumpregistrations()
-            exec_res = self.redis.pyexecute(
-                script_content,
-                unblocking=unblocking
-            )
+            exec_res = self.redis.pyexecute(script_content, unblocking=unblocking)
             ret = f"with return code '{exec_res}'."
             post_reg = self.redis.dumpregistrations()
             pre_reg = set([reg.id for reg in pre_reg])
             log.debug(f"Pre regs: {list(pre_reg)}")
             post_reg = set([reg.id for reg in post_reg])
             log.debug(f"Post regs: {list(post_reg)}")
-            diff_reg: set = post_reg-pre_reg
+            diff_reg: set = post_reg - pre_reg
             if len(diff_reg) > 0:
                 reg_id = diff_reg.pop()
                 self.redis.hset(
                     f"{self.index_prefix}{script_path}",
                     mapping={
-                        'registration_id': str(reg_id),
-                        'last_updated': datetime.utcnow().strftime(
+                        "registration_id": str(reg_id),
+                        "last_updated": datetime.utcnow().strftime(
                             formatting.iso8601_datefmt
                         ),
-                    }
+                    },
                 )
-                log.debug(
-                    f"Script '{script_path}' registered as '{reg_id}' {ret}"
-                )
+                log.debug(f"Script '{script_path}' registered as '{reg_id}' {ret}")
             else:
                 log.debug(f"Script '{script_path}' executed {ret}")
 
@@ -231,7 +218,7 @@ class GearsLoader:
         """
         log.debug(f"Unregistering script: '{script_path}'")
         reg_key = f"{self.index_prefix}{script_path}"
-        reg_id = self.redis.hget(reg_key, 'registration_id')
+        reg_id = self.redis.hget(reg_key, "registration_id")
         if reg_id is not None:
             log.debug(
                 f"Removing registration for script '{script_path}' "
@@ -289,10 +276,7 @@ class GearsLoader:
                 "Ignoring."
             )
         else:
-            log.warn(
-                f"Unknown file type '{file}' deleted. "
-                "Ignoring."
-            )
+            log.warn(f"Unknown file type '{file}' deleted. " "Ignoring.")
 
     def on_modified(self, event):
         """Watchdog event handler for events signalling that a
@@ -309,16 +293,13 @@ class GearsLoader:
             self.file_index.signal(file, self.register_script, file)
         elif fnmatch(event.src_path, self.requirements_pattern):
             log.debug(
-                f"Gears requirements file '{file}' modified. "
-                "Updating dependencies."
+                f"Gears requirements file '{file}' modified. " "Updating dependencies."
             )
             # Apply hysteresis in case additional events shortly follow,
             # before we actually update requirements.
             self.file_index.signal(file, self.update_dependencies, file)
         else:
-            log.warn(
-                f"Unknown file type '{event.src_path}' modified. Ignoring."
-            )
+            log.warn(f"Unknown file type '{event.src_path}' modified. Ignoring.")
 
     def on_moved(self, event):
         """Watchdog event handler for events signalling that a
@@ -365,15 +346,10 @@ class GearsLoader:
             )
             # Apply hysteresis in case additional events shortly follow,
             # before we actually update requirements.
-            self.file_index.signal(
-                new_file,
-                self.update_dependencies,
-                new_file
-            )
+            self.file_index.signal(new_file, self.update_dependencies, new_file)
         else:
             log.warn(
-                f"File '{old_file}' moved to unknonwn type '{new_file}'. "
-                "Ignoring."
+                f"File '{old_file}' moved to unknonwn type '{new_file}'. " "Ignoring."
             )
 
     def start(self):

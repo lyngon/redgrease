@@ -2,7 +2,7 @@ from typing import Callable, Any, Iterable, TypeVar
 
 # Type aliases for type hints
 
-T = TypeVar('T')
+T = TypeVar("T")
 Key = str
 Record = dict
 Callback = Callable[[Record], Any]

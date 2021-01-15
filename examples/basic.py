@@ -13,13 +13,13 @@ def bar(x):
     return x
 
 
-log(str(redgrease.Reader.PythonReader), level='warning')
+log(str(redgrease.Reader.PythonReader), level="warning")
 
 
 try:
     rg = GB("CommandReader")
     rg.map(bar).map(foo).map(bar)
-    rg.register(trigger='HOO')
+    rg.register(trigger="HOO")
     log("Done")
 except Exception as ex:
     log(str(ex))

@@ -2,8 +2,17 @@ import logging
 import redgrease.operations as gearop
 from redgrease.sugar import Reader, TriggerMode, LogLevel
 from redgrease.typing import (
-    T, Key, Callback, Processor, Filterer, Accumulator,
-    Reducer, BatchReducer, Extractor, Mapper, Expander
+    T,
+    Key,
+    Callback,
+    Processor,
+    Filterer,
+    Accumulator,
+    Reducer,
+    BatchReducer,
+    Extractor,
+    Mapper,
+    Expander,
 )
 
 
@@ -19,7 +28,7 @@ class atomic:
 
 
 def execute(command: str, *args) -> str:
-    '''execute redis command'''
+    """execute redis command"""
     # TODO: Call some default Redis Server?
     pass
 
@@ -44,7 +53,7 @@ class GearsBuilder:
     def __init__(
         self,
         reader: str = Reader.KeysReader,
-        defaultArgs: str = '*',
+        defaultArgs: str = "*",
         desc: str = None,
     ):
         """Gear process
@@ -77,11 +86,7 @@ class GearsBuilder:
         self.operations = []
 
     def run(
-        self,
-        arg: str = None,
-        convertToStr: bool = True,
-        collect: bool = True,
-        **kargs
+        self, arg: str = None, convertToStr: bool = True, collect: bool = True, **kargs
     ):
         """Runs a gear function as a batch.
         The function is executed once and exits once the data is
@@ -110,18 +115,13 @@ class GearsBuilder:
             [type]: [description]
         """
         self.operations.append(
-            gearop.Run(
-                arg=arg,
-                convertToStr=convertToStr,
-                collect=collect,
-                kargs=kargs
-            )
+            gearop.Run(arg=arg, convertToStr=convertToStr, collect=collect, kargs=kargs)
         )
         return self
 
     def register(
         self,
-        prefix: str = '*',
+        prefix: str = "*",
         convertToStr: bool = True,
         collect: bool = True,
         mode: str = TriggerMode.Async,
@@ -179,7 +179,7 @@ class GearsBuilder:
                 mode=mode,
                 onRegistered=onRegistered,
                 trigger=trigger,
-                kargs=kargs
+                kargs=kargs,
             )
         )
         return self
@@ -194,9 +194,7 @@ class GearsBuilder:
         Returns:
             A gear flow outputting the transformed records
         """
-        self.operations.append(
-            gearop.Map(op=op)
-        )
+        self.operations.append(gearop.Map(op=op))
         return self
 
     def flatmap(self, op: Expander):
@@ -216,9 +214,7 @@ class GearsBuilder:
         Returns:
             A gear flow outputting the expanded records
         """
-        self.operations.append(
-            gearop.FlatMap(op=op)
-        )
+        self.operations.append(gearop.FlatMap(op=op))
         return self
 
     def foreach(self, op: Processor):
@@ -237,9 +233,7 @@ class GearsBuilder:
         Returns:
             A gear flow outputting the **input** records unmodified
         """
-        self.operations.append(
-            gearop.ForEach(op=op)
-        )
+        self.operations.append(gearop.ForEach(op=op))
         return self
 
     def filter(self, op: Filterer):
@@ -258,9 +252,7 @@ class GearsBuilder:
             A gear flow outputting only the records tha pass the
             filter (i.e evaluates to 'True')
         """
-        self.operations.append(
-            gearop.Filter(op=op)
-        )
+        self.operations.append(gearop.Filter(op=op))
         return self
 
     def accumulate(self, op: Accumulator):
@@ -278,9 +270,7 @@ class GearsBuilder:
         Returns:
             A gear flow outputting the final accumulated value
         """
-        self.operations.append(
-            gearop.Accumulate(op=op)
-        )
+        self.operations.append(gearop.Accumulate(op=op))
         return self
 
     def localgroupby(self, extractor: Extractor[Key], reducer: Reducer):
@@ -325,9 +315,7 @@ class GearsBuilder:
             record index (inclusive) and start+length record index
             (exclusive).
         """
-        self.operations.append(
-            gearop.Limit(length=length, start=start)
-        )
+        self.operations.append(gearop.Limit(length=length, start=start))
         return self
 
     def collect(self):
@@ -339,9 +327,7 @@ class GearsBuilder:
         Returns:
             A gear flow outputting the input records across all shards.
         """
-        self.operations.append(
-            gearop.Collect()
-        )
+        self.operations.append(gearop.Collect())
         return self
 
     def repartition(self, extractor: Extractor[Key]):
@@ -361,17 +347,10 @@ class GearsBuilder:
             A gear flow outputting the input records, but each record
             is repartitioned to the shards as per the extractor function.
         """
-        self.operations.append(
-            gearop.Repartition(extractor=extractor)
-        )
+        self.operations.append(gearop.Repartition(extractor=extractor))
         return self
 
-    def aggregate(
-        self,
-        zero: T,
-        seqOp: Accumulator[T],
-        combOp: Accumulator[T]
-    ):
+    def aggregate(self, zero: T, seqOp: Accumulator[T], combOp: Accumulator[T]):
         """Perform aggregation on all the execution data.
 
         Args:
@@ -388,17 +367,11 @@ class GearsBuilder:
             A gear flow with the output of the
             'combOp' aggregation as output.
         """
-        self.operations.append(
-            gearop.Aggregate(zero=zero, seqOp=seqOp, combOp=combOp)
-        )
+        self.operations.append(gearop.Aggregate(zero=zero, seqOp=seqOp, combOp=combOp))
         return self
 
     def aggregateby(
-        self,
-        extractor: Extractor[Key],
-        zero: T,
-        seqOp: Reducer[T],
-        combOp: Reducer[T]
+        self, extractor: Extractor[Key], zero: T, seqOp: Reducer[T], combOp: Reducer[T]
     ):
         """Like aggregate, but on each key, the key is extracted using the extractor.
 
@@ -421,10 +394,7 @@ class GearsBuilder:
         """
         self.operations.append(
             gearop.AggregateBy(
-                extractor=extractor,
-                zero=zero,
-                seqOp=seqOp,
-                combOp=combOp
+                extractor=extractor, zero=zero, seqOp=seqOp, combOp=combOp
             )
         )
         return self
@@ -452,16 +422,10 @@ class GearsBuilder:
             The output records consist of the grouping key and its
             respective accumulator's value.
         """
-        self.operations.append(
-            gearop.GroupBy(extractor=extractor, reducer=reducer)
-        )
+        self.operations.append(gearop.GroupBy(extractor=extractor, reducer=reducer))
         return self
 
-    def batchgroupby(
-        self,
-        extractor: Extractor[Key],
-        reducer: BatchReducer[T]
-    ):
+    def batchgroupby(self, extractor: Extractor[Key], reducer: BatchReducer[T]):
         """Many-to-less (N:M) grouping of records.
 
         Note: Using this operation may cause a substantial increase in
@@ -515,9 +479,7 @@ class GearsBuilder:
         Returns:
             A gear flow outputting the input recods in sorted order.
         """
-        self.operations.append(
-            gearop.Sort(reverse=reverse)
-        )
+        self.operations.append(gearop.Sort(reverse=reverse))
         return self
 
     def distinct(self):
@@ -533,9 +495,7 @@ class GearsBuilder:
         Returns:
             A gear flow outputting the unique records, discaring duplicates
         """
-        self.operations.append(
-            gearop.Distinct()
-        )
+        self.operations.append(gearop.Distinct())
         return self
 
     def count(self):
@@ -549,9 +509,7 @@ class GearsBuilder:
         Returns:
             A gear flow outputting the number of input recods (int)
         """
-        self.operations.append(
-            gearop.Count()
-        )
+        self.operations.append(gearop.Count())
         return self
 
     def countby(self, extractor: Extractor[Key] = lambda x: x):
@@ -572,9 +530,7 @@ class GearsBuilder:
             A Gear flow outputting the number of items
             per extracted value.
         """
-        self.operations.append(
-            gearop.CountBy(extractor=extractor)
-        )
+        self.operations.append(gearop.CountBy(extractor=extractor))
         return self
 
     def avg(self, extractor: Extractor[Key] = lambda x: float(x)):
@@ -598,9 +554,7 @@ class GearsBuilder:
             [float]: A gear flow outputting the average
             of the extracted values
         """
-        self.operations.append(
-            gearop.Avg(extractor=extractor)
-        )
+        self.operations.append(gearop.Avg(extractor=extractor))
         return self
 
 

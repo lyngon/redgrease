@@ -1,7 +1,9 @@
 twine
+tox
 black
 flake8
-isort
+isort[requirements_deprecated_finder]
+mypy
 pytest
 pytest-cov
 pytest-xdist

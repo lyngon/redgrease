@@ -5,7 +5,7 @@ from .sugar import TriggerMode, Reader, LogLevel  # noqa: F401
 # Redis Gears Python environment top level builtin funvtions
 # Depending on if the module is loaded in a 'redisgears' environment
 # or not (e.g. dev or client)
-if 'redisgears' in sys.modules:
+if "redisgears" in sys.modules:
     # Server Gears runtime environment
     # Import the default functions and classes
     from redisgears import atomicCtx as atomic  # noqa: F401
@@ -18,7 +18,7 @@ if 'redisgears' in sys.modules:
 else:
     # Dev or Client environment
     # Import placeholder functions and classes
-    from .placeholders import (   # noqa: F401
+    from .placeholders import (  # noqa: F401
         atomic,
         execute,
         hashtag,

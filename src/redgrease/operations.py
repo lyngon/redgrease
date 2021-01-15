@@ -21,7 +21,7 @@ class Run(Operation):
 
 @dataclass
 class Register(Operation):
-    prefix: str = '*'
+    prefix: str = "*"
     convertToStr: bool = True
     collect: bool = True
     mode: str = TriggerMode.Async

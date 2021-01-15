@@ -1,6 +1,6 @@
 import sys
 
-if 'redisgears' in sys.modules:
+if "redisgears" in sys.modules:
     # Import the default functions and classes
     from redisgears import atomicCtx as atomic  # noqa: F401
     from redisgears import executeCommand as execute  # noqa: F401
@@ -11,7 +11,7 @@ if 'redisgears' in sys.modules:
     from __main__ import GB  # noqa: F401
 else:
     # Import placeholder functions and classes
-    from .placeholders import (   # noqa: F401
+    from .placeholders import (  # noqa: F401
         atomic,
         execute,
         hashtag,

@@ -15,6 +15,7 @@ class ResettableTimer:
     Both the timer, as well as the function and its arguments can be reset
     when/if the timer is reset.
     """
+
     def __init__(self):
         """Create timer"""
         self.handler = nop
@@ -75,6 +76,7 @@ class HysteresisHandlerIndex:
     For example loading a file when there hasnt been any modifications to it
     for a period of time
     """
+
     def __init__(self, hysteresis_duration: float = 1.0):
         """Initialize the Index.
 
@@ -107,8 +109,5 @@ class HysteresisHandlerIndex:
             self.handlers[handler_id] = ResettableTimer()
 
         self.handlers[handler_id].set(
-            self.hysteresis_duration,
-            handler_function,
-            *handler_args,
-            **handler_kwargs
+            self.hysteresis_duration, handler_function, *handler_args, **handler_kwargs
         )

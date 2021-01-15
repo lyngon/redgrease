@@ -5,6 +5,7 @@ import logging
 
 class Reader:
     """Redis Gears Reader Types"""
+
     KeysReader = "KeysReader"
     KeysOnlyReader = "KeysOnlyReader"
     StreamReader = "StreamReader"
@@ -15,17 +16,19 @@ class Reader:
 
 class TriggerMode:
     """Redis Geears Trigger modes for registered actions"""
-    Async = 'async'
-    AsyncLocal = 'async_local'
-    Sync = 'sync'
+
+    Async = "async"
+    AsyncLocal = "async_local"
+    Sync = "sync"
 
 
 class LogLevel:
     """Redis Gears log levels"""
-    Debug = 'debug'
-    Verbose = 'verbose'
-    Notice = 'notice'
-    Warning = 'warninig'
+
+    Debug = "debug"
+    Verbose = "verbose"
+    Notice = "notice"
+    Warning = "warninig"
 
     @staticmethod
     def to_logging_level(rg_log_level):

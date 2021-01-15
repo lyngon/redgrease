@@ -35,4 +35,4 @@ v = rg.normal(mu, sigma, 10000)
 
 gb = GearsBuilder("CommandReader")
 gb.map(foo)
-gb.register(trigger='video')
+gb.register(trigger="video")

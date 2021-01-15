@@ -4,7 +4,7 @@ import pathlib
 import yaml
 import json
 from datetime import datetime
-from typing import Union
+from typing import Union, Dict, Any
 
 
 iso8601_datefmt = "%Y-%m-%dT%H:%M:%S.%f"
@@ -34,17 +34,14 @@ log_message_format = (
 log_formatter = UTC_ISO8601_Formatter(fmt=log_message_format)
 
 
+# TODO: Simplify
 def initialize_logger(
     level=logging.DEBUG,
     fmt: Union[logging.Formatter, str] = None,
-    config: Union[pathlib.Path, str, dict] = None,
+    config: Union[pathlib.Path, str, Dict[str, Any]] = None,
 ):
     # Initialize to good (tm) defaults
-    logging.basicConfig(
-        level=level,
-        format=log_message_format,
-        datefmt=iso8601_datefmt
-    )
+    logging.basicConfig(level=level, format=log_message_format, datefmt=iso8601_datefmt)
 
     if not fmt:
         fmt = log_message_format
@@ -68,7 +65,7 @@ def initialize_logger(
                 raise FileNotFoundError(conf_file)
 
             # assume yaml, unelss explicitly otherwise
-            if not config and suffix not in ['.ini', '.json']:
+            if not config and suffix not in [".ini", ".json"]:
                 logging.getLogger(__name__).debug(
                     f"Attempting to parse '{conf_file}' as yaml file."
                 )
@@ -79,7 +76,7 @@ def initialize_logger(
                             f"Successfully read '{conf_file}''"
                         )
                 except Exception as ex:
-                    if suffix in ['.yaml', '.yml']:
+                    if suffix in [".yaml", ".yml"]:
                         raise ex
                     else:
                         logging.getLogger(__name__).warning(
@@ -87,7 +84,7 @@ def initialize_logger(
                         )
 
             # if not yaml, assume json, unless explicitly otherwise
-            if suffix not in ['.ini', '.yaml', '.yml']:
+            if suffix not in [".ini", ".yaml", ".yml"]:
                 logging.getLogger(__name__).debug(
                     f"Attempting to parse '{conf_file}' as json file."
                 )
@@ -99,7 +96,7 @@ def initialize_logger(
                         )
 
                 except Exception as ex:
-                    if suffix == '.json':
+                    if suffix == ".json":
                         raise ex
                     else:
                         logging.getLogger(__name__).warning(
@@ -107,21 +104,20 @@ def initialize_logger(
                         )
 
             # if neither json nor yaml, attempt to parse as legacy ini
-            if not config and suffix not in ['.json', '.yaml', '.yml']:
+            if not config and suffix not in [".json", ".yaml", ".yml"]:
                 logging.getLogger(__name__).debug(
                     f"Attempting to parse '{conf_file}' as legacy ini file."
                 )
                 try:
                     logging.config.fileConfig(
-                        str(conf_file),
-                        disable_existing_loggers=False
+                        str(conf_file), disable_existing_loggers=False
                     )
                     logging.getLogger(__name__).info(
                         f"Successfully loaded '{conf_file}'"
                     )
                     return
                 except Exception as ex:
-                    if suffix == '.ini':
+                    if suffix == ".ini":
                         raise ex
                     else:
                         logging.getLogger(__name__).warning(
@@ -132,6 +128,4 @@ def initialize_logger(
                 raise ValueError(f"Unable to parse '{conf_file}'")
 
         logging.config.dictConfig(config)
-        logging.getLogger(__name__).info(
-            "Successfully loaded configuration"
-        )
+        logging.getLogger(__name__).info("Successfully loaded configuration")

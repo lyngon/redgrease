@@ -1,7 +1,8 @@
 from redgrease.runtime import execute, log
 
-## Remove
+# # Remove
 import redis
+
 r = redis.Redis()
 ##
 
@@ -12,15 +13,24 @@ def not_implemented(func):
         msg = f"redgrease.runtime.command.{fun_name} is not yet implemented. Contact support@lyngon.com for more info or for feature request."
         log(f"Error: {msg}")
         raise NotImplementedError(msg)
+
     return raiser
 
+
 r.close()
-r.execute_command(args=*[], options=**{})
-r.lock(name="", timeout=..., sleep=..., blocking_timeout=..., lock_class=..., thread_local=...)
+r.execute_command(args=[], options={})
+r.lock(
+    name="",
+    timeout=...,
+    sleep=...,
+    blocking_timeout=...,
+    lock_class=...,
+    thread_local=...,
+)
 r.ping()
 r.pipeline(transaction=..., shard_hint=...)
 r.response_callbacks()  # ???
-r.sentinel(args=*[])
+r.sentinel(args=[])
 r.sentinel_get_master_addr_by_name(service_name="")
 r.sentinel_master(service_name="")
 r.sentinel_masters()
@@ -30,7 +40,7 @@ r.sentinel_sentinels(service_name="")
 r.sentinel_set(name="", option=None, value=None)
 r.sentinel_slaves(service_name="")
 r.set_response_callback(command=None, callback=None)
-r.transaction(func=None, watches=*[], kwargs=**{})
+r.transaction(func=None, watches=[], kwargs={})
 
 
 ## Cluster
@@ -102,18 +112,43 @@ r.geopos(name="")
 # GeoDist
 r.geodist(name="", place1=None, place2=None, unit="m")
 # GeoRadius
-r.georadius(name="", longitude=0.0, latitude=0.0, radius=0.0, unit="m", withdist=False, withcoord=False, withhash=False, count=None, sort=None, store=None, store_dist=None)
+r.georadius(
+    name="",
+    longitude=0.0,
+    latitude=0.0,
+    radius=0.0,
+    unit="m",
+    withdist=False,
+    withcoord=False,
+    withhash=False,
+    count=None,
+    sort=None,
+    store=None,
+    store_dist=None,
+)
 # GeoRadiusByMember
-r.georadiusbymember(name="", member=..., radius=0.0, unit="m", withdist=False, withcoord=False, withhash=False, count=None, sort=None, store=None, store_dist=None)
+r.georadiusbymember(
+    name="",
+    member=...,
+    radius=0.0,
+    unit="m",
+    withdist=False,
+    withcoord=False,
+    withhash=False,
+    count=None,
+    sort=None,
+    store=None,
+    store_dist=None,
+)
 # GeoSearch
 # GeoSearchStore
 
 ## Hashes
 # HDel
-r.hdel(name="", keys=*[])
+r.hdel(name="", keys=[])
 # HExists
 r.hexists(name="", key="")
-# HGet 
+# HGet
 r.hget(name="", key="")
 # HGetAll
 r.hgetall(name="")
@@ -126,7 +161,7 @@ r.hkeys(name="")
 # HLen
 r.hlen(name="")
 # HMGet
-r.hmget(name="", keys=..., args=*[])
+r.hmget(name="", keys=..., args=[])
 # HMSet
 r.hmset(name="", mapping={})
 # HSet
@@ -143,7 +178,7 @@ r.hscan_iter(name="", match=..., count=...)
 
 ## HyperLogLog
 # PFAdd
-r.pfadd(name="", values=*[])
+r.pfadd(name="", values=[])
 # PFCount
 r.pfcount(name="")
 # PFMerge
@@ -160,11 +195,20 @@ r.exists(names="")
 # Expire
 r.expire(name="", time=0)
 # ExpireAt
-r.expireat(name="",when="")
+r.expireat(name="", when="")
 # Keys
-r.keys(pattern='*')
+r.keys(pattern="*")
 # Migrate
-r.migrate(host="", port=6379, keys=[], destination_db="", timeout=0, copy=False, replace=False, auth=None)
+r.migrate(
+    host="",
+    port=6379,
+    keys=[],
+    destination_db="",
+    timeout=0,
+    copy=False,
+    replace=False,
+    auth=None,
+)
 # Move
 r.move(name="", db="")
 # Object
@@ -185,7 +229,17 @@ r.renamenx(src="", dst="")
 # Restore
 r.restore(name="", ttl=..., value=None)
 # Sort
-r.sort(name="", start=..., num=..., by=..., get=..., desc=..., alpha=..., store=..., groups=...)
+r.sort(
+    name="",
+    start=...,
+    num=...,
+    by=...,
+    get=...,
+    desc=...,
+    alpha=...,
+    store=...,
+    groups=...,
+)
 # Touch
 r.touch()
 # TTL
@@ -216,7 +270,7 @@ r.llen(name="")
 r.lpop(name="")
 # LPos
 # LPush
-r.lpush(name="", values=*[])
+r.lpush(name="", values=[])
 # LPushX
 r.lpushx(name="", value=None)
 # LRange
@@ -233,7 +287,7 @@ r.rpop(name="")
 r.rpoplpush(src="", dst="")
 # LMove
 # RPush
-r.rpush(name="", values=*[])
+r.rpush(name="", values=[])
 # RPushX
 r.rpushx(name="", value=None)
 
@@ -243,7 +297,7 @@ r.rpushx(name="", value=None)
 r.pubsub(shard_hint=..., ignore_subscribe_messages=...)
 r.pubsub_channels(pattern="*")
 r.pubsub_numpat()
-r.pubsub_numsub(args=*[])
+r.pubsub_numsub(args=[])
 # Publish
 r.publish(channel="", message="")
 # PUnsubscribe
@@ -251,14 +305,14 @@ r.publish(channel="", message="")
 # Unsubscribe
 
 ## Scripting
-r.register_script(script="")  # ???? used wist evalsha 
+r.register_script(script="")  # ???? used wist evalsha
 # Eval
-r.eval(script=None, numkeys=None, keys_and_args=*[])
+r.eval(script=None, numkeys=None, keys_and_args=[])
 # EvalSha
-r.evalsha(sha="", numkeys=0, keys_and_args=*[])
+r.evalsha(sha="", numkeys=0, keys_and_args=[])
 # Script Debug
 # Script Exists
-r.script_exists(args=*[])
+r.script_exists(args=[])
 # Script Flush
 r.script_flush()
 # Script Kill
@@ -279,13 +333,26 @@ r.acl_users()
 # ACL GetUser
 r.acl_getuser(username="")
 # ACL SetUser
-r.acl_setuser(username="", enabled=False, passwords=None, nopass=False, hashed_passwords=None, categories=None, commands=None, keys=None, reset=False, reset_keys=False, reset_passwords=False)
+r.acl_setuser(
+    username="",
+    enabled=False,
+    passwords=None,
+    nopass=False,
+    hashed_passwords=None,
+    categories=None,
+    commands=None,
+    keys=None,
+    reset=False,
+    reset_keys=False,
+    reset_passwords=False,
+)
 # ACL DelUser
 r.acl_deluser(username="")
 # ACL Cat
 @not_implemented
 def acl_cat(category=...):
     ...
+
 
 # ACL GenPass
 r.acl_genpass()
@@ -300,7 +367,7 @@ r.bgsave()
 # Command
 # Command Count
 # Command GetKeys
-# Command Info 
+# Command Info
 # Config Get
 r.config_get(pattern=...)
 # Config Rewrite
@@ -346,7 +413,7 @@ r.shutdown()
 r.slaveof(host=..., port=...)
 # ReplicaOf
 # SlowLog
-r.slowlog_get(num=0)""
+r.slowlog_get(num=0)
 r.slowlog_len()
 r.slowlog_reset()
 # SwapDB
@@ -364,17 +431,17 @@ r.time()
 
 ## Sets
 # SAdd
-r.sadd(name="", values=*[])
+r.sadd(name="", values=[])
 # SCard
 r.scard(name="")
 # SDiff
-r.sdiff(keys=..., args=*[])
+r.sdiff(keys=..., args=[])
 # SDiffScore
-r.sdiffstore(dest="", keys=..., args=*[])
+r.sdiffstore(dest="", keys=..., args=[])
 # SInter
-r.sinter(keys="", args=*[])
+r.sinter(keys="", args=[])
 # SInterStore
-r.sinterstore(dest=..., keys=..., args=*[])
+r.sinterstore(dest=..., keys=..., args=[])
 # SIsMember
 r.sismember(name="", value=None)
 # SMIsMember
@@ -387,11 +454,11 @@ r.spop(name="")
 # SRandMember
 r.srandmember(name="", number=...)
 # SRem
-r.srem(name="", values=*[])
+r.srem(name="", values=[])
 # SUnion
-r.sunion(keys=[], args=*[])
+r.sunion(keys=[], args=[])
 # SUnionStore
-r.sunionstore(dest, keys=[], args=*[])
+r.sunionstore(dest, keys=[], args=[])
 # SScan
 r.sscan(name="", cursor=..., match=..., cmunt=...)
 r.sscan_iter(name="", match=..., count=...)
@@ -425,11 +492,13 @@ r.zlexcount(name="", min=..., max=...)
 # ZRevRangeByLex
 r.zrevrangebylex(name="", max=..., min=..., start=None, num=None)
 # ZRangeByScore
-r.zrevrangebyscore(name="", max=..., min=..., start=..., num=..., withscores=..., score_cast_func=...)
+r.zrevrangebyscore(
+    name="", max=..., min=..., start=..., num=..., withscores=..., score_cast_func=...
+)
 # ZRank
-r.zrank(name="", value=Non"e)
+r.zrank(name="", value=None)
 # ZRem
-r.zrem(name="", values=*[])
+r.zrem(name="", values=[])
 # ZRemRangeByLex
 r.zremrangebylex(name="", min=..., max=...)
 # ZRemRangeByRank
@@ -460,7 +529,7 @@ r.xadd(name="", fields=..., id=..., maxlen=..., approximate=...)
 # XTrim
 r.xtrim(name="", maxlen=0, approximate=...)
 # XDel
-r.xdel(name="", ids=*[])
+r.xdel(name="", ids=[])
 # XRange
 r.xrange(name="", min=..., max=..., count=...)
 # XRevRange
@@ -477,9 +546,20 @@ r.xgroup_setid(name="", groupname="", id=...)
 # XReadGroup
 r.xreadgroup(groupname="", consumername="", streams=[], count=..., block=..., noack=...)
 # XAck
-r.xack(name="", groupname="", ids=*[])
+r.xack(name="", groupname="", ids=[])
 # XClaim
-r.xclaim(name="", groupname="", consumername="", min_idle_time=0, message_ids=[], idle=..., time=..., retrycount=..., force=..., justid=...)
+r.xclaim(
+    name="",
+    groupname="",
+    consumername="",
+    min_idle_time=0,
+    message_ids=[],
+    idle=...,
+    time=...,
+    retrycount=...,
+    force=...,
+    justid=...,
+)
 # XAutoClaim
 # XPending
 r.xpending(name="", groupname="")
@@ -494,7 +574,7 @@ r.bitcount(key="", start=..., end=...)
 # Bitfield
 r.bitfield(keyy="", default_overflow=None)
 # Bitop
-r.bitop(operation=None, dest=None, keys=*[])
+r.bitop(operation=None, dest=None, keys=[])
 # Bitpos
 r.bitpos(key="", bit=None, start=..., end=...)
 # Decr
@@ -517,11 +597,11 @@ r.incrby(name="", amount=...)
 # IncrByFloat
 r.incrbyfloat(name="", amount=...)
 # MGet
-r.mget(keys="", args=*[])
+r.mget(keys="", args=[])
 # MSet
-r.mset(args=*[], kwargs=**{})
+r.mset(args=[], kwargs={})
 # MSetNx
-r.msetnx(args=*[], kwargs=**{})
+r.msetnx(args=[], kwargs={})
 # PSetEx
 r.psetex(name="", time_ms=..., value=None)
 # Set
@@ -546,4 +626,4 @@ r.strlen(name="")
 # Unwatch
 r.unwatch()
 # Watch
-r.watch(names=*[])
+r.watch(names=[])
