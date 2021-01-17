@@ -1,6 +1,7 @@
+from functools import lru_cache
+
 from redgrease import execute
 from redgrease.client import RedisGears
-from functools import lru_cache
 
 
 def runtime_execute_command(self, *args, **options):

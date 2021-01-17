@@ -1,20 +1,20 @@
 import logging
-import redgrease.operations as gearop
-from redgrease.sugar import Reader, TriggerMode, LogLevel
-from redgrease.typing import (
-    T,
-    Key,
-    Callback,
-    Processor,
-    Filterer,
-    Accumulator,
-    Reducer,
-    BatchReducer,
-    Extractor,
-    Mapper,
-    Expander,
-)
 
+import redgrease.operations as gearop
+from redgrease.sugar import LogLevel, Reader, TriggerMode
+from redgrease.typing import (
+    Accumulator,
+    BatchReducer,
+    Callback,
+    Expander,
+    Extractor,
+    Filterer,
+    Key,
+    Mapper,
+    Processor,
+    Reducer,
+    T,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,10 @@
-import time
-import configargparse
-import re
-from pathlib import Path
 import logging
+import re
+import time
+from pathlib import Path
+
+import configargparse
+
 import redgrease.formatting
 import redgrease.loader
 

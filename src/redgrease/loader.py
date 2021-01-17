@@ -1,18 +1,16 @@
-from fnmatch import fnmatch
-from datetime import datetime
-from os.path import isfile
-from typing import Union
-from pathlib import Path
-import re
 import logging
+import re
+from datetime import datetime
+from fnmatch import fnmatch
+from os.path import isfile
+from pathlib import Path
+from typing import Union
 
 from redis.exceptions import ResponseError
-
-from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
+from watchdog.observers import Observer
 
-from redgrease import client, requirements, hysteresis, formatting
-
+from redgrease import client, formatting, hysteresis, requirements
 
 log = logging.getLogger(__name__)
 

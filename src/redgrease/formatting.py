@@ -1,14 +1,13 @@
+import json
 import logging
 import logging.config
 import pathlib
-import yaml
-import json
 from datetime import datetime
-from typing import Union, Dict, Any
+from typing import Any, Dict, Union
 
+import yaml
 
 iso8601_datefmt = "%Y-%m-%dT%H:%M:%S.%f"
-
 
 # Logging matters
 class UTC_ISO8601_Formatter(logging.Formatter):

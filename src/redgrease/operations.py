@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
-from redgrease.sugar import TriggerMode
-from redgrease.typing import T, Key
+
 import redgrease.typing as optype
+from redgrease.sugar import TriggerMode
+from redgrease.typing import Key, T
 
 
 # Redis Gears Operations

@@ -1,9 +1,11 @@
-from redis import Redis
-from typing import Optional, Union, List, Iterable, Mapping
-import attr
-from enum import Enum
-import redgrease
 import logging
+from enum import Enum
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Union
+
+import attr
+from redis import Redis
+
+import redgrease
 
 log = logging.getLogger(__name__)
 
@@ -34,16 +36,16 @@ def to_bytes(input):
     )
 
 
-def to_str(input):
+def to_str(input: Any) -> str:
     return input.decode() if isinstance(input, bytes) else str(input)
 
 
-def to_list(mapping: dict):
+def to_list(mapping: Dict[Any, Any]):
     return list([item for kwpair in mapping.items() for item in kwpair])
 
 
 def to_dict(
-    items: Iterable,
+    items: Iterable[Any],
     keyname: str = None,
     keytype=lambda x: x,
     valuename: str = None,
@@ -113,7 +115,7 @@ class ExecID:
         )
 
     @staticmethod
-    def parse(value):
+    def parse(value: Any) -> "ExecID":
         if isinstance(value, bytes):
             value = value.decode()
 

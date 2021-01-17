@@ -1,6 +1,6 @@
+import logging
 from threading import Timer
 from typing import Callable, Hashable
-import logging
 
 log = logging.getLogger(__name__)
 
