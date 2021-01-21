@@ -4,7 +4,7 @@ from datetime import datetime
 from fnmatch import fnmatch
 from os.path import isfile
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
 from redis.exceptions import ResponseError
 from watchdog.events import PatternMatchingEventHandler
@@ -18,7 +18,7 @@ default_index_prefix = "/redgrease/scripts"
 default_script_pattern = "*.py"
 default_requirements_pattern = "*requirements*.txt"
 default_unblocking_pattern = "unblock"
-default_ignore_patterns = []
+default_ignore_patterns: List[str] = []
 
 
 def fail(exception, *messages):
@@ -44,7 +44,7 @@ class GearsLoader:
         self,
         script_pattern: str = None,
         requirements_pattern: str = None,
-        unblocking_pattern: Union[str, re.Pattern] = None,
+        unblocking_pattern: Union[str, re.Pattern[str]] = None,
         ignore_patterns: str = None,
         index_prefix: str = None,
         server: str = "localhost",
@@ -52,7 +52,7 @@ class GearsLoader:
         observe: float = None,
         **redis_kwargs,
     ):
-        self.directories = []
+        self.directories: List[Path] = []
 
         self.script_pattern = (
             script_pattern if script_pattern else default_script_pattern

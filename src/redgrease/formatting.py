@@ -9,9 +9,10 @@ import yaml
 
 iso8601_datefmt = "%Y-%m-%dT%H:%M:%S.%f"
 
+
 # Logging matters
 class UTC_ISO8601_Formatter(logging.Formatter):
-    converter = datetime.utcfromtimestamp
+    converter = datetime.utcfromtimestamp  # type: ignore
 
     def formatTime(self, record, datefmt=None):
         ct = self.converter(record.created)
@@ -53,78 +54,77 @@ def initialize_logger(
     root_logger.setLevel(level)
     root_logger.handlers[0].setFormatter(msg_formatter)
 
-    # Override with config options
-    if config:
-        if not isinstance(config, dict):
-            conf_file = pathlib.Path(str(config))
-            suffix = conf_file.suffix.lower()
-            config = None
+    # Override with config options, if any
+    if not config:
+        return
 
-            if not conf_file.is_file():
-                raise FileNotFoundError(conf_file)
-
-            # assume yaml, unelss explicitly otherwise
-            if not config and suffix not in [".ini", ".json"]:
-                logging.getLogger(__name__).debug(
-                    f"Attempting to parse '{conf_file}' as yaml file."
-                )
-                try:
-                    with conf_file.open() as f:
-                        config = yaml.safe_load(f.read())
-                        logging.getLogger(__name__).info(
-                            f"Successfully read '{conf_file}''"
-                        )
-                except Exception as ex:
-                    if suffix in [".yaml", ".yml"]:
-                        raise ex
-                    else:
-                        logging.getLogger(__name__).warning(
-                            f"Unable to parse '{conf_file}' as yaml file."
-                        )
-
-            # if not yaml, assume json, unless explicitly otherwise
-            if suffix not in [".ini", ".yaml", ".yml"]:
-                logging.getLogger(__name__).debug(
-                    f"Attempting to parse '{conf_file}' as json file."
-                )
-                try:
-                    with conf_file.open() as f:
-                        config = json.load(f)
-                        logging.getLogger(__name__).info(
-                            f"Successfully read '{conf_file}'"
-                        )
-
-                except Exception as ex:
-                    if suffix == ".json":
-                        raise ex
-                    else:
-                        logging.getLogger(__name__).warning(
-                            f"Unable to parse '{conf_file}' as json file."
-                        )
-
-            # if neither json nor yaml, attempt to parse as legacy ini
-            if not config and suffix not in [".json", ".yaml", ".yml"]:
-                logging.getLogger(__name__).debug(
-                    f"Attempting to parse '{conf_file}' as legacy ini file."
-                )
-                try:
-                    logging.config.fileConfig(
-                        str(conf_file), disable_existing_loggers=False
-                    )
-                    logging.getLogger(__name__).info(
-                        f"Successfully loaded '{conf_file}'"
-                    )
-                    return
-                except Exception as ex:
-                    if suffix == ".ini":
-                        raise ex
-                    else:
-                        logging.getLogger(__name__).warning(
-                            f"Unable to parse '{conf_file}' as legacy ini"
-                        )
-
-            if not config:
-                raise ValueError(f"Unable to parse '{conf_file}'")
-
+    if isinstance(config, dict):
         logging.config.dictConfig(config)
-        logging.getLogger(__name__).info("Successfully loaded configuration")
+        logging.getLogger(__name__).info("Successfully loaded configuration from dict")
+        return
+
+    conf_file = pathlib.Path(str(config))
+    suffix = conf_file.suffix.lower()
+    config_dict = None
+
+    if not conf_file.is_file():
+        raise FileNotFoundError(conf_file)
+
+    # assume yaml, unelss explicitly otherwise
+    if suffix not in [".ini", ".json"]:
+        logging.getLogger(__name__).debug(
+            f"Attempting to parse '{conf_file}' as yaml file."
+        )
+        try:
+            with conf_file.open() as f:
+                config_dict = yaml.safe_load(f.read())
+                logging.getLogger(__name__).info(f"Successfully read '{conf_file}''")
+        except Exception as ex:
+            if suffix in [".yaml", ".yml"]:
+                raise ex
+            else:
+                logging.getLogger(__name__).warning(
+                    f"Unable to parse '{conf_file}' as yaml file."
+                )
+
+    # if not yaml, assume json, unless explicitly otherwise
+    if not config_dict and suffix not in [".ini", ".yaml", ".yml"]:
+        logging.getLogger(__name__).debug(
+            f"Attempting to parse '{conf_file}' as json file."
+        )
+        try:
+            with conf_file.open() as f:
+                config_dict = json.load(f)
+                logging.getLogger(__name__).info(f"Successfully read '{conf_file}'")
+
+        except Exception as ex:
+            if suffix == ".json":
+                raise ex
+            else:
+                logging.getLogger(__name__).warning(
+                    f"Unable to parse '{conf_file}' as json file."
+                )
+
+    # if neither json nor yaml, attempt to parse as legacy ini
+    if not config_dict and suffix not in [".json", ".yaml", ".yml"]:
+        logging.getLogger(__name__).debug(
+            f"Attempting to parse '{conf_file}' as legacy ini file."
+        )
+        try:
+            logging.config.fileConfig(str(conf_file), disable_existing_loggers=False)
+            logging.getLogger(__name__).info(f"Successfully loaded '{conf_file}'")
+            return
+        except Exception as ex:
+            if suffix == ".ini":
+                raise ex
+            else:
+                logging.getLogger(__name__).warning(
+                    f"Unable to parse '{conf_file}' as legacy ini"
+                )
+
+    if not config_dict:
+        raise ValueError(f"Unable to parse '{conf_file}'")
+
+    logging.config.dictConfig(config_dict)
+    logging.getLogger(__name__).info("Successfully loaded configuration")
+    return

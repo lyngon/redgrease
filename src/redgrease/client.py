@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
 
 import attr
 from redis import Redis
@@ -10,7 +10,7 @@ import redgrease
 log = logging.getLogger(__name__)
 
 
-def to_bool(input):
+def to_bool(input) -> bool:
     if isinstance(input, bytes):
         input = input.decode()
     if isinstance(input, str):
@@ -18,7 +18,7 @@ def to_bool(input):
     return bool(input)
 
 
-def to_bytes(input):
+def to_bytes(input) -> bytes:
     if isinstance(input, bytes):
         return input
 
@@ -26,7 +26,7 @@ def to_bytes(input):
         return input.encode()
 
     if isinstance(input, ExecID):
-        return input.id
+        return bytes(input)
 
     if hasattr(input, "__bytes__"):
         input.__bytes__()
@@ -40,7 +40,7 @@ def to_str(input: Any) -> str:
     return input.decode() if isinstance(input, bytes) else str(input)
 
 
-def to_list(mapping: Dict[Any, Any]):
+def to_list(mapping: Dict[Any, Any]) -> List[Any]:
     return list([item for kwpair in mapping.items() for item in kwpair])
 
 
@@ -50,7 +50,7 @@ def to_dict(
     keytype=lambda x: x,
     valuename: str = None,
     valuetype=lambda x: x,
-):
+) -> Dict[Any, Any]:
     kwargs = {}
     iterator = iter(items)
     key_is_set = False
@@ -82,11 +82,11 @@ def to_dict(
     return kwargs
 
 
-def to_kwargs(items):
+def to_kwargs(items) -> Dict[str, Any]:
     return to_dict(items, keytype=to_str)
 
 
-def list_parser(item_parser):
+def list_parser(item_parser) -> Callable[[List[Any]], List[Any]]:
     def parser(input_list):
         return list(map(item_parser, input_list))
 
@@ -115,7 +115,7 @@ class ExecID:
         )
 
     @staticmethod
-    def parse(value: Any) -> "ExecID":
+    def parse(value: Union[str, bytes]) -> "ExecID":
         if isinstance(value, bytes):
             value = value.decode()
 
@@ -163,7 +163,7 @@ class RedisObject:
 # @dataclass
 @attr.s(auto_attribs=True, frozen=True)
 class ExecutionInfo(RedisObject):
-    executionId: ExecID = attr.ib(converter=ExecID.parse)
+    executionId: ExecID = attr.ib(converter=ExecID.parse)  # type: ignore #7912
     status: ExecutionStatus = attr.ib(converter=ExecutionStatus)
     registered: bool
 
@@ -177,17 +177,19 @@ class RegData(RedisObject):
     numFailures: int
     numAborted: int
     lastError: str
-    args: dict = attr.ib(converter=to_kwargs)
+    args: Dict[str, Any] = attr.ib(converter=to_kwargs)
 
 
 # @dataclass
 @attr.s(auto_attribs=True, frozen=True)
 class Registration(RedisObject):
-    id: ExecID = attr.ib(converter=ExecID.parse)
+    id: ExecID = attr.ib(converter=ExecID.parse)  # type: ignore #7912
     reader: redgrease.Reader
     desc: str
-    RegistrationData: RegData = attr.ib(converter=RegData.from_redis)
-    PD: dict
+    RegistrationData: RegData = attr.ib(
+        converter=RegData.from_redis  # type: ignore #7912
+    )
+    PD: Dict[Any, Any]
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -208,7 +210,7 @@ class ExecutionPlan(RedisObject):
     total_duration: int
     read_duration: int
     steps: List[ExecutionStep] = attr.ib(
-        converter=list_parser(ExecutionStep.from_redis)
+        converter=list_parser(ExecutionStep.from_redis)  # type: ignore #7912
     )
 
     @classmethod
@@ -239,11 +241,13 @@ class ShardInfo(RedisObject):
 @attr.s(auto_attribs=True, frozen=True)
 class ClusterInfo(RedisObject):
     my_id: str
-    shards: List[ShardInfo] = attr.ib(converter=list_parser(ShardInfo.from_redis))
+    shards: List[ShardInfo] = attr.ib(
+        converter=list_parser(ShardInfo.from_redis)  # type: ignore #7912
+    )
 
     @classmethod
     def parse(res):
-        if res is None or res == b"no cluster mode":
+        if not res or res == b"no cluster mode":
             return None
 
         cluster_info = ClusterInfo(
@@ -269,7 +273,7 @@ class PyRequirementInfo(RedisObject):
     IsInstalled: bool = attr.ib(converter=to_bool)
     CompiledOs: str = attr.ib(converter=to_str)
     Wheels: List[str] = attr.ib(
-        converter=lambda wheels: to_str(wheels)
+        converter=lambda wheels: to_str(wheels)  # type: ignore
         if isinstance(wheels, bytes)
         else [to_str(wheel) for wheel in wheels]
     )
@@ -328,7 +332,7 @@ class RedisGears(Redis):
         return self.execute_command("RG.ABORTEXECUTION", id)
 
     # TODO: Problematic name, as it is very similar to Redis' config_get
-    def configget(self, *config_name: Union[ExecID, bytes, str]) -> List:
+    def configget(self, *config_name: Union[ExecID, bytes, str]) -> List[str]:
         """Get the value of one or more built-in configuration or
         a user-defined options.
 
@@ -410,8 +414,8 @@ class RedisGears(Redis):
         if isinstance(id, ExecutionInfo):
             id = id.executionId
 
-        locality = [] if locality is None else [to_str(locality).upper()]
-        return self.execute_command("RG.GETEXECUTION", to_bytes(id), *locality)
+        loc = [] if locality is None else [to_str(locality).upper()]
+        return self.execute_command("RG.GETEXECUTION", to_bytes(id), *loc)
 
     def getresults(
         self,
@@ -526,7 +530,7 @@ class RedisGears(Redis):
         """
         return self.execute_command("RG.REFRESHCLUSTER")
 
-    def trigger(self, trigger_name: str, *args) -> List:
+    def trigger(self, trigger_name: str, *args) -> List[Any]:
         """Trigger the execution of a registered 'CommandReader' function.
 
         Args:

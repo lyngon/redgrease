@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+import configparser
+import subprocess
 import sys
+
 from packaging.version import Version
 from setuptools import sandbox
-import subprocess
-import configparser
-
 
 config_file = "setup.cfg"
 config = configparser.ConfigParser()

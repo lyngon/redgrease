@@ -1,4 +1,5 @@
 import logging
+from typing import Any, List
 
 import redgrease.operations as gearop
 from redgrease.sugar import LogLevel, Reader, TriggerMode
@@ -83,7 +84,7 @@ class GearsBuilder:
         self.reader = reader
         self.defaultArgs = defaultArgs
         self.desc = desc
-        self.operations = []
+        self.operations: List[gearop.Operation] = []
 
     def run(
         self, arg: str = None, convertToStr: bool = True, collect: bool = True, **kargs
@@ -255,7 +256,7 @@ class GearsBuilder:
         self.operations.append(gearop.Filter(op=op))
         return self
 
-    def accumulate(self, op: Accumulator):
+    def accumulate(self, op: Accumulator[Any]):
         """Instance-local Accumulate operation performs many-to-one
         mapping (N:1) of records.
 
@@ -273,7 +274,7 @@ class GearsBuilder:
         self.operations.append(gearop.Accumulate(op=op))
         return self
 
-    def localgroupby(self, extractor: Extractor[Key], reducer: Reducer):
+    def localgroupby(self, extractor: Extractor[Key], reducer: Reducer[Any]):
         """Instance-local LocalGroupBy operation performs many-to-less
         mapping (N:M) of records.
 
@@ -512,7 +513,7 @@ class GearsBuilder:
         self.operations.append(gearop.Count())
         return self
 
-    def countby(self, extractor: Extractor[Key] = lambda x: x):
+    def countby(self, extractor: Extractor[Key] = lambda x: str(x)):
         """Counts the records grouped by key.
 
         It requires a single extractor function callback.
@@ -533,7 +534,7 @@ class GearsBuilder:
         self.operations.append(gearop.CountBy(extractor=extractor))
         return self
 
-    def avg(self, extractor: Extractor[Key] = lambda x: float(x)):
+    def avg(self, extractor: Extractor[Key] = lambda x: str(x)):
         """Calculating arithmetic average of the records
 
         It accepts an optional value extractor function callback.

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 import redgrease.typing as optype
 from redgrease.sugar import TriggerMode
@@ -14,10 +15,10 @@ class Operation:
 
 @dataclass
 class Run(Operation):
-    arg: str = None
+    arg: Optional[str] = None
     convertToStr: bool = True
     collect: bool = True
-    kargs: dict = field(default_factory=dict)
+    kargs: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -26,9 +27,9 @@ class Register(Operation):
     convertToStr: bool = True
     collect: bool = True
     mode: str = TriggerMode.Async
-    onRegistered: optype.Callback = None
-    trigger: str = None
-    kargs: dict = field(default_factory=dict)
+    onRegistered: Optional[optype.Callback] = None
+    trigger: Optional[str] = None
+    kargs: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -53,13 +54,13 @@ class Filter(Operation):
 
 @dataclass
 class Accumulate(Operation):
-    op: optype.Accumulator
+    op: optype.Accumulator[Any]
 
 
 @dataclass
 class LocalGroupBy(Operation):
     extractor: optype.Extractor[Key]
-    reducer: optype.Reducer
+    reducer: optype.Reducer[Any]
 
 
 @dataclass
@@ -80,29 +81,29 @@ class Repartition(Operation):
 
 @dataclass
 class Aggregate(Operation):
-    zero: T
-    seqOp: optype.Accumulator[T]
-    combOp: optype.Accumulator[T]
+    zero: Any
+    seqOp: optype.Accumulator[Any]
+    combOp: optype.Accumulator[Any]
 
 
 @dataclass
 class AggregateBy(Operation):
     extractor: optype.Extractor[Key]
-    zero: T
-    seqOp: optype.Reducer[T]
-    combOp: optype.Reducer[T]
+    zero: Any
+    seqOp: optype.Reducer[Any]
+    combOp: optype.Reducer[Any]
 
 
 @dataclass
 class GroupBy(Operation):
     extractor: optype.Extractor[Key]
-    reducer: optype.Reducer[T]
+    reducer: optype.Reducer[Any]
 
 
 @dataclass
 class BatchGroupBy(Operation):
     extractor: optype.Extractor[Key]
-    reducer: optype.BatchReducer[T]
+    reducer: optype.BatchReducer[Any]
 
 
 @dataclass

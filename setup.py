@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-import setuptools
 import pathlib
 import sys
+
+import setuptools
 
 here = pathlib.Path(__file__).parent.resolve()
 
 
 def text(*names, encoding="utf8"):
     return here.joinpath(*names).read_text(encoding=encoding)
+
 
 # try:
 #     version = open(".version").readline()

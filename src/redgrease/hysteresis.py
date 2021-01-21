@@ -1,6 +1,6 @@
 import logging
 from threading import Timer
-from typing import Callable, Hashable
+from typing import Callable, Dict, Hashable, Optional
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class HysteresisHandlerIndex:
     for a period of time
     """
 
-    def __init__(self, hysteresis_duration: float = 1.0):
+    def __init__(self, hysteresis_duration: Optional[float] = 1.0):
         """Initialize the Index.
 
         Args:
@@ -86,7 +86,7 @@ class HysteresisHandlerIndex:
             Defaults to 1.0 second.
         """
         self.hysteresis_duration = hysteresis_duration
-        self.handlers = {}
+        self.handlers: Dict[Hashable, ResettableTimer] = {}
 
     def signal(
         self,
