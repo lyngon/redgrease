@@ -1,6 +1,5 @@
-redis
 attrs
-watchdog
 ConfigArgParse
 pyyaml
-# redgrease[all]
+redis
+watchdog

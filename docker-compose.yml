@@ -4,7 +4,7 @@ services:
   redisgears:
     image: redislabs/redisgears:latest
     ports:
-    - 127.0.0.1:6379:6379
+    - 127.0.0.1:${REDGREASE_PORT:-6379}:6379
     
   redgrease:
     image: lyngon/redgrease
@@ -16,5 +16,6 @@ services:
     command: -w -r /redgrease/watch/examples 
     environment:
     - SERVER=redisgears
+    - PORT=${REDGREASE_PORT:-6379}
     depends_on:
     - redisgears

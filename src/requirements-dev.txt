@@ -1,5 +1,3 @@
-twine
-tox
 black
 flake8
 isort[requirements_deprecated_finder]
@@ -7,5 +5,8 @@ mypy
 pytest
 pytest-cov
 pytest-xdist
+tox
+tox-docker
+twine
 wheel
 -r requirements.txt
