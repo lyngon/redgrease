@@ -1,50 +1,174 @@
-import os
-
 import pytest
 
-import redgrease
-import redgrease.client
-
-redisgears_name = "REDISLABS_REDISGEARS"
+from redgrease.client import RedisGears
 
 
-@pytest.fixture
-def server_port():
-    server_port = os.getenv(f"{redisgears_name}_6379_TCP_PORT")
-    return None if server_port is None else int(server_port)
+def bool_like(default=False):
+    return [default, 0, 1, True, False]
 
 
-@pytest.fixture
-def server_hostname():
-    return os.getenv(f"{redisgears_name}_HOST")
+def int_like(default=0, min=None, max=None):
+    return [default] + [] if min is None else [min] + [] if min is None else [min]
 
 
-@pytest.fixture
-def server(server_hostname, server_port):
-    return redgrease.client.RedisGears(host=server_hostname, port=server_port)
+# ^\s{4}[(\w.]*[\n\s]*\(\s*(["\w]+),\s+(\w+),\s*(\w+)[^)]+\),
+
+gears_config_params = [
+    {
+        "config_name": "MaxExecutions",
+        "read_response_type": int,
+        "write_response_type": bool,
+    },
+    {
+        "config_name": "MaxExecutionsPerRegistration",
+        "read_response_type": int,
+        "write_response_type": bool,
+    },
+    {
+        "config_name": "ProfileExecutions",
+        "read_response_type": bool,
+        "write_response_type": bool,
+    },
+    {
+        "config_name": "PythonAttemptTraceback",
+        "read_response_type": bool,
+        "write_response_type": bool,
+    },
+    {
+        "config_name": "DownloadDeps",
+        "read_response_type": bool,
+        "write_response_type": False,
+    },
+    {
+        "config_name": "DependenciesUrl",
+        "read_response_type": str,
+        "write_response_type": False,
+    },  # URL like actually
+    {
+        "config_name": "DependenciesSha256",
+        "read_response_type": str,
+        "write_response_type": False,
+    },
+    {
+        "config_name": "PythonInstallationDir",
+        "read_response_type": str,
+        "write_response_type": False,
+    },  # Path
+    {
+        "config_name": "CreateVenv",
+        "read_response_type": bool,
+        "write_response_type": False,
+    },
+    {
+        "config_name": "ExecutionThreads",
+        "read_response_type": int,
+        "write_response_type": False,
+    },
+    {
+        "config_name": "ExecutionMaxIdleTime",
+        "read_response_type": int,
+        "write_response_type": bool,
+    },
+    {
+        "config_name": "PythonInstallReqMaxIdleTime",
+        "read_response_type": int,
+        "write_response_type": bool,
+    },
+    {
+        "config_name": "SendMsgRetries",
+        "read_response_type": int,
+        "write_response_type": bool,
+    },
+    {
+        "config_name": "ThisConfigDoesNotExist",
+        "read_response_type": Exception,
+        "write_response_type": bool,
+    },
+    {"config_name": "", "read_response_type": Exception, "write_response_type": bool},
+    {
+        "config_name": None,
+        "read_response_type": Exception,
+        "write_response_type": Exception,
+    },
+    {"config_name": 42, "read_response_type": Exception, "write_response_type": bool},
+]
 
 
-def test_port_variable(server_port):
-    print(f"Server Port: {server_port}")
-    assert server_port is not None
+@pytest.mark.parametrize("config", gears_config_params)
+def test_configget(gears_instance: RedisGears, config):
+    assert isinstance(gears_instance.configget(config["config_name"]), list)
 
 
-def test_host_variable(server_hostname):
-    print(f"Server Host: {server_hostname}")
-    assert server_hostname is not None
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_configset(gears_instance: RedisGears):
+    assert False
 
 
-def test_server_initialized(server):
-    assert server is not None
-    assert server.set("TESTKEY", "TESTVALUE")
-    assert server.keys() == [b"TESTKEY"]
-    assert server.delete("TESTKEY")
-    assert not server.keys()
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_pyexecute(gears_instance: RedisGears):
+    assert False
 
 
-def test_default_builder():
-    assert redgrease.GearsBuilder() is not None
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_pydumpreqs(gears_instance: RedisGears):
+    assert False
 
 
-def test_shorthand_builder():
-    assert redgrease.GB() is not None
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_getexecution(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_getresults(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_getresultsblocking(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_dumpexecutions(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_dropexecution(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_abortexecution(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_trigger(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_dumpregistrations(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_unregister(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_pystats(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_infocluster(gears_instance: RedisGears):
+    assert False
+
+
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_refreshcluster(gears_instance: RedisGears):
+    assert False

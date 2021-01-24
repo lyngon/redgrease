@@ -3,7 +3,13 @@ flake8
 isort[requirements_deprecated_finder]
 mypy
 pytest
+# pytest-asyncio
+pytest-benchmark
+pytest-clarity
 pytest-cov
+# pytest-dependency
+pytest-sugar
+pytest-timeout
 pytest-xdist
 tox
 tox-docker
