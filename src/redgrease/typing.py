@@ -1,8 +1,12 @@
-from typing import Any, AnyStr, Callable, Dict, Iterable, TypeVar
+from typing import Any, Callable, Dict, Iterable, Type, TypeVar, Union
 
 # Type aliases for type hints
 
 T = TypeVar("T")
+
+Constructor = Union[Type[T], Callable[..., T]]
+
+
 Key = str
 Record = dict
 Callback = Callable[[Record], Any]

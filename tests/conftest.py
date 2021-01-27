@@ -1,5 +1,7 @@
 import os
+from datetime import datetime
 from typing import Callable
+from uuid import uuid4
 
 import pytest
 import redis
@@ -37,7 +39,7 @@ def server_connection_params():
 
 
 @pytest.fixture(scope="session")
-def gears_instance(server_connection_params):
+def rg(server_connection_params):
     """redgrease.client.RedisGears client instance from the redgrease package,
     connected to the test server.
 
@@ -50,7 +52,7 @@ def gears_instance(server_connection_params):
 
 
 @pytest.fixture(scope="session")
-def redis_instance(server_connection_params):
+def r(server_connection_params):
     """Vanilla redis.Redis() client instance, from the redis-py package,
     connected to the test server.
 
@@ -61,3 +63,30 @@ def redis_instance(server_connection_params):
         redis.Redis,
         **server_connection_params,
     )
+
+
+@pytest.fixture(scope="session")
+def testrun_timestamp():
+    return datetime.utcnow()
+
+
+@pytest.fixture()
+def var(request, testrun_timestamp):
+    ts = testrun_timestamp.strftime("%Y-%m-%dT%H:%M:%S")
+    base = f"testrun@{ts}::redgrease/{request.node.nodeid}::"
+
+    def var_generator(*names, base=base):
+
+        if not names:
+            name = ""
+        elif names is ...:
+            name = uuid4().hex
+        else:
+            name = "/".join(names)
+
+        if not base:
+            base = ""
+
+        return f"{base}{name}"
+
+    return var_generator
