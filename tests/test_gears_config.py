@@ -395,9 +395,8 @@ def test_ExecutionThreads(rg: RedisGears, new_val, case):
 # ################################## #
 
 
-@pytest.mark.parametrize("case", ["", "upper", "lower"])
 @pytest.mark.parametrize("new_val", ["Meaning", 42, True, 3.14])
-def test_UnknownConfigName(rg: RedisGears, var, new_val, case):
+def test_UnknownConfigName(rg: RedisGears, var, new_val):
     name = "ThisConfigDoesNotExist"
 
     with pytest.raises(AttributeError):

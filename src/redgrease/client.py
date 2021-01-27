@@ -58,7 +58,7 @@ def str_if_bytes(value):
 
 
 # Copied as is from redis.utils, as it is not exported
-def safe_str(value: AnyStr) -> str:
+def safe_str(value: Any) -> str:
     return str(str_if_bytes(value))
 
 
