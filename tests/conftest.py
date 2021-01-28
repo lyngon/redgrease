@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 from typing import Callable
 from uuid import uuid4
@@ -24,6 +23,9 @@ redis_port = "6379/tcp"
 redisgears_repo = "redislabs/redisgears:latest"
 
 redisgears_image = fetch(repository=redisgears_repo)
+
+# Note: function scope significantly slows down testing
+# but ensures clean environment for each test
 redisgears_container = container(
     image="{redisgears_image.id}", scope="class", ports={redis_port: None}
 )

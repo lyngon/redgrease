@@ -1,19 +1,18 @@
+# TODO: Separate dev and test
 black
 flake8
 isort[requirements_deprecated_finder]
 mypy
 pytest
-# pytest-asyncio
 pytest-benchmark
 pytest-clarity
 pytest-cov
-# pytest-dependency
+pytest-datafiles
 pytest-docker-tools
 pytest-sugar
 pytest-timeout
 pytest-xdist[psutil]
 tox
-# tox-docker
 twine
 wheel
--r requirements.txt
+-r requirements.txt 

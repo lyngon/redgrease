@@ -43,7 +43,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Development Status :: 3 - PreAlpha",
+        "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
         "Topic :: Database",
         "Topic :: Software Development",

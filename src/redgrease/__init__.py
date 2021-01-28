@@ -18,6 +18,7 @@ if "redisgears" in sys.modules:
     # Import the default functions and classes
     from __main__ import GB as GB
     from __main__ import GearsBuilder as GearsBuilder
+    from __main__ import configGet as configGet
     from __main__ import gearsConfigGet as gearsConfigGet
     from redisgears import atomicCtx as atomic
     from redisgears import executeCommand as execute
