@@ -12,14 +12,6 @@ def text(*names, encoding="utf8"):
     return here.joinpath(*names).read_text(encoding=encoding)
 
 
-# try:
-#     version = open(".version").readline()
-# except FileNotFoundError:
-#     print("Unable to determine version.")
-#     print("Set the version on the first line of a '.version' file")
-#     sys.exit(404)
-
-
 runtime_extras = ["redis"]
 client_extras = runtime_extras + [
     "attrs",
@@ -34,7 +26,6 @@ all_extras = cli_extras
 
 setuptools.setup(
     name="redgrease",
-    #    version=version,
     license="MIT License",
     description="RedisGears helper package",
     long_description=text("README.md"),
@@ -45,6 +36,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[  # https://pypi.org/classifiers/
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
@@ -55,7 +47,7 @@ setuptools.setup(
         "Intended Audience :: Developers",
         "Topic :: Database",
         "Topic :: Software Development",
-        "Topic :: Software Development :: Libraries :: Application Frameworks",  # noqa: E501
+        "Topic :: Software Development :: Libraries :: Application Frameworks",
     ],
     install_requires=[],  # Should remain empty for minimal runtime install.
     extras_require={

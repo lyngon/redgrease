@@ -8,11 +8,12 @@ pytest-benchmark
 pytest-clarity
 pytest-cov
 # pytest-dependency
+pytest-docker-tools
 pytest-sugar
 pytest-timeout
-pytest-xdist
+pytest-xdist[psutil]
 tox
-tox-docker
+# tox-docker
 twine
 wheel
 -r requirements.txt

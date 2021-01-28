@@ -6,11 +6,27 @@ from uuid import uuid4
 import pytest
 import redis
 import redis.exceptions
+from pytest_docker_tools import container, fetch
 
 import redgrease
 import redgrease.client
 
-redisgears_name = "REDISLABS_REDISGEARS"
+redis_port = "6379/tcp"
+
+# The environment variable 'TOX_ENV_NAME' contains the name of the Tox environment,
+# as specified in tox.ini
+# I.e. something like '1.0.0-py38' or 'latest-pypy'
+# Ideally there should be a parameterized fixture that instantiates the correct
+# RedisGears image repo based on this parsing this variable, and extracting the version
+# Note: current tox env naming has the version of the 'redislabs/redisgears' repo
+# as the first part, without any prefix and delimited by a '-'
+# (followed by other env identifiers such as python version and whatnot)
+redisgears_repo = "redislabs/redisgears:latest"
+
+redisgears_image = fetch(repository=redisgears_repo)
+redisgears_container = container(
+    image="{redisgears_image.id}", scope="class", ports={redis_port: None}
+)
 
 
 def instantiate(client_cls: Callable[..., redis.Redis], *args, **kwargs):
@@ -27,18 +43,16 @@ def instantiate(client_cls: Callable[..., redis.Redis], *args, **kwargs):
     return instance
 
 
-@pytest.fixture(scope="session")
-def server_connection_params():
+@pytest.fixture(scope="class")
+def server_connection_params(redisgears_container):
     """Connection parameters, at minimum including hostname and port,
     for the Redis Gears test server
     """
-    return {
-        "host": os.environ.get(f"{redisgears_name}_HOST", "localhost"),
-        "port": os.environ.get(f"{redisgears_name}_6379_TCP_PORT", 6379),
-    }
+    ip, port = redisgears_container.get_addr(redis_port)
+    return {"host": ip, "port": port}
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def rg(server_connection_params):
     """redgrease.client.RedisGears client instance from the redgrease package,
     connected to the test server.
@@ -51,7 +65,7 @@ def rg(server_connection_params):
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def r(server_connection_params):
     """Vanilla redis.Redis() client instance, from the redis-py package,
     connected to the test server.
