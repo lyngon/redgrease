@@ -1,8 +1,10 @@
 import os
+import re
 from pathlib import Path
 
 import pytest
 
+import redgrease.client
 from redgrease.client import RedisGears
 
 # ################################# #
@@ -11,6 +13,8 @@ from redgrease.client import RedisGears
 
 
 scripts_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "gear_scripts")
+
+explicit_redgrease_import = re.compile(r"from redgrease[^\n]+")
 
 
 def gear_script(file):
@@ -22,7 +26,6 @@ def gear_scripts(file_pattern):
     return directory.rglob(file_pattern)
 
 
-# @pytest.fixture()
 def read(file_pattern):
     directory = Path(str(scripts_dir))
     files_contents = []
@@ -37,18 +40,43 @@ def read(file_pattern):
 # ################################# #
 
 
-# @pytest.mark.parametrize(
-#     "redgrease_import", ["import_none", "import_explicit", "import_implicit"]
-# )
+def test_install():
+    pass
+
+
+@pytest.mark.parametrize(
+    "redgrease_import", ["import_none", "import_explicit", "import_all"]
+)
 @pytest.mark.parametrize(
     "gears_script",
     read("runtime_func_*.py"),
     ids=lambda x: x[0],
 )
-def test_pyexecute(rg: RedisGears, gears_script):
+def test_builtin_runtime_functions(rg: RedisGears, gears_script, redgrease_import):
     name, contents = gears_script
-    res = rg.gears.pyexecute(contents)
+
+    if redgrease_import == "import_explicit":
+        script_str = contents
+        assert explicit_redgrease_import.findall(script_str)
+        assert "import *" not in script_str
+
+    elif redgrease_import == "import_none":
+        script_str = explicit_redgrease_import.sub("", contents)
+        assert "redgrease" not in script_str
+
+    elif redgrease_import == "import_all":
+        implicit_import = "from redgrease import *"
+        script_str = explicit_redgrease_import.sub(implicit_import, contents)
+        assert implicit_import in script_str
+
+    else:
+        raise ValueError(f"Unsupported redgrease import case: '{redgrease_import}'")
+
+    res = rg.gears.pyexecute(script_str)
+
     assert res
+    assert isinstance(res, redgrease.client.Execution)
+    assert not res.errors
 
 
 @pytest.mark.xfail(reason="Testcase not implemented")
