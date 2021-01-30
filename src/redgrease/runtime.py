@@ -13,7 +13,7 @@ def runtime_execute_command(self, *args, **options):
     return response
 
 
-@lru_cache
+@lru_cache()
 def get_runtime_client():
     runtime_client = RedisGears(connection_pool=...)
     runtime_client.execute_command = runtime_execute_command
