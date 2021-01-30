@@ -47,7 +47,7 @@ def read(file_pattern):
 )
 def test_pyexecute(rg: RedisGears, gears_script):
     name, contents = gears_script
-    res = rg.gears.pyexecute(contents, requirements=["redgrease"])
+    res = rg.gears.pyexecute(contents)
     assert res
 
 

@@ -17,11 +17,20 @@ minor = current_version.minor
 patch = current_version.micro
 
 if "rc" in sys.argv:
-    pre_release = (
-        "rc" if not current_version.is_prerelease else f"rc{current_version.pre[1]+1}"
-    )
+    pre_release = "rc1" if not current_version.pre else f".rc{current_version.pre[1]+1}"
 else:
     pre_release = ""
+
+if "dev" in sys.argv or "test" in sys.argv:
+    dev_release = (
+        ".dev1" if not current_version.is_devrelease else f".dev{current_version.dev+1}"
+    )
+    if current_version.pre and not pre_release:
+        print(f"current_version: {current_version}")
+        print(f"current_version.pre: {current_version.pre}")
+        pre_release = f".{current_version.pre[0]}{current_version.pre[1]}"
+else:
+    dev_release = ""
 
 if not current_version.is_prerelease:
     if "major" in sys.argv:
@@ -35,16 +44,19 @@ if not current_version.is_prerelease:
         patch = patch + 1
 
 
-new_version = Version(f"{major}.{minor}.{patch}{pre_release}")
+new_version = Version(f"{major}.{minor}.{patch}{pre_release}{dev_release}")
 
-print("")
-print(f"Current version : {current_version}")
-while True:
+confirmed = "-y" in sys.argv
+while not confirmed:
     print("")
-    proceed = input(f"Is version {new_version} correct? [yN] : ")
-    if proceed.lower() in ["y", "yes"]:
-        break
-    new_version = Version(input("Input desired version: "))
+    print(f"You are about to publish version : {new_version}")
+    print(f"    (Current version : {current_version})")
+    print("")
+    proceed = input(f"Is version '{new_version}' correct? [yN] : ")
+    confirmed = proceed.lower() in ["y", "yes"]
+
+    if not confirmed:
+        new_version = Version(input("Input desired version: "))
 
 if not config.has_section("metadata"):
     config.add_section("metadata")
@@ -54,11 +66,17 @@ config.set("metadata", "version", str(new_version))
 with open(config_file, "w") as cfg_file:
     config.write(cfg_file)
 
+try:
+    sandbox.run_setup("setup.py", ["sdist", "bdist_wheel"])
 
-sandbox.run_setup("setup.py", ["sdist", "bdist_wheel"])
+    res = subprocess.call(
+        ["python3", "-m", "twine", "upload", f"dist/redgrease-{new_version}*"]
+    )
+except Exception:
+    config.set("metadata", "version", str(current_version))
 
-res = subprocess.call(
-    ["python3", "-m", "twine", "upload", f"dist/redgrease-{new_version}*"]
-)
+    with open(config_file, "w") as cfg_file:
+        config.write(cfg_file)
+    res = 1
 
 sys.exit(res)
