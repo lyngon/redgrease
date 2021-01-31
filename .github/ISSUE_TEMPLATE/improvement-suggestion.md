@@ -12,13 +12,13 @@ Its more intended for enforcing good practices, making an existing solution more
 
 **Which part of RedGrease does it concern?**
 (Indicate all that apply)
- [] client library functionality
- [] runtime / server library functionality
- [] cli
- [] docker image
- [] tests
- [] documentation
- [] other
+- [ ] client library functionality
+- [ ] runtime / server library functionality
+- [ ] cli
+- [ ] docker image
+- [ ] tests
+- [ ] documentation
+- [ ] other
 
 **Describe the improvement you'd like**
 A clear and concise description of what you want to happen.
