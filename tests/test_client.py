@@ -8,7 +8,6 @@ from redgrease.client import RedisGears, safe_str, str_if_bytes
 
 # Other things to test:
 # - Syntactinc sugar / enums
-# - runtime 'client'
 # - cli / loader
 
 
@@ -241,16 +240,39 @@ def test_abortexecution(rg: RedisGears):
     assert False
 
 
-@pytest.mark.xfail(reason="Testcase not implemented")
 def test_pystats(rg: RedisGears):
-    assert False
+    stats = rg.gears.pystats()
+    assert stats
+    assert isinstance(stats, redgrease.client.PyStats)
+
+    assert stats.TotalAllocated
+    assert isinstance(stats.TotalAllocated, int)
+    assert stats.TotalAllocated > 0
+
+    assert stats.PeakAllocated
+    assert isinstance(stats.PeakAllocated, int)
+    assert stats.PeakAllocated > 0
+
+    assert stats.CurrAllocated
+    assert isinstance(stats.CurrAllocated, int)
+    assert stats.CurrAllocated > 0
 
 
-@pytest.mark.xfail(reason="Testcase not implemented")
-def test_infocluster(rg: RedisGears):
-    assert False
+# TODO: Actually test on a cluster setup
+@pytest.mark.parametrize("cluster_mode", [False])
+def test_infocluster(rg: RedisGears, cluster_mode):
+    info = rg.gears.infocluster()
+    # Non-c
+    if not cluster_mode:
+        assert info is None
+        return
+
+    assert info
 
 
-@pytest.mark.xfail(reason="Testcase not implemented")
+# TODO: Actually test on a cluster setup
 def test_refreshcluster(rg: RedisGears):
-    assert False
+    # Pretty pointless test, but anyway
+    # TODO: Somehow validate that it is run... Unsure of how though
+    # TODO: See issue #11
+    assert rg.gears.refreshcluster()
