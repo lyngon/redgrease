@@ -1,3 +1,4 @@
+import ast
 import logging
 from enum import Enum
 from typing import Any, AnyStr, Callable, Dict, Iterable, List, Mapping, Optional, Union
@@ -225,7 +226,7 @@ def parse_execute_response(response):
     elif isinstance(response, list) and len(response) == 2:
         return Execution(*response)
     elif isinstance(response, bytes):
-        return Execution(ExecID.parse(response))
+        return Execution(ExecID.parse(response), [])
     else:
         return response
 
@@ -299,6 +300,11 @@ class RedisObject:
         return cls(**to_kwargs(params))
 
 
+def parse_PD(value) -> Dict:
+    str_val = safe_str(value)
+    return dict(ast.literal_eval(str_val))
+
+
 # @dataclass
 @attr.s(auto_attribs=True, frozen=True)
 class ExecutionInfo(RedisObject):
@@ -310,7 +316,7 @@ class ExecutionInfo(RedisObject):
 # @dataclass
 @attr.s(auto_attribs=True, frozen=True)
 class RegData(RedisObject):
-    mode: redgrease.TriggerMode = attr.ib()
+    mode: str = attr.ib(converter=safe_str)  # Should be redgrease.TriggerMode
     numTriggered: int
     numSuccess: int
     numFailures: int
@@ -323,12 +329,12 @@ class RegData(RedisObject):
 @attr.s(auto_attribs=True, frozen=True)
 class Registration(RedisObject):
     id: ExecID = attr.ib(converter=ExecID.parse)  # type: ignore #7912
-    reader: redgrease.Reader
+    reader: str = attr.ib(converter=safe_str)  # Should be redgrease.Reader
     desc: str
     RegistrationData: RegData = attr.ib(
         converter=RegData.from_redis  # type: ignore #7912
     )
-    PD: Dict[Any, Any]
+    PD: Dict[Any, Any] = attr.ib(converter=parse_PD)
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -341,7 +347,7 @@ class ExecutionStep(RedisObject):
 
 @attr.s(auto_attribs=True, frozen=True)
 class ExecutionPlan(RedisObject):
-    status: ExecutionStatus  # = attr.ib(converter=ExecutionStatus)
+    status: ExecutionStatus = attr.ib(converter=ExecutionStatus)
     shards_received: int
     shards_completed: int
     results: int
@@ -352,19 +358,20 @@ class ExecutionPlan(RedisObject):
         converter=list_parser(ExecutionStep.from_redis)  # type: ignore #7912
     )
 
-    @classmethod
+    @staticmethod
     def parse(res):
         executions = map(
-            # lambda x: to_dict(
-            #     x,
-            #     keyname="shard_id",
-            #     valuename="execution_plan",
-            #     valuetype=ExecutionPlan.from_redis,
-            # ),
-            # TODO: is this the same thing?
-            lambda x: redis.client.pairs_to_dict_typed(
-                x, type_info={"shard_id": ExecutionPlan.from_redis}
+            lambda x: to_dict(
+                x,
+                keyname="shard_id",
+                keytype=str_if_bytes,
+                valuename="execution_plan",
+                valuetype=ExecutionPlan.from_redis,
             ),
+            # TODO: is this the same thing? - NO apparently not
+            # lambda x: redis.client.pairs_to_dict_typed(
+            #     x, type_info={"shard_id": ExecutionPlan.from_redis}
+            # ),
             res,
         )
         return {k: v for d in executions for k, v in d.items()}
@@ -388,7 +395,7 @@ class ClusterInfo(RedisObject):
         converter=list_parser(ShardInfo.from_redis)  # type: ignore #7912
     )
 
-    @classmethod
+    @staticmethod
     def parse(res):
         if not res or res == b"no cluster mode":
             return None
@@ -685,6 +692,8 @@ class Gears:
         """
         if isinstance(id, ExecutionInfo):
             id = id.executionId
+        if isinstance(id, ExecID):
+            id = str(id)
 
         return self.redis.execute_command("RG.GETRESULTS", id)
 
@@ -808,6 +817,8 @@ class Gears:
         """
         if isinstance(id, ExecutionInfo):
             id = id.executionId
+        if isinstance(id, ExecID):
+            id = str(id)
 
         return self.redis.execute_command("RG.UNREGISTER", id)
 
