@@ -8,6 +8,7 @@ import pytest
 import redis.exceptions
 
 import redgrease.client
+import redgrease.data
 from redgrease.client import RedisGears
 
 redgrease_version = importlib.metadata.version("redgrease")
@@ -116,7 +117,7 @@ def test_builtin_runtime_functions(
     result = rg.gears.pyexecute(script_str)
 
     assert result
-    assert isinstance(result, redgrease.client.Execution)
+    assert isinstance(result, redgrease.data.Execution)
     assert not result.errors
 
     runtime_extras_import = """
