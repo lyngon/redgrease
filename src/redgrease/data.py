@@ -146,13 +146,12 @@ class ExecutionPlan(RedisObject):
 
     @staticmethod
     def parse(res: Iterable):
-        plans = {}
-        for shard in map(to_dict, res):
-            shard_id = str_if_bytes(shard[b"shard_id"])  # type: ignore
-            plan = shard[b"execution_plan"]  # type: ignore
-            exec_plan = ExecutionPlan.from_redis(plan)
-            plans[shard_id] = exec_plan
-        return plans
+        return {
+            str_if_bytes(shard[b"shard_id"]): ExecutionPlan.from_redis(  # type: ignore
+                shard[b"execution_plan"]  # type: ignore
+            )
+            for shard in map(to_dict, res)
+        }
 
 
 @attr.s(auto_attribs=True, frozen=True)
