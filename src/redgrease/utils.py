@@ -268,7 +268,7 @@ def transform(
             Transformation function or a dict of transformation functions.
             If a dict is used, the key argument is used to look up the transformation.
             If the key is not present in the dict, but there is a 'None'-key mapping
-            to a function, this function will be used as a default.
+            to a functsion, this function will be used as a default.
             Otherwise, the value will be returned untransformed.
 
         key (Key): key to use to look up the appropriate transforpation
@@ -353,7 +353,7 @@ def to_dict(
     result = {}
     for key, value in zip(it, it):
         key = transform(key, key_transform, key)
-        value = transform(value, val_transform, key)
+        value = transform(value, val_transform, key)  # type: ignore
         result[key] = value
 
     return result

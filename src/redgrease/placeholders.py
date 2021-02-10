@@ -513,7 +513,7 @@ class GearsBuilder:
         self.operations.append(gearop.Count())
         return self
 
-    def countby(self, extractor: Extractor[Key] = lambda x: str(x)):
+    def countby(self, extractor: Extractor = lambda x: str(x)):
         """Counts the records grouped by key.
 
         It requires a single extractor function callback.
@@ -534,7 +534,7 @@ class GearsBuilder:
         self.operations.append(gearop.CountBy(extractor=extractor))
         return self
 
-    def avg(self, extractor: Extractor[Key] = lambda x: str(x)):
+    def avg(self, extractor: Extractor = lambda x: str(x)):
         """Calculating arithmetic average of the records
 
         It accepts an optional value extractor function callback.
