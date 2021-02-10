@@ -295,27 +295,31 @@ def test_to_list(input, output):
         ({"items": []}, {}),
         ({"items": ["foo", "bar"]}, {"foo": "bar"}),
         ({"items": range(4)}, {0: 1, 2: 3}),
-        ({"items": [True, 42], "keytype": str}, {"True": 42}),
-        ({"items": ["meaning", "42"], "valuetype": int}, {"meaning": 42}),
+        ({"items": [True, 42], "key_transform": str}, {"True": 42}),
+        ({"items": ["meaning", "42"], "val_transform": int}, {"meaning": 42}),
         (
-            {"items": [42, "42", True, True], "keytype": str, "valuetype": int},
+            {
+                "items": [42, "42", True, True],
+                "key_transform": str,
+                "val_transform": int,
+            },
             {"42": 42, "True": 1},
         ),
-        # (
-        #     {
-        #         "items": ["meaning", "42", "life", "False"],
-        #         "valuetype": {"meaning": int, "life": utils.safe_bool},
-        #     },
-        #     {"meaning": 42, "life": True},
-        # ),
-        # (
-        #     {
-        #         "items": [0, "0", True, "True"],
-        #         "keytype": int,
-        #         "valuetype": {0: int, 1: bool},
-        #     },
-        #     {0: 0, 1: True},
-        # ),
+        (
+            {
+                "items": ["meaning", "42", "news", "False"],
+                "val_transform": {"meaning": int, "news": utils.safe_bool},
+            },
+            {"meaning": 42, "news": False},
+        ),
+        (
+            {
+                "items": [0, "0", True, "True"],
+                "key_transform": int,
+                "val_transform": {0: int, 1: bool},
+            },
+            {0: 0, 1: True},
+        ),
     ],
 )
 def test_to_dict(input, output):

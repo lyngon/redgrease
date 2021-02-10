@@ -251,20 +251,54 @@ def to_list(
     )
 
 
-# TODO: REMOVE THIS MONSTROSITY ANS USE
-# redis.client.pairs_to_dict and
-# redis.client.pairs_to_dict_typed instead
-# or at least clean it up!!!
-# TODO: Maybe keytype should be a Dict[str, Callable[[Any],Key]] , and
-# TODO: Maybe valutype should be a Dict[str, Callable[[Any],Val]] , ...
-# TODO: ... for looking up the right type transform based on name.
-# TODO: Or even more gerenal: Union()
+def transform(
+    value: Any,
+    constuctor: Union[Constructor[T], Dict[Any, Constructor[T]]],
+    key: Key = None,
+) -> T:
+    """Applies a transformation to a value. The tranformatoin fuction could either be
+    passed directly or in a dictionary along with a key to look it up.
+    This is mostly only useful as a helper functoin for constructors of composite types,
+    where the value may need to be transformed differently depending on the field/key.
+
+    Args:
+        value (Any): value to transform
+
+        constuctor (Union[Constructor[T], Dict[Any, Constructor[T]]]):
+            Transformation function or a dict of transformation functions.
+            If a dict is used, the key argument is used to look up the transformation.
+            If the key is not present in the dict, but there is a 'None'-key mapping
+            to a function, this function will be used as a default.
+            Otherwise, the value will be returned untransformed.
+
+        key (Key): key to use to look up the appropriate transforpation
+
+    Returns:
+        T: Transformed value
+    """
+    if constuctor is None:
+        return value  # type: ignore
+
+    try:
+        if isinstance(constuctor, dict):
+            if key in constuctor:
+                return constuctor[key](value)  # type: ignore
+            elif None in constuctor:
+                return constuctor[None](value)  # type: ignore
+            else:
+                return value
+        else:
+            return constuctor(value)  # type: ignore
+    except Exception:
+        # if for some reason the value can't be coerced, just use
+        # the raw value
+        return value
+
+
 def to_dict(
     items: Iterable,
-    keyname: Optional[str] = None,
-    keytype: Callable[[Any], Key] = lambda x: x,
-    valuename: Optional[str] = None,
-    valuetype: Callable[[Any], Val] = lambda x: x,
+    key_transform: Union[Constructor[Key], Dict[Any, Constructor[Key]]] = None,
+    val_transform: Union[Constructor[Val], Dict[Key, Constructor[Val]]] = None,
 ) -> Dict[Key, Val]:
     """Folds an iterable of values into a dict.
     This is useful for parsing Redis' list responseses into a more manageable structure.
@@ -273,25 +307,34 @@ def to_dict(
     - Alternating unnamed Key and values, i.e:
     [key_1, value_1, key_2, value_2, ... ]
         eg:
-            input:  ["foo", 42, 13, 37]
-            output: {"foo": 42, 13: 37}
+        - to_dict(["foo", 42, 13, 37]) == {"foo": 42, 13: 37}
+        - to_dict(["foo", 42, 13, 37], key_transform=str) == {"foo": 42, "13": 37}
+        - to_dict(["foo", 42, 13, 37], val_transform=str) == {"foo": "42", 13: "37"}
+        - to_dict(["foo", 42, 13, 37], val_transform={"foo":int, 13:float})
+            == {"foo": 42, 13: 37.0}
+        - to_dict(
+            ["foo", 42, 13, 37],
+            key_transform=str,
+            val_transform={"foo":int, "13":float}
+        ) == {"foo": 42, "13": 37.0}
 
-    - .... are the keyname and key types really needed ?
 
     Args:
         items (Iterable): Iterable to "fold" into a dict
 
-        keyname (Optional[str], optional): Name of the key... ### NEEDED??? ###
-            Defaults to None.
+        key_transform (Union[Constructor[Key], Dict[Any, Constructor[Key]]], optional):
+            Transformation function / type / constructor to apply to keys.
+            It can either be a callable, which is then applied to all keys.
+            Altertnatively, it can be a mapping from 'raw' key to a specific transform
+            for that key
+            Defaults to None (No key transformation).
 
-        keytype (Callable[[Any], Key], optional): Transformation function for keys
-            Defaults to lambdax:x.
-
-        valuename (Optional[str], optional): Name of the value... ### NEEDED??? ###
-            Defaults to None.
-
-        valuetype (Callable[[Any], Val], optional): Transformation function for values
-            Defaults to lambdax:x.
+        val_transform (Union[Constructor[Val], Dict[Key, Constructor[Val]]], optional):
+            Transformation function / type / constructor to apply to values.
+            It can either be a callable, which is then applied to all values.
+            Altertnatively, it can be a mapping from (transformed) key to a specific
+            transform for the value of that key
+            Defaults to None (No value transformation).
 
     Returns:
         Dict[Key, Val]: Folded dictionary
@@ -300,36 +343,20 @@ def to_dict(
     if items is None:
         return {}  # type: ignore
 
-    kwargs = {}
-    iterator = iter(items)
-    key_is_set = False
-    value_is_set = False
-    for item in iterator:
-        if not key_is_set:
-            if keyname is None:
-                key = keytype(item)
-                key_is_set = True
-            else:
-                if safe_str(item) == safe_str(keyname):
-                    item = next(iterator)
-                    key = keytype(item)
-                    key_is_set = True
-        elif not value_is_set:
-            if valuename is None:
-                value = valuetype(item)
-                value_is_set = True
-            else:
-                if safe_str(item) == safe_str(valuename):
-                    item = next(iterator)
-                    value = valuetype(item)
-                    value_is_set = True
-        # I have forgotten why, below is not an else branch...
-        # A
-        if key_is_set and value_is_set:
-            kwargs[key] = value
-            key_is_set, value_is_set = False, False
+    if key_transform is None:
+        key_transform = as_is
 
-    return kwargs
+    if val_transform is None:
+        val_transform = as_is
+
+    it = iter(items)
+    result = {}
+    for key, value in zip(it, it):
+        key = transform(key, key_transform, key)
+        value = transform(value, val_transform, key)
+        result[key] = value
+
+    return result
 
 
 def to_kwargs(items: Iterable) -> Dict[str, Any]:
@@ -351,7 +378,7 @@ def to_kwargs(items: Iterable) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Folded dictionary
     """
-    return to_dict(items, keytype=safe_str)
+    return to_dict(items, key_transform=safe_str)
 
 
 # TODO: Should maybe be renamed to list_of or parse_list or sometiong
@@ -410,11 +437,9 @@ def dict_of(
     """
 
     def parser(values: Iterable, keys: Iterable[Key]):
-        return dict(
-            [
-                (key, constructors[key](value) if key in constructors else value)
-                for (key, value) in zip(keys, values)
-            ]
-        )
+        return {
+            key: transform(value, constructors, key)
+            for (key, value) in zip(keys, values)
+        }
 
     return parser
