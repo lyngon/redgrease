@@ -38,7 +38,7 @@ class ResettableTimer:
 
     def set(
         self,
-        timeout: float,
+        timeout: Optional[float],
         handler: Callable[..., None],
         *handler_args,
         **handler_kwargs

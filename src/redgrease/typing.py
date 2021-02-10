@@ -6,7 +6,7 @@ T = TypeVar("T")
 Key = TypeVar("Key")
 Val = TypeVar("Val")
 
-Constructor = Union[Type[T], Callable[..., T]]
+Constructor = Union[Type[T], Callable[[Any], T]]
 
 RedisType = Union[bytes, int, float]
 SafeType = Union[bytes, int, float, str]

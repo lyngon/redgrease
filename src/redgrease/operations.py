@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional
 
 import redgrease.typing as optype
 from redgrease.sugar import TriggerMode
-from redgrease.typing import Key
 
 
 # Redis Gears Operations
@@ -59,7 +58,7 @@ class Accumulate(Operation):
 
 @dataclass
 class LocalGroupBy(Operation):
-    extractor: optype.Extractor[Key]
+    extractor: optype.Extractor
     reducer: optype.Reducer[Any]
 
 
@@ -76,7 +75,7 @@ class Collect(Operation):
 
 @dataclass
 class Repartition(Operation):
-    extractor: optype.Extractor[Key]
+    extractor: optype.Extractor
 
 
 @dataclass
@@ -88,7 +87,7 @@ class Aggregate(Operation):
 
 @dataclass
 class AggregateBy(Operation):
-    extractor: optype.Extractor[Key]
+    extractor: optype.Extractor
     zero: Any
     seqOp: optype.Reducer[Any]
     combOp: optype.Reducer[Any]
@@ -96,13 +95,13 @@ class AggregateBy(Operation):
 
 @dataclass
 class GroupBy(Operation):
-    extractor: optype.Extractor[Key]
+    extractor: optype.Extractor
     reducer: optype.Reducer[Any]
 
 
 @dataclass
 class BatchGroupBy(Operation):
-    extractor: optype.Extractor[Key]
+    extractor: optype.Extractor
     reducer: optype.BatchReducer[Any]
 
 
@@ -123,9 +122,9 @@ class Count(Operation):
 
 @dataclass
 class CountBy(Operation):
-    extractor: optype.Extractor[Key]
+    extractor: optype.Extractor
 
 
 @dataclass
 class Avg(Operation):
-    extractor: optype.Extractor[Key]
+    extractor: optype.Extractor
