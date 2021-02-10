@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 import redgrease.typing as optype
 from redgrease.sugar import TriggerMode
-from redgrease.typing import Key, T
+from redgrease.typing import Key
 
 
 # Redis Gears Operations

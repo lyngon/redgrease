@@ -1,10 +1,13 @@
+import time
 from typing import List
 
 import pytest
 
 import redgrease
 import redgrease.client
-from redgrease.client import RedisGears, safe_str, str_if_bytes
+import redgrease.data
+from redgrease.client import RedisGears
+from redgrease.utils import safe_str, str_if_bytes
 
 # Other things to test:
 # - Syntactinc sugar / enums
@@ -82,9 +85,9 @@ def test_dumpregistrations(rg: RedisGears, mode: str):
     assert len(registrations_list) == 1
     reg = registrations_list[0]
     assert reg
-    assert isinstance(reg, redgrease.client.Registration)
+    assert isinstance(reg, redgrease.data.Registration)
     assert reg.id
-    assert isinstance(reg.id, redgrease.client.ExecID)
+    assert isinstance(reg.id, redgrease.data.ExecID)
     assert reg.reader
     assert isinstance(
         reg.reader, str
@@ -93,7 +96,7 @@ def test_dumpregistrations(rg: RedisGears, mode: str):
 
     # # Registration data
     assert reg.RegistrationData
-    assert isinstance(reg.RegistrationData, redgrease.client.RegData)
+    assert isinstance(reg.RegistrationData, redgrease.data.RegData)
     rdat = reg.RegistrationData
     assert rdat.mode
     assert isinstance(
@@ -162,22 +165,24 @@ def test_getexecution(rg: RedisGears, fun_str: str):
 
     exec = rg.gears.pyexecute(fun_str, unblocking=True)
     assert exec
-    assert isinstance(exec, redgrease.client.Execution)
+    assert isinstance(exec, redgrease.data.Execution)
     assert exec.results
     assert not exec.errors
-    assert isinstance(exec.results, redgrease.client.ExecID)
+    assert isinstance(exec.results, redgrease.data.ExecID)
     shard_id = exec.results.shard_id
 
-    # ! Possibly a race condition that executon is not complete
+    # ! Possibly a race condition that executon is not complete. Ugly AF sln.
+    time.sleep(5)
+
     res = rg.gears.getexecution(exec.results)  # TODO: This is an odd API syntax
     assert res
     assert isinstance(res, dict)
     assert shard_id in res.keys()
     exe_plan = res[exec.results.shard_id]  # TODO: Real awkward
     assert exe_plan
-    assert isinstance(exe_plan, redgrease.client.ExecutionPlan)
+    assert isinstance(exe_plan, redgrease.data.ExecutionPlan)
     assert exe_plan.status
-    assert isinstance(exe_plan.status, redgrease.client.ExecutionStatus)
+    assert isinstance(exe_plan.status, redgrease.data.ExecutionStatus)
     assert isinstance(exe_plan.shards_received, int)
     assert isinstance(exe_plan.shards_completed, int)
     assert isinstance(exe_plan.results, int)
@@ -188,7 +193,7 @@ def test_getexecution(rg: RedisGears, fun_str: str):
     assert exe_plan.steps
     for exe_step in exe_plan.steps:
         assert exe_step
-        assert isinstance(exe_step, redgrease.client.ExecutionStep)
+        assert isinstance(exe_step, redgrease.data.ExecutionStep)
         assert exe_step.type
         assert isinstance(exe_step.type, str)
         assert isinstance(exe_step.duration, int)
@@ -206,12 +211,14 @@ def test_getresults(rg: RedisGears):
 
     exec = rg.gears.pyexecute(fun_str, unblocking=True)
     assert exec
-    assert isinstance(exec, redgrease.client.Execution)
+    assert isinstance(exec, redgrease.data.Execution)
     assert exec.results
     assert not exec.errors
-    assert isinstance(exec.results, redgrease.client.ExecID)
+    assert isinstance(exec.results, redgrease.data.ExecID)
 
-    # ! Possibly a race condition that executon is not complete
+    # ! Possibly a race condition that executon is not complete. Ugly AF sln.
+    time.sleep(5)
+
     res = rg.gears.getresults(exec.results)  # TODO: is this how we want it to work?
     assert res
     assert isinstance(
@@ -243,7 +250,7 @@ def test_abortexecution(rg: RedisGears):
 def test_pystats(rg: RedisGears):
     stats = rg.gears.pystats()
     assert stats
-    assert isinstance(stats, redgrease.client.PyStats)
+    assert isinstance(stats, redgrease.data.PyStats)
 
     assert stats.TotalAllocated
     assert isinstance(stats.TotalAllocated, int)
