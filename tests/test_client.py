@@ -1,3 +1,4 @@
+import time
 from typing import List
 
 import pytest
@@ -170,7 +171,9 @@ def test_getexecution(rg: RedisGears, fun_str: str):
     assert isinstance(exec.results, redgrease.data.ExecID)
     shard_id = exec.results.shard_id
 
-    # ! Possibly a race condition that executon is not complete
+    # ! Possibly a race condition that executon is not complete. Ugly AF sln.
+    time.sleep(5)
+
     res = rg.gears.getexecution(exec.results)  # TODO: This is an odd API syntax
     assert res
     assert isinstance(res, dict)
@@ -213,7 +216,9 @@ def test_getresults(rg: RedisGears):
     assert not exec.errors
     assert isinstance(exec.results, redgrease.data.ExecID)
 
-    # ! Possibly a race condition that executon is not complete
+    # ! Possibly a race condition that executon is not complete. Ugly AF sln.
+    time.sleep(5)
+
     res = rg.gears.getresults(exec.results)  # TODO: is this how we want it to work?
     assert res
     assert isinstance(

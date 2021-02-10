@@ -265,6 +265,7 @@ class Gears:
             id = id.executionId
 
         loc = [] if locality is None else [safe_str(locality).upper()]
+
         return self.redis.execute_command("RG.GETEXECUTION", to_redis_type(id), *loc)
 
     def getresults(

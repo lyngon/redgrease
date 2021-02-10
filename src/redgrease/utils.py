@@ -1,9 +1,9 @@
 from enum import Enum
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import redgrease
 import redgrease.data
-from redgrease.typing import Constructor, Key, RedisType, SafeType, T, Val
+from redgrease.typing import Constructor, Key, RedisType, T, Val
 
 
 # Not a parser
@@ -70,31 +70,6 @@ class CaseInsensitiveDict(dict):
         super(CaseInsensitiveDict, self).update(data)
 
 
-# def trigger(
-#     trigger: str,
-#     prefix: str = "*",
-#     convertToStr: bool = True,
-#     collect: bool = True,
-#     mode: str = redgrease.TriggerMode.Async,
-#     onRegistered: Callback = None,
-#     **kargs,
-# ):
-#     def gear(func):
-#         redgrease.GearsBuilder("CommandReader").map(
-#             lambda params: func(params[1:])
-#         ).register(
-#             prefix=prefix,
-#             convertToStr=convertToStr,
-#             collect=collect,
-#             mode=mode,
-#             onRegistered=onRegistered,
-#             trigger=trigger,
-#             **kargs,
-#         )
-#
-#     return gear
-
-
 def as_is(value: T) -> T:
     """Passthrough parser / identity function
 
@@ -132,6 +107,8 @@ def safe_str(value: Any) -> str:
     Returns:
         str: String
     """
+    if value is None:
+        return ""
     return str(str_if_bytes(value))
 
 
@@ -177,6 +154,8 @@ def safe_bool(input: Any) -> bool:
     Returns:
         bool: Parsed boolean
     """
+    if isinstance(input, (bool, int)):
+        return bool(input)
     if isinstance(input, (bytes, str)):
         return any(
             [
@@ -213,12 +192,11 @@ def to_redis_type(value: Any) -> RedisType:
     Args:
         value (Any): Value to serialize for Redis
 
-    Raises:
-        ValueError: Raised if the value can
-
     Returns:
         RedisType: A serialized version
     """
+    if value is None:
+        return bytes()
 
     if isinstance(value, bool):
         return to_int_if_bool(value)
@@ -235,12 +213,12 @@ def to_redis_type(value: Any) -> RedisType:
     if isinstance(value, (bytes, int, float)):
         return value
 
-    raise ValueError(f"Value {value} :: {type(value)} is not a valid as bytes.")
+    return to_redis_type(str(value))
 
 
 # Not a parser
 def to_list(
-    mapping: Dict[Key, Val],
+    mapping: Optional[Dict[Key, Val]],
     key_transform: Callable[[Key], Any] = str_if_bytes,
     val_transform: Callable[[Val], Any] = to_redis_type,
 ) -> List:
@@ -262,6 +240,8 @@ def to_list(
     Returns:
         List: Flattened list of the transformed keys and values
     """
+    if mapping is None:
+        return []
     return list(
         [
             item
@@ -316,6 +296,9 @@ def to_dict(
     Returns:
         Dict[Key, Val]: Folded dictionary
     """
+
+    if items is None:
+        return {}  # type: ignore
 
     kwargs = {}
     iterator = iter(items)
@@ -399,41 +382,9 @@ def list_parser(item_parser: Constructor[T]) -> Callable[[Iterable], List[T]]:
 list_of_str = list_parser(safe_str)
 
 
-def hetero_list(
+def dict_of(
     constructors: Dict[Key, Constructor[Any]]
-) -> Callable[[Iterable, List[Key]], List]:
-    """Creates a parser that parses a list of values to a new heterogenous list of values
-        each transformed using a constructor in a lookup dict.
-
-        The generated parser takes both the iterable of values to parse,
-        as well as, an equally long, iterable of names/keys to to use to lookup the
-        corresponding parser/constructor in the constructor lookup dict.
-        The parser for the Nth value is using the parser found by looking up the Nth
-        name/key in the key list in the lookup dict
-    s
-        E.g:
-        parser = hetero_list({"b":bool, "i":int})
-        parser([0,1,0,1], ["b","i","i","b"])
-
-        => [False, 1, 0, Bool]
-
-        Args:
-            constructors (Dict[Key, Constructor[Any]]): [description]
-
-        Returns:
-            Callable[[Iterable[Any], List[Key]], List[Any]]: [description]
-    """
-
-    def parser(input_list: Iterable, keys: Iterable[Key]):
-        return [
-            constructors[key](res) if key in constructors else res
-            for res, key in zip(input_list, keys)
-        ]
-
-    return parser
-
-
-def dict_of(constructors: Dict[str, Constructor[Any]]) -> Callable[..., Dict[str, Any]]:
+) -> Callable[[Iterable, Iterable[Key]], Dict[Key, Any]]:
     """Creates a parser that parses a list of values to a dict,
     according to a dict of named constructors.
 
@@ -458,7 +409,7 @@ def dict_of(constructors: Dict[str, Constructor[Any]]) -> Callable[..., Dict[str
         Callable[..., Dict[str, Any]]: Dict parser
     """
 
-    def parser(values: Iterable, keys: Iterable):
+    def parser(values: Iterable, keys: Iterable[Key]):
         return dict(
             [
                 (key, constructors[key](value) if key in constructors else value)

@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Iterable, List, Union
 
 import attr
 
@@ -145,18 +145,14 @@ class ExecutionPlan(RedisObject):
     )
 
     @staticmethod
-    def parse(res):
-        executions = map(
-            lambda x: to_dict(
-                x,
-                keyname="shard_id",  # is this needed actually ?
-                keytype=str_if_bytes,
-                valuename="execution_plan",  # is this needed actualls
-                valuetype=ExecutionPlan.from_redis,
-            ),
-            res,
-        )
-        return {k: v for d in executions for k, v in d.items()}
+    def parse(res: Iterable):
+        plans = {}
+        for shard in map(to_dict, res):
+            shard_id = str_if_bytes(shard[b"shard_id"])  # type: ignore
+            plan = shard[b"execution_plan"]  # type: ignore
+            exec_plan = ExecutionPlan.from_redis(plan)
+            plans[shard_id] = exec_plan
+        return plans
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -184,7 +180,7 @@ class ClusterInfo(RedisObject):
 
         cluster_info = ClusterInfo(
             my_id=safe_str(res[1]),
-            shards=res[2],  # list(map(ShardInfo.from_redis, res[2]))
+            shards=res[2],
         )
 
         return cluster_info
