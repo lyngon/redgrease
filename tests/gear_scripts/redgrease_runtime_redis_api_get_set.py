@@ -1,5 +1,4 @@
 import redgrease
-import redgrease.runtime
 
 
 def double(record):
@@ -13,7 +12,7 @@ def double(record):
         raise ValueError(err_msg) from ex
 
     try:
-        val = redgrease.runtime.api.get(key)
+        val = redgrease.cmd.get(key)
     except Exception as ex:
         err_msg = f"Unable to get key '{key}'"
         redgrease.log(err_msg + f": {ex}")
@@ -27,7 +26,7 @@ def double(record):
         raise TypeError(err_msg) from ex
     else:
         val *= 2
-        redgrease.runtime.api.set(key, val)
+        redgrease.cmd.set(key, val)
 
 
 redgrease.GB(redgrease.Reader.KeysReader).foreach(double).run()

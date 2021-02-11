@@ -41,11 +41,6 @@ redisgears_container = docker.container(
     image="{redisgears_image.id}", ports={redis_port: None}
 )
 
-redgrease_runtime_container = docker.container(
-    image="{redgrease_runtime_image.id}",
-    ports={redis_port: None},
-)
-
 
 def instantiate(client_cls: Callable[..., redis.Redis], *args, **kwargs):
     """Helper function to ensure that the SOT Redis Gears client object use the same
@@ -81,6 +76,12 @@ def redgrease_runtime_image(docker_client: DockerClient, redisgears_container):
         image = docker_client.images.get(redgrease_runtime_image_name)
 
     return image
+
+
+redgrease_runtime_container = docker.container(
+    image="{redgrease_runtime_image.id}",
+    ports={redis_port: None},
+)
 
 
 @pytest.fixture()

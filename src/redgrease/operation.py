@@ -6,7 +6,6 @@ from redgrease.sugar import TriggerMode
 
 
 # Redis Gears Operations
-# Should maybe be in a separate sub-package 'redgrease.operations'
 @dataclass
 class Operation:
     pass
