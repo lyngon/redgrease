@@ -95,7 +95,7 @@ def test_builtin_runtime_functions(
         "", requirements=[f"redgrease{extras}=={redgrease_version}"]
     )
 
-    name, contents = gears_script
+    _, contents = gears_script
 
     if redgrease_import == "import_explicit":
         script_str = contents

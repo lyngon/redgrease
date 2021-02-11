@@ -1,7 +1,8 @@
 import logging
 from typing import Any, Dict, List
 
-from redgrease.client import Redis
+import redis
+
 from redgrease.typing import Constructor
 from redgrease.utils import safe_str, to_list
 
@@ -27,7 +28,7 @@ class Config:
 
     __slots__ = "redis"
 
-    def __init__(self, redis: Redis):
+    def __init__(self, redis: redis.Redis):
         self.redis = redis
 
     def get(self, *config_option) -> List[str]:

@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import pytest
-import redis.exceptions
 
 from redgrease.client import RedisGears, safe_str
 
@@ -48,8 +47,3 @@ def test_basic(rg: RedisGears, script):
     assert res_1.errors == []
 
     assert float(safe_str(rg.get(key))) == orig_val * 2
-
-
-"""
-b"{'event': None, 'key': 'NUM', 'type': 'string', 'value': '13'}"
-"""

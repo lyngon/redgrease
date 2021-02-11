@@ -1,12 +1,24 @@
+__all__ = []
+
 import sys
 
 from .sugar import LogLevel as LogLevel
 from .sugar import Reader as Reader
 from .sugar import TriggerMode as TriggerMode
 
+__all__ += ["LogLevel", "Reader", "TriggerMode"]
+
 # Note: the form "from ... import x as x" is used not to trigger the mypy error
 # "implicit reexport", as described here:
 # https://mypy.readthedocs.io/en/stable/config_file.html#confval-implicit_reexport
+
+try:
+    # This will fail if redis package is not installed
+    from .command import redis as cmd
+
+    __all__ += ["cmd"]
+except ModuleNotFoundError:
+    pass
 
 # Use either the real or mock (placeholder) implementations of the
 # Redis Gears Python environment top level builtin funvtions
@@ -27,7 +39,6 @@ if "redisgears" in sys.modules:
 else:
     # Dev or Client environment
     # Import placeholder functions and
-    from .command import redis as command
     from .runtime import GB as GB
     from .runtime import GearsBuilder as GearsBuilder
     from .runtime import atomic as atomic
@@ -37,11 +48,7 @@ else:
     from .runtime import hashtag as hashtag
     from .runtime import log as log
 
-__all__ = [
-    "LogLevel",
-    "Reader",
-    "TriggerMode",
-    "command",
+__all__ += [
     "GB",
     "GearsBuilder",
     "atomic",

@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import redgrease
-import redgrease.data
 from redgrease.typing import Constructor, Key, RedisType, T, Val
 
 
@@ -203,9 +201,6 @@ def to_redis_type(value: Any) -> RedisType:
 
     if isinstance(value, str):
         return value.encode()
-
-    if isinstance(value, redgrease.data.ExecID):
-        return bytes(value)
 
     if hasattr(value, "__bytes__"):
         value.__bytes__()
