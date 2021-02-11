@@ -26,7 +26,8 @@ if "redisgears" in sys.modules:
     from redisgears import log as log
 else:
     # Dev or Client environment
-    # Import placeholder functions and classes
+    # Import placeholder functions and
+    from .command import redis as command
     from .placeholders import GB as GB
     from .placeholders import GearsBuilder as GearsBuilder
     from .placeholders import atomic as atomic

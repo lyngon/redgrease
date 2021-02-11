@@ -23,7 +23,7 @@ def get_runtime_client():
     return runtime_client
 
 
-api = get_runtime_client()  # noqa: F811 - Used as exported var
+redis = get_runtime_client()  # noqa: F811 - Used as exported var
 
 
 # ## Redis v6 commands

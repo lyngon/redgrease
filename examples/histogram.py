@@ -5,7 +5,7 @@ import numpy as np
 # during development.
 # I.e: 'GearsBuilder' and its functions.
 # It can be removed for final deployments, but can also be left as is.
-from redgrease.runtime import GearsBuilder
+from redgrease import GearsBuilder
 
 
 def foo():
