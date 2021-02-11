@@ -1,7 +1,7 @@
 import logging
 from typing import Any, List
 
-import redgrease.operations as gearop
+import redgrease.operation as gearop
 from redgrease.sugar import LogLevel, Reader, TriggerMode
 from redgrease.typing import (
     Accumulator,
@@ -27,7 +27,7 @@ class GearsBuilder:
         defaultArgs: str = "*",
         desc: str = None,
     ):
-        """Gear process
+        """Gear function / process factory
         Args:
             reader (str, optional): Input records reader
             Defining where the input to the gear will come from.
@@ -499,7 +499,8 @@ def configGet(key: str) -> bytes:
 
 
 def gearsConfigGet(key: str, default=None) -> bytes:
-    """Fetches the current value of a RedisGears configuration option and returns a default value if that key does not exist.
+    """Fetches the current value of a RedisGears configuration option and returns a
+    default value if that key does not exist.
 
     Args:
         key (str): The configuration option key.
