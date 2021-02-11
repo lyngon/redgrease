@@ -6,16 +6,21 @@
 - (change 2)
 
 # Additionl Info
-- (any additional info or context)
+- (additional info or context, if any)
 
 
 # Checklist
 (Check those that apply, just so we know)
-- [ ] Ad-hoc/manual testing
-- [ ] Ran relveant pytest's 
+## Testing
+- [ ] Testing : Ad-hoc/manual
+- [ ] Testing : Ran relveant pytest's 
     (I.e some test cases only)
-- [ ] Ran whole pytest suite 
+- [ ] Testing : Ran whole pytest suite 
     (I.e. all test-cases but for one or limited number of environments)
-- [ ] Ran whole nox test suite 
+- [ ] Testing : Ran whole nox test suite 
     (I.e. all test-casese across all supported environments)
-- [ ] Documentation
+  
+## Documentation
+- [ ] Documentation : Type Hints
+- [ ] Documentation : Doc-Strigns
+- [ ] Documentation : Usage Guide / Manual
