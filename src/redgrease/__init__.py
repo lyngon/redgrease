@@ -2,6 +2,7 @@ __all__ = []
 
 import sys
 
+from .sugar import KeyType
 from .sugar import LogLevel as LogLevel
 from .sugar import Reader as Reader
 from .sugar import TriggerMode as TriggerMode

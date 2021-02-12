@@ -16,7 +16,7 @@ class Run(Operation):
     arg: Optional[str] = None
     convertToStr: bool = True
     collect: bool = True
-    kargs: Dict[str, Any] = field(default_factory=dict)
+    kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -27,7 +27,7 @@ class Register(Operation):
     mode: str = TriggerMode.Async
     onRegistered: Optional[optype.Callback] = None
     trigger: Optional[str] = None
-    kargs: Dict[str, Any] = field(default_factory=dict)
+    kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
