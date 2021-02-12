@@ -1,4 +1,3 @@
-import redgrease
 from redgrease import GearsBuilder, execute, hashtag
 from redgrease.client import RedisGears
 

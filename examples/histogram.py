@@ -8,7 +8,7 @@ import numpy as np
 from redgrease import GearsBuilder
 
 
-def foo():
+def foo(_):
     pass
 
 
