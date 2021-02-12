@@ -154,7 +154,7 @@ class KeysOnlyReader(GearReader):
         default_key_pattern: str = "*",
     ):
         super().__init__(
-            reader=redgrease.Reader.KeysReader, defaultArg=default_key_pattern
+            reader=redgrease.Reader.KeysOnlyReader, defaultArg=default_key_pattern
         )
         self.default_key_pattern = default_key_pattern
 
@@ -189,7 +189,7 @@ class StreamReader(GearReader):
         default_key_pattern: str = "*",
     ):
         super().__init__(
-            reader=redgrease.Reader.KeysReader, defaultArg=default_key_pattern
+            reader=redgrease.Reader.StreamReader, defaultArg=default_key_pattern
         )
         self.default_key_pattern = default_key_pattern
 
@@ -244,12 +244,8 @@ class StreamReader(GearReader):
 
 
 class PythonReader(GearReader):
-    def __init__(
-        self,
-        dummy_arg: str = None,
-    ):
-        super().__init__(reader=redgrease.Reader.KeysReader, defaultArg="*")
-        self.dummy_arg = dummy_arg
+    def __init__(self):
+        super().__init__(reader=redgrease.Reader.PythonReader)
 
     def run(
         self,
@@ -273,12 +269,8 @@ class PythonReader(GearReader):
 
 
 class ShardsIDReader(GearReader):
-    def __init__(
-        self,
-        dummy_arg: str = None,
-    ):
-        super().__init__(reader=redgrease.Reader.KeysReader, defaultArg="*")
-        self.dummy_arg = dummy_arg
+    def __init__(self):
+        super().__init__(reader=redgrease.Reader.ShardsIDReader)
 
     def run(
         self,
@@ -300,12 +292,8 @@ class ShardsIDReader(GearReader):
 
 
 class CommandReader(GearReader):
-    def __init__(
-        self,
-        dummy_arg: str = None,
-    ):
-        super().__init__(reader=redgrease.Reader.KeysReader, defaultArg="*")
-        self.dummy_arg = dummy_arg
+    def __init__(self):
+        super().__init__(reader=redgrease.Reader.CommandReaderReader)
 
     def register(
         self,
