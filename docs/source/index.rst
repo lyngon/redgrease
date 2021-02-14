@@ -1,0 +1,126 @@
+.. redgrease documentation master file, created by
+   sphinx-quickstart on Sat Feb 13 14:27:38 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to redgrease's documentation!
+=====================================
+
+Client
+------
+Documentation is Work-in-Progress.
+Comming soon, hopefully. 
+
+Builtin Runtime Functions
+-------------------------
+You can load the default redisgears symbols (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc) from the `redgrease.runtime` package. 
+
+During development this will give you auto-completion and type hints
+In the Redis Gears Python runtime, all the `redgrease.runtime` are mapped directly to the normal ones wihtout side-effects.
+
+``
+from redgrease import GearsBuilder, log, atomic, execute
+``
+
+This will enable auto completion in your IDE, for Redis Gears stuff. Example from Redis Gears Introduction:
+
+RedGrease's `runtime` package will detect when it is imported inside an actual RedisGears Python runtime environment and will then load the default redis gears symbols, avoiding conflict with the built-in Redis Gears Python environment.
+If it is loaded outside a Redis Gears Python runtime environment, i.e. a development environment, the `redgrease.runtime` package will instead load placeholder symbols with decent (hopefully) doc-strings and type-hints, for easier development.
+
+It is possible to load all symbols, using `*`, but it's generally not a recomended practice.
+
+
+Example
+~~~~~~~
+Below is an ex
+``
+from redgrease.runtime import GearsBuilder, execute
+
+def age(x):
+   ''' Extracts the age from a person's record '''
+   return int(x['value']['age'])
+
+def cas(x):
+   ''' Checks and sets the current maximum '''
+   k = 'age:maximum'
+   v = execute('GET', k)   # read key's current value
+   v = int(v) if v else 0  # initialize to 0 if N
+   if x > v:               # if a new maximum found
+   execute('SET', k, x)  # set key to new value
+
+# Event handling function registration
+gb = GearsBuilder()
+gb.map(age)
+gb.foreach(cas)
+gb.register('person:*')
+
+``
+
+Syntactic Sugar
+---------------
+Documentation is Work-in-Progress.
+Comming soon, hopefully. 
+
+Serverside Redis Commands
+-------------------------
+Documentation is Work-in-Progress.
+Comming soon, hopefully. 
+
+Loader CLI
+----------
+`redgrease` can be invoked from the CLI:
+``
+redgrease --help
+usage: redgrease [-h] [-c PATH] [--index-prefix PREFIX] [-r] [--script-pattern PATTERN] [--requirements-pattern PATTERN] [--unblocking-pattern PATTERN] [-i PATTERN] [-w [SECONDS]] [-s [SERVER]] [-p PORT] [-l LOG_CONFIG] dir_path [dir_path ...]
+
+Scans one or more directories for Redis Gears scripts, and executes them in a Redis Gears instance or cluster. Can optionally run continiously, montoring and re-loading scripts whenever changes are detected. Args that start with '--' (eg. --index-prefix) can also be set in a config file
+(./*.conf or /etc/redgrease/conf.d/*.conf or specified via -c). Config file syntax allows: key=value, flag=true, stuff=[a,b,c] (for details, see syntax at https://goo.gl/R74nmi). If an arg is specified in more than one place, then commandline values override environment variables which override
+config file values which override defaults.
+
+positional arguments:
+   dir_path              One or more directories containing Redis Gears scripts to watch
+
+   optional arguments:
+   -h, --help            show this help message and exit
+   -c PATH, --config PATH
+                        Config file path [env var: CONFIG_FILE]
+   --index-prefix PREFIX
+                        Redis key prefix added to the index of monitored/executed script files. [env var: INDEX_PREFIX]
+   -r, --recursive       Recursively watch subdirectories. [env var: RECURSIVE]
+   --script-pattern PATTERN
+                        File name pattern (glob-style) that must be matched for scripts to be loaded. [env var: SCRIPT_PATTERN]
+   --requirements-pattern PATTERN
+                        File name pattern (glob-style) that must be matched for requirement files to be loaded. [env var: REQUIREMENTS_PATTERN]
+   --unblocking-pattern PATTERN
+                        Scripts with file paths that match this regular expression, will be executed with the 'UNBLOCKING' modifier, i.e. async execution. Note that the pattern is a 'search' pattern and not anchored to thestart of the path string. [env var: UNBLOCKING_PATTERN]
+   -i PATTERN, --ignore PATTERN
+                        Ignore files matching this pattern. [env var: IGNORE]
+   -w [SECONDS], --watch [SECONDS]
+                        If set, the directories will be continously montiored for updates/modifications to scripts and requirement files, and automatically loaded/rerun. The flag takes an optional value specifying the duration, in seconds, to wait for further updates/modifications to files,
+                        before executing. This 'hysteresis' period is to prevent malformed scripts to be unnecessarily loaded during coding. If no value is supplied, the duration is defaulting to 5 seconds. [env var: WATCH]
+   -s [SERVER], --server [SERVER]
+                        Redis Gears host server IP or hostname. [env var: SERVER]
+   -p PORT, --port PORT  Redis Gears host port number [env var: PORT]
+   -l LOG_CONFIG, --log-config LOG_CONFIG
+                        [env var: LOG_CONFIG]
+``
+
+Remote Gears
+------------
+Documentation is Work-in-Progress.
+Comming soon, hopefully. 
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
