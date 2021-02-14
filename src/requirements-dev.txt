@@ -1,8 +1,12 @@
-# TODO: Separate dev and test
 black
+isort
+sphinx==3.4.3 
+twine 
+wheel
+
 flake8
-isort[requirements_deprecated_finder]
 mypy
+
 pytest
 pytest-benchmark
 pytest-clarity
@@ -13,6 +17,5 @@ pytest-sugar
 pytest-timeout
 pytest-xdist[psutil]
 tox
-twine
-wheel
--r requirements.txt 
+
+-r requirements.txt s
