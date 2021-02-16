@@ -1,3 +1,21 @@
+![Redis Gears](https://img.shields.io/badge/Redis-Gears-red?logo=redis)
+![License](https://img.shields.io/github/license/lyngon/redgrease)
+![PyPI Version](https://img.shields.io/pypi/v/redgrease)
+![PyPI - Status](https://img.shields.io/pypi/status/redgrease)
+![PyPI Downloads](https://img.shields.io/pypi/dw/redgrease)
+![PyPI PythonVersion](https://img.shields.io/pypi/pyversions/redgrease)
+![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)
+![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)
+![GitHub Open bugs](https://img.shields.io/github/issues-raw/lyngon/redgrease/bug?label=open%20bugs)
+![GitHub Closed issues](https://img.shields.io/github/issues-closed-raw/lyngon/redgrease?color=informational)
+![Lines of Code](https://img.shields.io/tokei/lines/github/lyngon/redgrease?label=LOC)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![Docker Image](https://img.shields.io/docker/v/lyngon/redgrease?label=lyngon%2Fredgrease&logo=docker)
+
+<!--
+![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/lyngon/redgrease)
+![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/lyngon/redgrease) 
+-->
 # RedGrease
 RedGrease is a Python package and set of tools to facilitate development against [Redis](https://redis.io/) in general and [Redis Gears](https://redislabs.com/modules/redis-gears/) in particular.
 
@@ -29,7 +47,7 @@ cap.register(prefix='*',
              readValue=False)
 ```
 
-4. [Servers-side Redis commands](https://redgrease.readthedocs.io), allowing for all Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of 'manually' invoking the `execute()`. It is basically the [redis](https://pypi.org/project/redis/) client, but with `execute_command` rewired to use the Gears-native `execute` instead under the hood. 
+4. [Servers-side Redis commands](https://redgrease.readthedocs.io), allowing for all Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of 'manually' invoking the `execute()`. It is basically the [redis](https://pypi.org/project/redis/) client, but with `execute_command()` rewired to use the Gears-native `execute()` instead under the hood. 
 ```python
 import redgrease
 
