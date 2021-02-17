@@ -8,7 +8,7 @@ Badges, badges, badges, badges:
 ![PyPI PythonVersion](https://img.shields.io/pypi/pyversions/redgrease)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/alerts/)
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/lyngon/redgrease/tests-all/main?logo=github)
+[![Build Status](https://travis-ci.com/lyngon/redgrease.svg?branch=main)](https://travis-ci.com/lyngon/redgreaseanders)
 [![codecov](https://codecov.io/gh/lyngon/redgrease/branch/main/graph/badge.svg?token=pQZbBVxxmm)](https://codecov.io/gh/lyngon/redgrease)
 ![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)
 ![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)
@@ -175,14 +175,10 @@ pip install -r src/requirements-dev.txt
 ```
 Then the tess can be run with PyTest as per usual:
 ```
-pytest .
-```
-Or across all supported environments (>= Python 3.6), using Tox:
-```
-tox .
+pytest 
 ```
 
-**Note:** Running the tests takes excruciatingly long, particularly with Tox, as a new fresh Redis instance is spun up **for each test**, just to ensure no risk of cross-contamination. This may be optimized, as many tests are actually independent, but it's left like this for now.
+**Note:** Running the tests takes excruciatingly long, sas a new fresh Redis instance is spun up **for each test**, just to ensure no risk of cross-contamination. This may be optimized, as many tests are actually independent, but it's left like this for now.
 
 # Why This?
 The need for this arose from wanting to prototype the concepts for a new Redis module, using Gears CommandReaders and triggers instead of having to write full fledged module in C.

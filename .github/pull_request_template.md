@@ -17,7 +17,7 @@
     (I.e some test cases only)
 - [ ] Testing : Ran whole PyTest suite 
     (I.e. all test-cases but for one or limited number of environments)
-- [ ] Testing : Ran whole Tox test suite 
+- [ ] Testing : Ran whole Travis test suite 
     (I.e. all test-cases across all supported environments)
   
 ## Documentation
