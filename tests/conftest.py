@@ -1,9 +1,9 @@
-import importlib.metadata
 import time
 from datetime import datetime
 from typing import Callable
 from uuid import uuid4
 
+import importlib_metadata
 import pytest
 import pytest_docker_tools as docker
 import redis
@@ -14,10 +14,7 @@ from docker.errors import APIError as DockerError
 import redgrease
 import redgrease.client
 
-# from pytest_docker_tools import container, fetch
-
-
-redgrease_version = importlib.metadata.version("redgrease")
+redgrease_version = importlib_metadata.version("redgrease")
 redgrease_runtime_repo = "lyngon/redisgears"
 redgrease_runtime_image_name = f"{redgrease_runtime_repo}:{redgrease_version}"
 
