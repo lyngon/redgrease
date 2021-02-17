@@ -1,21 +1,27 @@
+Badges, badges, badges, badges:
+
 ![Redis Gears](https://img.shields.io/badge/Redis-Gears-red?logo=redis)
 ![License](https://img.shields.io/github/license/lyngon/redgrease)
 ![PyPI Version](https://img.shields.io/pypi/v/redgrease)
 ![PyPI - Status](https://img.shields.io/pypi/status/redgrease)
 ![PyPI Downloads](https://img.shields.io/pypi/dw/redgrease)
 ![PyPI PythonVersion](https://img.shields.io/pypi/pyversions/redgrease)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/alerts/)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/lyngon/redgrease/tests-all/main?logo=github)
+[![codecov](https://codecov.io/gh/lyngon/redgrease/branch/main/graph/badge.svg?token=pQZbBVxxmm)](https://codecov.io/gh/lyngon/redgrease)
 ![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)
 ![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)
 ![GitHub Open bugs](https://img.shields.io/github/issues-raw/lyngon/redgrease/bug?label=open%20bugs)
 ![GitHub Closed issues](https://img.shields.io/github/issues-closed-raw/lyngon/redgrease?color=informational)
 ![Lines of Code](https://img.shields.io/tokei/lines/github/lyngon/redgrease?label=LOC)
+![GitHub top language](https://img.shields.io/github/languages/top/lyngon/redgrease)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![Docker Image](https://img.shields.io/docker/v/lyngon/redgrease?label=lyngon%2Fredgrease&logo=docker)
 
-<!--
-![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/lyngon/redgrease)
-![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/lyngon/redgrease) 
--->
+![Mushroom! Musroom!](https://img.shields.io/badge/Mushroom!-Mushroom!-8B4513)
+
+
 # RedGrease
 RedGrease is a Python package and set of tools to facilitate development against [Redis](https://redis.io/) in general and [Redis Gears](https://redislabs.com/modules/redis-gears/) in particular.
 
@@ -26,11 +32,13 @@ RedGrease consists of the followinig, components:
 ```python
 from redgrease.client import RedisGears
 
+gear_script = ... # Some Gear script
+
 rg = RedisGears()
-rg.gears.pyexecute("GB().run()")  # <--
+rg.gears.pyexecute(gear_script)  # <--
 ```
 
-2. Some [helper runtime functions](https://redgrease.readthedocs.io) defined in(#builtin-runtime-functions) `redgrease.runtime`, but also exposed at 'top-level' (`redgrease`), exposing placeholders for the built-in Redis Gears functions (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc) that are automatically loaded into the server [runtime environment](https://oss.redislabs.com/redisgears/runtime.html). These placeholder versions provide auto completion and type hints during development, and does not clash with the actual runtime, i.e does not require redgrease to be installed on the server.
+2. Some [helper runtime functions](https://redgrease.readthedocs.io) defined in `redgrease.runtime`, but also exposed at 'top-level' (`redgrease`), exposing placeholders for the built-in Redis Gears functions (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc) that are automatically loaded into the server [runtime environment](https://oss.redislabs.com/redisgears/runtime.html). These placeholder versions provide auto completion and type hints during development, and does not clash with the actual runtime, i.e does not require redgrease to be installed on the server.
 ![basic hints](docs/images/basic_usage_hints.jpg)
 
 3. [Syntactic sugar](https://redgrease.readthedocs.io) for various things like 'magic' values and strings, like the different reader names (e.g `redgrease.Reader.CommandReader`), trigger modes (e.g. `redgrease.TriggerMode.AsyncLocal`) and log levels (e.g. `redgrease.LogLevel.Notice`). 
@@ -47,7 +55,7 @@ cap.register(prefix='*',
              readValue=False)
 ```
 
-4. [Servers-side Redis commands](https://redgrease.readthedocs.io), allowing for all Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of 'manually' invoking the `execute()`. It is basically the [redis](https://pypi.org/project/redis/) client, but with `execute_command()` rewired to use the Gears-native `execute()` instead under the hood. 
+4. [Servers-side Redis commands](https://redgrease.readthedocs.io), allowing for **all** Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of 'manually' invoking the `execute()`. It is basically the [redis](https://pypi.org/project/redis/) client, but with `execute_command()` rewired to use the Gears-native `execute()` instead under the hood. 
 ```python
 import redgrease
 
@@ -97,7 +105,7 @@ rg.gears.trigger("bang")
 6. **[In Backlog]** Other boilerplate or otherwise functions, that may commonly be used in gears. e.g:
     - A simple `records()` function  that can be used to transform the default `KeysReader` dict to an `Records` object with the appropriate attributes. Maybe even sertter for the value (?)
     ```python
-    KeysReader().map(redgrease.record).foreach(lambda r: log(f"The key '{r[.key]}' is of type '{r.type}' with value '{r.valuer}'")
+    KeysReader().map(redgrease.record).foreach(lambda r: log(f"The key '{r[.key]}' is of type '{r.type}' with value '{r.value}'")
     ```
     - Helpers to aid debugging and/ or testing of gears. 
     - ...
@@ -106,7 +114,7 @@ Suggestions appriciated.
 
 # Installation
 Redgrease may be installed either as a developmet tool only, a client library and/or as a runtime library on the Redis Gears server.
-It can be installed with different 'extras', dependencies depending on preferred usage. 
+It can be installed with different 'extras' dependencies depending on preferred usage. 
 
 ## Development / Client Environment Install
 In the environment where you develop your Gears scripts, simply install 'redgrease' with pip3, as usual:
@@ -118,10 +126,8 @@ This installs all the dependencies, allowing for the full features set.
 
 `reagrease[cli]` : Installs dependencies for the CLI
 
-## Runtime / Server Enviromnment Install
-A minimal install, without any  3-rd party dependencies, which is pretty much only the syntactic sugar and runtime placeholders, can be installed usig the bare 'redgrease' package. This migth be useful if you want a clean server runtime but still want the sugar.
-
-Otherwise it is recomendede to use the `redgreese[runtime]' package as a serverside dependency. 
+## Runtime / Server Environment Install
+It is recomendede to use the `redgreese[runtime]` package as a serverside dependency. 
 This installs dependencies for the all the serverside features such as serverside Redis commands and the runtime for gears constructed with the 'Remote Gears Builder'
 
 ```python
@@ -131,18 +137,21 @@ rg = RedisGears()
 rg.gears.pyexecute("", requirements=["redgrease[runtime]"])
 ```
 
-### Note Redis Gears Runtime Environment
-The RedGrease package is NOT required to be installed in the Redis Gears Python Runtime environment, in order to run conventional Gears scripts that only use the standard commands, even if RedGrease was used for development.
+The current 3rd party packages in the `runtime` extras are:
+- [attrs](https://pypi.org/project/attrs/) - For parsing composite Gears response structures into attrs objects
+- [redis](https://pypi.org/project/redis/) - Needed for server-side redis commands
+- [cludpickle](https://pypi.org/project/cloudpickle/) - Needed for the "Remote" gears (similarly to the official [redisgears-py](https://github.com/RedisGears/redisgears-py) client)
 
-If you remove the redgrease import clause from your script, or wrap it in a check as outlined on the "Slightly more Advanced Usage" section, such scripts will still run perfectly fine without redgrease in Redis Gears Environment.
+### Note on the runtime environment
+If the only thing you need is the redgrease client and/or docstings, typhints and the loader CLI for development of conventional Gears scripts (i.e that only use the standard commands and loaded as strings), **then the RedGrease package is not strictly required to be installed** in the Redis Gears Python Runtime environment (i.e. on the server)  
 
-However, it is also perfectly safe to install the `redgrease` package on the Redis Gears server, and leave the redgrease import clauses in your scripts. It is probably more convenient.
+You can in this case simply remove the redgrease import clause from your script, after development but before `pyexecuting` them as per the [Redis Gears documentation](https://oss.redislabs.com/redisgears/intro.html). Such scripts will still run perfectly fine without redgrease in Redis Gears Environment.
 
-In this case, you would simply load the scripts with 'redgrease' as a requirement the conventional way:
-```
-redis-cli RG.PYEXCUTE "$(cat yourscript.py)" REQUIRE redgrease
-```
-Alternative you can use the RedGrease watcher or loader to automate loading your scripts as well as requirements from a normal 'requirements.txt' files, as outlined [here](https://github.com/lyngon/redgrease) 
+A minimal install, without any  3-rd party dependencies, which is pretty much only the syntactic sugar and runtime placeholders, can be installed usig the bare 'redgrease' package. 
+
+This migth be useful if you really don't want the 3rd party packages in the server runtime but still want to use the redgrese sugar.
+
+You can also use the RedGrease watcher or loader CLI to automate loading your scripts as well as requirements from a normal 'requirements.txt' files, as outlined [here](https://github.com/lyngon/redgrease) 
 
 # Usage / Documentation
 The Documenttion is work-in-progress, but the latest and greatest version is available here: 
@@ -157,7 +166,7 @@ git clone https://github.com/lyngon/redgrease
 
 In order to run the tests, [Docker](https://docs.docker.com/get-docker/) is required to be installed in order to spin up fresh Redis instances, on demand for the tests. 
 
-PyTest and quite a number of its add-ons, as well as Tox, is also needed to run the tests properls. All test (and dev) requirements is best installed through:
+PyTest and quite a number of its add-ons, as well as Tox, is also needed to run the tests properly. All test (and dev) requirements is best installed through:
 ```
 cd redgrease/
 python3 -m venv .venv
@@ -178,7 +187,7 @@ tox .
 # Why This?
 The need for this arose from wanting to prototype the concepts for a new Redis module, using Gears CommandReaders and triggers instead of having to write full fledged module in C.
 
-Intitially RedGrease was just a very simple module, with placeholders for the default Redis gears runtime functiions, with type hints and docstrings, just to make it more convenient and less error prone to write Gears functions.
+Intitially RedGrease was just a very simple module, with placeholders for the default Redis gears runtime functions, with type hints and docstrings, just to make it more convenient and less error prone to write Gears functions.
 
 Then the loader cli was created, in order to furthure speed up the rapid development cycle. 
 
@@ -186,5 +195,9 @@ Then the server-side Redis 'client' commands function was addes to minimize erro
 
 Then the client was added ... and before long it started to get a life of its own. 
 
-Note that this means RedGrease package is primarily intended to aid development of Gears scripts, and was not originally intended to be used in any "production" software. This intent has now changed, and the goal is now to make Redgrease a production grade package for Redis Gears.
-Granted, there is stilll quite some way to go to get there. 
+Note that this means RedGrease package is primarily intended to be an aid for **development** of Gears scripts, and was not originally intended to be used in any "production" software. 
+
+This intent has now changed, and the new goal is now to make Redgrease a production grade package for Redis Gears.
+Granted, there is stilll quite some way to go to get there, so your support and feedback is greatly appriciated.
+
+If you like this project, or want professional support, please consider [sponsoring](https://github.com/sponsors/lyngon).
