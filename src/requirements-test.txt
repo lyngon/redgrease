@@ -1,0 +1,15 @@
+codecov
+flake8
+importlib-metadata
+pytest==6.0.1
+pytest-benchmark
+pytest-clarity
+pytest-cov==2.10.1
+pytest-datafiles
+pytest-docker-tools
+pytest-sugar
+pytest-timeout
+pytest-xdist[psutil]==2.0.0
+# tox
+
+-r requirements.txt s

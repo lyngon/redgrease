@@ -3,21 +3,6 @@ isort
 sphinx==3.4.3 
 twine 
 wheel
-
-flake8
 mypy
 
-codecov
-importlib-metadata
-pytest
-pytest-benchmark
-pytest-clarity
-pytest-cov
-pytest-datafiles
-pytest-docker-tools
-pytest-sugar
-pytest-timeout
-pytest-xdist[psutil]
-tox
-
--r requirements.txt s
+-r requirements-test.txt s
