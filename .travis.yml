@@ -1,10 +1,18 @@
 sudo: false
 language: python
-python:
-    - "3.6"
-    - "3.7"
-    - "3.8"
-    - "3.9"
+matrix:
+  include:
+    - python: 3.6
+      env: TOXENV=py36
+    - python: 3.7
+      env: TOXENV=py37
+    - python: 3.8
+      env: TOXENV=py38
+    - python: 3.9
+      env: TOXENV=py39
+#    - python: pypy
+#      env: TOXENV=pypy
+    - env: TOXENV=flake8
 services:
   - docker
 before_install:
