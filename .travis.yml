@@ -1,21 +1,36 @@
-sudo: false
 language: python
-matrix:
-  include:
-    - python: 3.6
-      env: TOXENV=py36
-    - python: 3.7
-      env: TOXENV=py37
-    - python: 3.8
-      env: TOXENV=py38
-    - python: 3.9
-      env: TOXENV=py39
-#    - python: pypy
-#      env: TOXENV=pypy
-    - env: TOXENV=flake8
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+  - "3.9"
+install:
+  - pip install -r src/requirements-test.txt
+  - pip install .
 services:
   - docker
 before_install:
   - docker pull redislabs/redisgears
-install: pip install tox-travis
-script: tox
+script:
+  - pytest
+
+# sudo: false
+# language: python
+# matrix:
+#   include:
+#     - python: 3.6
+#       env: TOXENV=py36
+#     - python: 3.7
+#       env: TOXENV=py37
+#     - python: 3.8
+#       env: TOXENV=py38
+#     - python: 3.9
+#       env: TOXENV=py39
+# #    - python: pypy3
+# #      env: TOXENV=pypy3
+# services:
+#   - docker
+# before_install:
+#   - docker pull redislabs/redisgears
+# install: pip install tox-travis
+# script: tox
