@@ -10,6 +10,6 @@ pytest-docker-tools
 pytest-sugar
 pytest-timeout
 pytest-xdist[psutil]
-tox
+# tox
 
 -r requirements.txt s

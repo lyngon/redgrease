@@ -13,6 +13,9 @@ before_install:
   - docker pull redislabs/redisgears
 script:
   - pytest
+after_success:
+  - codecov
+
 
 # sudo: false
 # language: python
