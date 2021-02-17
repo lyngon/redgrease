@@ -4,18 +4,18 @@
 ![PyPI - Status](https://img.shields.io/pypi/status/redgrease)
 ![PyPI Downloads](https://img.shields.io/pypi/dw/redgrease)
 ![PyPI PythonVersion](https://img.shields.io/pypi/pyversions/redgrease)
+![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/lyngon/redgrease)
+![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/lyngon/redgrease) 
 ![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)
 ![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)
 ![GitHub Open bugs](https://img.shields.io/github/issues-raw/lyngon/redgrease/bug?label=open%20bugs)
 ![GitHub Closed issues](https://img.shields.io/github/issues-closed-raw/lyngon/redgrease?color=informational)
 ![Lines of Code](https://img.shields.io/tokei/lines/github/lyngon/redgrease?label=LOC)
+![GitHub top language](https://img.shields.io/github/languages/top/lyngon/redgrease)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![Docker Image](https://img.shields.io/docker/v/lyngon/redgrease?label=lyngon%2Fredgrease&logo=docker)
 
-<!--
-![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/lyngon/redgrease)
-![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/lyngon/redgrease) 
--->
+
 # RedGrease
 RedGrease is a Python package and set of tools to facilitate development against [Redis](https://redis.io/) in general and [Redis Gears](https://redislabs.com/modules/redis-gears/) in particular.
 
