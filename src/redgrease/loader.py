@@ -44,7 +44,7 @@ class GearsLoader:
         self,
         script_pattern: str = None,
         requirements_pattern: str = None,
-        unblocking_pattern: Union[str, re.Pattern[str]] = None,
+        unblocking_pattern=None,
         ignore_patterns: str = None,
         index_prefix: str = None,
         server: str = "localhost",

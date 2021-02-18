@@ -1,18 +1,8 @@
-# TODO: Separate dev and test
 black
-flake8
-isort[requirements_deprecated_finder]
-mypy
-pytest
-pytest-benchmark
-pytest-clarity
-pytest-cov
-pytest-datafiles
-pytest-docker-tools
-pytest-sugar
-pytest-timeout
-pytest-xdist[psutil]
-tox
-twine
+isort
+sphinx==3.4.3 
+twine 
 wheel
--r requirements.txt 
+mypy
+
+-r requirements-test.txt s

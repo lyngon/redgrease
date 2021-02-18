@@ -1,4 +1,4 @@
-import importlib.metadata
+import importlib_metadata
 import os
 import re
 import time
@@ -11,7 +11,7 @@ import redgrease.client
 import redgrease.data
 from redgrease.client import RedisGears
 
-redgrease_version = importlib.metadata.version("redgrease")
+redgrease_version = importlib_metadata.version("redgrease")
 
 scripts_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "gear_scripts")
 

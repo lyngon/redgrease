@@ -171,7 +171,6 @@ def main():
             while running:
                 time.sleep(1)
         except KeyboardInterrupt:
-            running = False
             log.warning("Interrupted by user. Ending!")
         finally:
             loader.stop()
