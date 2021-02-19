@@ -1,4 +1,5 @@
 attrs
+cloudpickle
 ConfigArgParse
 dataclasses  # for python 3.6 compatibility only
 pyyaml

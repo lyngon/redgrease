@@ -1,17 +1,16 @@
 import logging
 
 import redgrease.operation as gearop
-from redgrease.gears import GearTrainBuilder
-from redgrease.sugar import LogLevel, Reader, TriggerMode
-from redgrease.typing import Callback
+import redgrease.sugar as sugar
+from redgrease.gears import PartialGearFunction
 
 logger = logging.getLogger(__name__)
 
 
-class GearsBuilder(GearTrainBuilder):
+class GearsBuilder(PartialGearFunction):
     def __init__(
         self,
-        reader: str = Reader.KeysReader,
+        reader: str = sugar.Reader.KeysReader,
         defaultArg: str = "*",
         desc: str = None,
     ):
@@ -38,118 +37,26 @@ class GearsBuilder(GearTrainBuilder):
             desc (str, optional): An optional description.
                 Defaults to None.
         """
-        super().__init__(reader=reader, defaultArg=defaultArg, desc=desc)
-
-    def run(
-        self,
-        arg: str = None,  # TODO: This can also be a Python generator
-        convertToStr: bool = False,
-        collect: bool = False,
-        **kwargs,
-        # TODO: Add all the Reader specific args here
-    ):
-        """Runs a gear function as a batch.
-        The function is executed once and exits once the data is
-        exhausted by its reader.
-        Args:
-            arg (str, optional): An optional argument that's passed to
-                the reader as its defaultArg.
-                It means the following:
-                - A glob-like pattern for the KeysReader
-                and KeysOnlyReader readers.
-                - A key name for the StreamReader reader.
-                - A Python generator for the PythonReader reader.
-                Defaults to None.
-
-            convertToStr (bool, optional): When `True` adds a map
-                operation to the flow's end that stringifies records.
-                Defaults to False.
-
-            collect (bool, optional): When `True` adds a collect operation
-                to flow's end.
-                Defaults to False.
-        Returns:s
-            [type]: [description]
-        """
-        self.operations.append(
-            gearop.Run(
-                arg=arg, convertToStr=convertToStr, collect=collect, kwargs=kwargs
-            )
-        )
-        return self
-
-    def register(
-        self,
-        prefix: str = "*",  # Reader Specific: ...
-        convertToStr: bool = False,
-        collect: bool = False,
-        mode: str = TriggerMode.Async,
-        onRegistered: Callback = None,
-        trigger: str = None,  # Reader Specific: CommandReader
-        **kwargs,
-        # TODO: Add all the Reader specific args here
-    ):
-        """Runs a Gear function as an event handler.
-        The function is executed each time an event arrives.
-        Each time it is executed, the function operates on the event's
-        data and once done is suspended until its future invocations by
-        new events.
-        Args:
-            prefix (str, optional): Key prefix pattern to match on.
-                Not relevant for 'CommandReader' readers (see 'trigger').
-                Defaults to '*'.
-
-            convertToStr (bool, optional): When `True` adds a map
-                operation to the flow's end that stringifies records.
-                Defaults to True.
-                collect (bool, optional): When True adds a collect operation
-                to flow's end.
-                Defaults to False.
-
-            mode (str, optional): The execution mode of the function.
-                Can be one of:
-                - 'async': Execution will be asynchronous across the entire
-                cluster.
-                - 'async_local': Execution will be asynchronous and restricted
-                to the handling shard.
-                - 'sync': Execution will be synchronous and local.
-                Defaults to 'async'.
-
-            onRegistered (Callback, optional): A function callback that's
-                called on each shard upon function registration.
-                It is a good place to initialize non-serializable objects
-                such as network connections.
-                Defaults to None.
-
-            trigger (str, optional): For 'CommandReader' only.
-                The trigger string that will trigger the function.
-                Defaults to None.
-        Returns:
-            [type]: [description]
-        """
-        self.operations.append(
-            gearop.Register(
-                prefix=prefix,
-                convertToStr=convertToStr,
-                collect=collect,
-                mode=mode,
-                onRegistered=onRegistered,
-                trigger=trigger,
-                kwargs=kwargs,
-            )
-        )
-        return self
+        reader_op = gearop.Reader(reader, defaultArg, desc)
+        super().__init__(operation=reader_op, input_function=None)
 
 
 GB = GearsBuilder
 
 
 class atomic:
-    def __enter__(self):
+    def __init__(self):
+        from redisgears import atomicCtx as redisAtomic
+
+        self.atomic = redisAtomic()
         pass
 
-    def __exit__(self, ex_type, ex_value, ex_traceback):
-        pass
+    def __enter__(self):
+        self.atomic.__enter__()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.atomic.__exit__()
 
 
 def execute(command: str, *args) -> bytes:
@@ -161,7 +68,9 @@ def execute(command: str, *args) -> bytes:
     Returns:
         bytes: Raw command response
     """
-    return b"[PLACEHOLDER]"
+    from redisgears import executeCommand as redisExecute
+
+    return redisExecute(command, *args)
 
 
 def hashtag() -> bytes:
@@ -172,11 +81,12 @@ def hashtag() -> bytes:
     Returns:
         str: [description]
     """
-    log("[PLACEHOLDER] hashtag()")
-    return b"[PLACEHOLDER]"
+    from redisgears import getMyHashTag as redisHashtag
+
+    return redisHashtag()
 
 
-def log(message: str, level: str = LogLevel.Notice):
+def log(message: str, level: str = sugar.LogLevel.Notice):
     """Print a message to Redis' log.
 
     Args:
@@ -185,7 +95,9 @@ def log(message: str, level: str = LogLevel.Notice):
         'debug', 'verbose', 'notice' or 'wartning'
             Defaults to 'notice'.
     """
-    logger.log(level=LogLevel.to_logging_level(level), msg=message)
+    from redisgears import log as redisLog
+
+    return redisLog(message, level=level)
 
 
 def configGet(key: str) -> bytes:
@@ -194,8 +106,9 @@ def configGet(key: str) -> bytes:
     Args:
         key (str): The configuration option key
     """
-    log(f"[PLACEHOLDER] configGet(key={key})")
-    return b"[PLACEHOLDER]"
+    from __main__ import configGet as redisConfigGet
+
+    return redisConfigGet(key)
 
 
 def gearsConfigGet(key: str, default=None) -> bytes:
@@ -207,5 +120,6 @@ def gearsConfigGet(key: str, default=None) -> bytes:
         default ([type], optional): A default value.
             Defaults to None.
     """
-    log(f"[PLACEHOLDER] gearsConfigGet(key={key}, default={default})")
-    return b"[PLACEHOLDER]"
+    from __main__ import gearsConfigGet as redisGearsConfigGet
+
+    return redisGearsConfigGet(key)

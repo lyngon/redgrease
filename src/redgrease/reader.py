@@ -1,14 +1,12 @@
-from typing import AnyStr, Callable, Iterable, Union
+from typing import Iterable, Union
 
-import redis
 from packaging.version import Version
 
 import redgrease
-from redgrease.gears import GearTrainBuilder
-from redgrease.typing import Callback
+import redgrease.runtime
 
 
-class GearReader(GearTrainBuilder):
+class GearReader(redgrease.runtime.GearsBuilder):
     def __init__(
         self,
         reader: str,
@@ -69,27 +67,6 @@ class GearReader(GearTrainBuilder):
         if requirements:
             self.requirements += list(requirements)
 
-    def _run(
-        self,
-        on: redis.Redis,
-        arg: str = None,  # TODO: This can also be a Python generator
-        convertToStr: bool = True,
-        collect: bool = True,
-        **kwargs,
-    ):
-        pass
-
-    def _register(
-        self,
-        on: redis.Redis,
-        convertToStr: bool = False,
-        collect: bool = False,
-        mode: str = redgrease.TriggerMode.Async,
-        onRegistered: Callback = None,
-        **kwargs,
-    ):
-        pass
-
 
 class KeysReader(GearReader):
     def __init__(
@@ -100,52 +77,6 @@ class KeysReader(GearReader):
             reader=redgrease.Reader.KeysReader, defaultArg=default_key_pattern
         )
         self.default_key_pattern = default_key_pattern
-
-    def run(
-        self,
-        on: redis.Redis,
-        key_pattern=None,
-        convertToStr: bool = False,
-        collect: bool = False,
-        noScan: bool = False,
-        readValue: bool = True,
-        **kwargs,
-    ):
-        return self._run(
-            on=on,
-            arg=key_pattern,
-            convertToStr=convertToStr,
-            collect=collect,
-            noScan=noScan,
-            readValue=readValue,
-            **kwargs,
-        )
-
-    def register(
-        self,
-        on: redis.Redis,
-        prefix: str = None,
-        event_types: list = None,  # TODO: Enumerator?
-        key_types: list = None,  # TODO: Enumerator?
-        readValue: bool = True,
-        convertToStr: bool = False,
-        collect: bool = False,
-        mode: str = redgrease.TriggerMode.Async,
-        onRegistered: Callback = None,
-        **kwargs,
-    ):
-        return self._register(
-            on=on,
-            prefix=prefix,
-            collect=collect,
-            mevent_types=event_types,
-            key_types=key_types,
-            readValue=readValue,
-            convertToStr=convertToStr,
-            ode=mode,
-            onRegistered=onRegistered,
-            **kwargs,
-        )
 
 
 class KeysOnlyReader(GearReader):
@@ -158,30 +89,6 @@ class KeysOnlyReader(GearReader):
         )
         self.default_key_pattern = default_key_pattern
 
-    def run(
-        self,
-        on: redis.Redis,
-        pattern: str = "*",
-        count: int = 1000,
-        patternGenerator: Callable[[AnyStr], str] = None,
-        convertToStr: bool = False,
-        collect: bool = False,
-        noScan: bool = False,
-        readValue: bool = True,
-        **kwargs,
-    ):
-        return self._run(
-            on=on,
-            pattern=pattern,
-            count=count,
-            patternGenerator=patternGenerator,
-            convertToStr=convertToStr,
-            collect=collect,
-            noScan=noScan,
-            readValue=readValue,
-            **kwargs,
-        )
-
 
 class StreamReader(GearReader):
     def __init__(
@@ -193,123 +100,17 @@ class StreamReader(GearReader):
         )
         self.default_key_pattern = default_key_pattern
 
-    def run(
-        self,
-        on: redis.Redis,
-        fromId: Union[redgrease.data.ExecID, str] = None,
-        convertToStr: bool = False,
-        collect: bool = False,
-        noScan: bool = False,
-        readValue: bool = True,
-        **kwargs,
-    ):
-        return self._run(
-            on=on,
-            fromId=fromId if fromId else redgrease.data.ExecID(),
-            convertToStr=convertToStr,
-            collect=collect,
-            noScan=noScan,
-            readValue=readValue,
-            **kwargs,
-        )
-
-    def register(
-        self,
-        on: redis.Redis,
-        prefix: str = "*",
-        batch: int = 1,
-        duration: int = 0,
-        onFailedPolicy: str = "continue",
-        onFailedRetryInterval: int = 1,
-        trimStream: bool = True,
-        convertToStr: bool = False,
-        collect: bool = False,
-        mode: str = redgrease.TriggerMode.Async,
-        onRegistered: Callback = None,
-        **kwargs,
-    ):
-        return self._register(
-            on=on,
-            prefix=prefix,
-            batch=batch,
-            duration=duration,
-            onFailedPolicy=onFailedPolicy,
-            onFailedRetryInterval=onFailedRetryInterval,
-            trimStream=trimStream,
-            convertToStr=convertToStr,
-            ode=mode,
-            onRegistered=onRegistered,
-            **kwargs,
-        )
-
 
 class PythonReader(GearReader):
     def __init__(self):
         super().__init__(reader=redgrease.Reader.PythonReader)
-
-    def run(
-        self,
-        on: redis.Redis,
-        generator: Iterable,
-        convertToStr: bool = False,
-        collect: bool = False,
-        noScan: bool = False,
-        readValue: bool = True,
-        **kwargs,
-    ):
-        return self._run(
-            on=on,
-            generator=generator,
-            convertToStr=convertToStr,
-            collect=collect,
-            noScan=noScan,
-            readValue=readValue,
-            **kwargs,
-        )
 
 
 class ShardsIDReader(GearReader):
     def __init__(self):
         super().__init__(reader=redgrease.Reader.ShardsIDReader)
 
-    def run(
-        self,
-        on: redis.Redis,
-        convertToStr: bool = False,
-        collect: bool = False,
-        noScan: bool = False,
-        readValue: bool = True,
-        **kwargs,
-    ):
-        return self._run(
-            on=on,
-            convertToStr=convertToStr,
-            collect=collect,
-            noScan=noScan,
-            readValue=readValue,
-            **kwargs,
-        )
-
 
 class CommandReader(GearReader):
     def __init__(self):
         super().__init__(reader=redgrease.Reader.CommandReaderReader)
-
-    def register(
-        self,
-        on: redis.Redis,
-        trigger: str,
-        convertToStr: bool = False,
-        collect: bool = False,
-        mode: str = redgrease.TriggerMode.Async,
-        onRegistered: Callback = None,
-        **kwargs,
-    ):
-        return self._register(
-            on=on,
-            trigger=trigger,
-            convertToStr=convertToStr,
-            ode=mode,
-            onRegistered=onRegistered,
-            **kwargs,
-        )

@@ -2,6 +2,7 @@ import ast
 from typing import Any, Dict, Iterable, List, Union
 
 import attr
+import cloudpickle
 
 from redgrease.utils import (
     REnum,
@@ -23,11 +24,14 @@ class Execution:
 
 # TODO: Should this be in utils?
 # TODO: Rethink how execution redponses should be handlde
-def parse_execute_response(response):
+def parse_execute_response(response, pickled_results=False):
     if bool_ok(response):
         return True
     elif isinstance(response, list) and len(response) == 2:
-        return Execution(*response)
+        results, errors = response
+        if pickled_results:
+            results = [cloudpickle.loads(result) for result in results]
+        return Execution(results, errors)
     elif isinstance(response, bytes):
         return Execution(ExecID.parse(response), [])
     else:
