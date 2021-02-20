@@ -12,8 +12,13 @@ def text(*names, encoding="utf8"):
     return here.joinpath(*names).read_text(encoding=encoding)
 
 
-runtime_extras = ["attrs", "redis", "cloudpickle"]
-client_extras = ["attrs", "redis", "cloudpickle"]
+common_extras = ["attrs", "redis", "cloudpickle"]
+
+runtime_extras = common_extras + []
+client_extras = common_extras + [
+    "dataclasses",
+    "typing-extensions",
+]
 cli_extras = client_extras + [
     "watchdog",
     "ConfigArgParse",

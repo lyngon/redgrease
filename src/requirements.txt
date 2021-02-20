@@ -4,4 +4,5 @@ ConfigArgParse
 dataclasses  # for python 3.6 compatibility only
 pyyaml
 redis
+typing-extensions # for python 3.6, 3.7 compatibility only
 watchdog

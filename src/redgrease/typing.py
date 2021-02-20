@@ -1,6 +1,9 @@
 from typing import Any, Callable, Dict, Iterable, Type, TypeVar, Union
 
-from typing_extensions import Protocol
+try:
+    from typing import Protocol
+except ImportError:
+    from typing_extensions import Protocol  # type: ignore
 
 # Type aliases for type hints
 
