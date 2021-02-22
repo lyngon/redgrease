@@ -67,7 +67,7 @@ class GearsLoader:
         if unblocking_pattern is None:
             unblocking_pattern = default_unblocking_pattern
         if isinstance(unblocking_pattern, str):
-            unblocking_pattern = re.compile(unblocking_pattern)
+            unblocking_pattern = re.compile(re.escape(unblocking_pattern))
         if not isinstance(unblocking_pattern, re.Pattern):
             fail(ValueError, f"Invalid unblocking pattern: {unblocking_pattern}")
         self.unblocking_pattern = unblocking_pattern
@@ -170,10 +170,10 @@ class GearsLoader:
 
             # This is a quite unsafe way of checking for registrations
             # Probabls Ok for dev situations in non-shared environments
-            pre_reg = self.redis.dumpregistrations()
-            exec_res = self.redis.pyexecute(script_content, unblocking=unblocking)
+            pre_reg = self.redis.gears.dumpregistrations()
+            exec_res = self.redis.gears.pyexecute(script_content, unblocking=unblocking)
             ret = f"with return code '{exec_res}'."
-            post_reg = self.redis.dumpregistrations()
+            post_reg = self.redis.gears.dumpregistrations()
             pre_reg = set([reg.id for reg in pre_reg])
             log.debug(f"Pre regs: {list(pre_reg)}")
             post_reg = set([reg.id for reg in post_reg])
@@ -223,7 +223,7 @@ class GearsLoader:
                 f"with id '{reg_id}'"
             )
             try:
-                self.redis.unregister(reg_id)
+                self.redis.gears.unregister(reg_id)
             except ResponseError as err:
                 log.warn(
                     "Unregistration failed. "
@@ -243,7 +243,7 @@ class GearsLoader:
         try:
             requirements_list = list(requirements.read(requirements_file_path))
             log.debug(f"Requirements to load: {', '.join(requirements_list)}")
-            self.redis.pyexecute("GB().run()", requirements=requirements_list)
+            self.redis.gears.pyexecute("GB().run()", requirements=requirements_list)
         except Exception as ex:
             log.error(f"Something went wrong: {ex}")
 

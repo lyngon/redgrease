@@ -1,7 +1,7 @@
 import logging
 import os.path
 import sys
-from typing import Any, List, Mapping, Optional, Union
+from typing import Any, Iterable, List, Mapping, Optional, Union
 
 import cloudpickle
 import redis
@@ -159,7 +159,7 @@ class Gears:
         self,
         gear_function: Union[str, redgrease.gears.ClosedGearFunction],
         unblocking=False,
-        requirements: List[str] = None,
+        requirements: Iterable[str] = None,
     ):
         """Execute Python code
 
@@ -188,19 +188,21 @@ class Gears:
             A simple 'OK' string is returned if the function has no output
             (i.e. it doesn't consist of any functions with the run action).
         """
+        requirements = list(requirements) if requirements else []
+
         pickled_results = False
         if isinstance(gear_function, redgrease.gears.GearFunction):
             if isinstance(gear_function, redgrease.reader.GearReader):
-                requirements = (
-                    gear_function.requirements + requirements if requirements else []
-                )
+                requirements = gear_function.requirements + requirements
 
             if isinstance(gear_function, redgrease.gears.ClosedGearFunction):
                 function_string = f"""
 import cloudpickle
 try:
+    log("Got Gear")
     cloudpickle.loads({cloudpickle.dumps(gear_function, protocol=4)}).compile(GB)
-except TypeError as err:
+except Exception as err:
+    log(str(err))
     import sys
     def pystr(pyver):
         return "Python %s.%s" % pyver

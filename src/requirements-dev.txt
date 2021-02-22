@@ -5,4 +5,4 @@ twine
 wheel
 mypy
 
--r requirements-test.txt s
+-r requirements-test.txt

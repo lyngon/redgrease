@@ -113,4 +113,4 @@ class ShardsIDReader(GearReader):
 
 class CommandReader(GearReader):
     def __init__(self):
-        super().__init__(reader=redgrease.Reader.CommandReaderReader)
+        super().__init__(reader=redgrease.Reader.CommandReader)
