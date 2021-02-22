@@ -13,7 +13,7 @@
 (Check those that apply, just so we know)
 ## Testing
 - [ ] Testing : Ad-hoc/manual
-- [ ] Testing : Ran releveant PyTest's 
+- [ ] Testing : Ran relevant PyTest's 
     (I.e some test cases only)
 - [ ] Testing : Ran whole PyTest suite 
     (I.e. all test-cases but for one or limited number of environments)

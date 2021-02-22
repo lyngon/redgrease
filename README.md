@@ -1,26 +1,58 @@
-Badges, badges, badges, badges:
-
-![Redis Gears](https://img.shields.io/badge/Redis-Gears-red?logo=redis)
-![License](https://img.shields.io/github/license/lyngon/redgrease)
-![PyPI Version](https://img.shields.io/pypi/v/redgrease)
-![PyPI - Status](https://img.shields.io/pypi/status/redgrease)
-![PyPI Downloads](https://img.shields.io/pypi/dw/redgrease)
-![PyPI PythonVersion](https://img.shields.io/pypi/pyversions/redgrease)
+[![Redis Gears](https://img.shields.io/badge/Redis-Gears-DC382D?logo=redis)](https://redislabs.com/modules/redis-gears/)
+[![License](https://img.shields.io/github/license/lyngon/redgrease)](https://mit-license.org/)
+[![PyPI Version](https://img.shields.io/pypi/v/redgrease)](https://pypi.org/project/redgrease/#history)
+[![PyPI - Status](https://img.shields.io/pypi/status/redgrease)](https://pypi.org/project/redgrease)
+[![PyPI Downloads](https://img.shields.io/pypi/dw/redgrease)](https://pypi.org/project/redgrease)
+[![PyPI PythonVersion](https://img.shields.io/pypi/pyversions/redgrease)](https://www.python.org/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/alerts/)
 [![Build Status](https://travis-ci.com/lyngon/redgrease.svg?branch=main)](https://travis-ci.com/lyngon/redgreaseanders)
 [![codecov](https://codecov.io/gh/lyngon/redgrease/branch/main/graph/badge.svg?token=pQZbBVxxmm)](https://codecov.io/gh/lyngon/redgrease)
-![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)
-![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)
-![GitHub Open bugs](https://img.shields.io/github/issues-raw/lyngon/redgrease/bug?label=open%20bugs)
-![GitHub Closed issues](https://img.shields.io/github/issues-closed-raw/lyngon/redgrease?color=informational)
-![Lines of Code](https://img.shields.io/tokei/lines/github/lyngon/redgrease?label=LOC)
-![GitHub top language](https://img.shields.io/github/languages/top/lyngon/redgrease)
+[![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)](https://libraries.io/pypi/redgrease)
+[![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)](https://github.com/lyngon/redgrease/pulls?q=is%3Apr+is%3Aclosed)
+[![GitHub Open bugs](https://img.shields.io/github/issues-raw/lyngon/redgrease/bug?label=open%20bugs)](https://github.com/lyngon/redgrease/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![GitHub Closed issues](https://img.shields.io/github/issues-closed-raw/lyngon/redgrease?color=informational)]()
+[![Lines of Code](https://img.shields.io/tokei/lines/github/lyngon/redgrease?label=LOC)](https://github.com/lyngon/redgrease/pulse)
+[![Python](https://img.shields.io/github/languages/top/lyngon/redgrease)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![Docker Image](https://img.shields.io/docker/v/lyngon/redgrease?label=lyngon%2Fredgrease&logo=docker)
+[![Docker Image](https://img.shields.io/docker/v/lyngon/redgrease?label=lyngon%2Fredgrease&logo=docker)](https://hub.docker.com/r/lyngon/redgrease)
 
-![Mushroom! Musroom!](https://img.shields.io/badge/Mushroom!-Mushroom!-8B4513)
+[![mushroom, mushroom!](https://img.shields.io/badge/mushroom-mushroom!-green)](https://www.youtube.com/watch?v=hGlyFc79BUE)
 
+```python
+import redgrease
+from redgrease.client import RedisGears
+from redgrease.reader import KeysReader
+
+def read_user_permissions(record) -> dict:
+    return redgrease.cmd.hget(
+        record.key, 
+        mapping={
+            "active": bool, 
+            "permissions": redgrease.list_of(str)
+        } 
+    )
+
+# Partial Gear function, w. default run param:
+active_users = KeysOnlyReader("user:*") \
+    .map(redgrease.record) \
+    .map(read_user_permissions) \
+    .filter(lambda usr: usr["active"])
+
+# Partial Gear function re-use:
+active_user_count = active_users.count()
+
+all_issued_permissions = active_users \
+    .flatmap(lambda usr: usr.permissions).
+    .distinct()
+
+# Redis Client w. Gears
+r = redgrease.client.RedisGears()
+
+# Two ways of running:
+count = r.gears.pyexecute(active_user_count.run())
+permissions = all_issued_permissions.run().on(r)
+```
 
 # RedGrease
 RedGrease is a Python package and set of tools to facilitate development against [Redis](https://redis.io/) in general and [Redis Gears](https://redislabs.com/modules/redis-gears/) in particular.
@@ -90,14 +122,15 @@ from redgrease.client import RedisGears
 from redgrease.reader import CommandReader
 from redgrease import log
 
-rg = RedisGears()
-
 def process(x):
     log(f"Processing '{x}'")
     return x
 
 my_command = CommandReader().flatmap(lambda x: x)
-my_command.register(rg, trigger="bang")
+my_command.register(trigger="bang")
+
+rg = RedisGears()
+my_command.on(rg)
 
 rg.gears.trigger("bang")
 ```
