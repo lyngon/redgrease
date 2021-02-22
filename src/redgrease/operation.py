@@ -46,20 +46,11 @@ class Register(Operation):
     prefix: str = "*"
     convertToStr: bool = True
     collect: bool = True
-    mode: str = TriggerMode.Async
-    onRegistered: Optional["optype.Callback"] = None
-    trigger: Optional[str] = None
     kwargs: Dict[str, Any] = field(default_factory=dict)
 
     def add_to(self, function: "PartialGearFunction"):
         return function.register(
-            self.prefix,
-            self.convertToStr,
-            self.collect,
-            self.mode,
-            self.onRegistered,
-            self.trigger,
-            **self.kwargs
+            self.prefix, self.convertToStr, self.collect, **self.kwargs
         )
 
 

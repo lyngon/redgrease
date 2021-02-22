@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Generic, Iterable, Optional
+from typing import TYPE_CHECKING, Dict, Generic, Hashable, Iterable, Optional
 
 import redgrease.operation as gearop
 import redgrease.sugar as sugar
@@ -85,6 +85,8 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         arg: str = None,  # TODO: This can also be a Python generator
         convertToStr: bool = False,
         collect: bool = False,
+        # Helpers, all must be None
+        # Other args
         **kwargs,
         # TODO: Add all the Reader specific args here
     ) -> ClosedGearFunction["optype.InputRecord"]:
@@ -123,12 +125,22 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
 
     def register(
         self,
-        prefix: str = "*",  # Reader Specific: ...
+        prefix: str = "*",
         convertToStr: bool = False,
         collect: bool = False,
-        mode: str = sugar.TriggerMode.Async,
+        # Helpers, all must be None
+        mode: str = None,
         onRegistered: "optype.Callback" = None,
+        eventTypes: Iterable[str] = None,
+        keyTypes: Iterable[str] = None,
+        readValue: bool = None,
+        batch: int = None,
+        duration: int = None,
+        onFailedPolcy: str = None,
+        onFailedRetryInterval: int = None,
+        trimStream: bool = None,
         trigger: str = None,  # Reader Specific: CommandReader
+        # Other args
         **kwargs,
         # TODO: Add all the Reader specific args here
     ) -> ClosedGearFunction["optype.OutputRecord"]:
@@ -171,17 +183,47 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             [type]: [description]
         """
 
+        if mode is not None:
+            kwargs["mode"] = mode
+
+        if onRegistered is not None:
+            kwargs["onRegistered"] = onRegistered
+
         if not self.supports_event_mode:
             raise TypeError(f"Event mode (run) is not supporterd for '{self.reader}'")
+
+        if eventTypes is not None:
+            kwargs["eventTypes"] = list(eventTypes)
+
+        if keyTypes is not None:
+            kwargs["keyTypes"] = list(keyTypes)
+
+        if readValue is not None:
+            kwargs["readValue"] = readValue
+
+        if batch is not None:
+            kwargs["batch"] = batch
+
+        if duration is not None:
+            kwargs["duration"] = duration
+
+        if onFailedPolcy is not None:
+            kwargs["onFailedPolicy"] = onFailedPolcy
+
+        if onFailedRetryInterval is not None:
+            kwargs["onFailedRetryInterval"] = onFailedRetryInterval
+
+        if trimStream is not None:
+            kwargs["trimStream"] = trimStream
+
+        if trigger is not None:
+            kwargs["trigger"] = trigger
 
         return ClosedGearFunction(
             gearop.Register(
                 prefix=prefix,
                 convertToStr=convertToStr,
                 collect=collect,
-                mode=mode,
-                onRegistered=onRegistered,
-                trigger=trigger,
                 kwargs=kwargs,
             ),
             input_function=self,
@@ -265,7 +307,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
 
     def localgroupby(
         self,
-        extractor: "optype.Extractor[Key]",
+        extractor: "optype.Extractor[optype.InputRecord, Key]",
         reducer: "optype.Reducer[Key, T, optype.InputRecord]",
     ) -> "PartialGearFunction[Dict[Key, T]]":
         """Instance-local LocalGroupBy operation performs many-to-less
@@ -315,8 +357,8 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(gearop.Collect(), input_function=self)
 
     def repartition(
-        self, extractor: "optype.Extractor[optype.InputRecord]"
-    ) -> "PartialGearFunction[str]":
+        self, extractor: "optype.Extractor[optype.InputRecord, Hashable]"
+    ) -> "PartialGearFunction[optype.InputRecord]":
         """Cluster-global Repartition operation repartitions the records
         by them shuffling between shards.
         It accepts a single key extractor function callback.
@@ -359,7 +401,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
 
     def aggregateby(
         self,
-        extractor: "optype.Extractor[Key]",
+        extractor: "optype.Extractor[optype.InputRecord, Key]",
         zero: T,
         seqOp: "optype.Reducer[Key, T, optype.InputRecord]",
         combOp: "optype.Reducer[Key, T, T]",
@@ -387,7 +429,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
 
     def groupby(
         self,
-        extractor: "optype.Extractor[Key]",
+        extractor: "optype.Extractor[optype.InputRecord, Key]",
         reducer: "optype.Reducer[Key, T, optype.InputRecord]",
     ) -> "PartialGearFunction[Dict[Key, T]]":
         """performs a many-to-less (N:M) grouping of records.
@@ -413,7 +455,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
 
     def batchgroupby(
         self,
-        extractor: "optype.Extractor[Key]",
+        extractor: "optype.Extractor[optype.InputRecord, Key]",
         reducer: "optype.BatchReducer[Key, T, optype.InputRecord]",
     ) -> "PartialGearFunction[Dict[Key, T]]":
         """Many-to-less (N:M) grouping of records.
@@ -482,8 +524,9 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(gearop.Count(), input_function=self)
 
     def countby(
-        self, extractor: "optype.Extractor[optype.InputRecord]" = lambda x: str(x)
-    ) -> "PartialGearFunction[Dict[str, int]]":
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, Hashable]" = lambda x: str(x),
+    ) -> "PartialGearFunction[Dict[Hashable, int]]":
         """Counts the records grouped by key.
         It requires a single extractor function callback.
         The operation is made of an aggregateby operation that uses
@@ -502,7 +545,8 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         )
 
     def avg(
-        self, extractor: "optype.Extractor[optype.InputRecord]" = lambda x: str(x)
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(x),
     ) -> "PartialGearFunction[float]":
         """Calculating arithmetic average of the records
         It accepts an optional value extractor function callback.

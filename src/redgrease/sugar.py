@@ -65,6 +65,12 @@ class KeyType:
         return KeyType._constructors[key_type]
 
 
+class FailurePolicy:
+    Continue = "continue"
+    Abort = "abort"
+    Retry = "retry"
+
+
 class LogLevel:
     """Redis Gears log levels"""
 

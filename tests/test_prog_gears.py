@@ -253,6 +253,8 @@ def test_register(rg: RedisGears):
     gear_fun = GearsBuilder("CommandReader").register(trigger="test")
     res = rg.gears.pyexecute(gear_fun)
     assert res is True
-    assert rg.gears.trigger("test", "this", "is", "a", "test") == [
-        b"['test', 'this', 'is', 'a', 'test']"
-    ]
+    res = rg.gears.trigger("test", "this", "is", "a", "test")
+    assert res
+    print(res)
+    # Todo: Is this the desired output?
+    assert res == [[b"test", b"this", b"is", b"a", b"test"]]

@@ -31,8 +31,8 @@ class Callback(Protocol[InputRecord]):
         ...
 
 
-class Extractor(Protocol[InputRecord]):
-    def __call__(self, record: InputRecord) -> str:
+class Extractor(Protocol[InputRecord, OutputRecord]):
+    def __call__(self, record: InputRecord) -> OutputRecord:
         ...
 
 
