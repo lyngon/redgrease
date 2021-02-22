@@ -13,38 +13,42 @@
 [![GitHub Open bugs](https://img.shields.io/github/issues-raw/lyngon/redgrease/bug?label=open%20bugs)](https://github.com/lyngon/redgrease/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
 [![GitHub Closed issues](https://img.shields.io/github/issues-closed-raw/lyngon/redgrease?color=informational)]()
 [![Lines of Code](https://img.shields.io/tokei/lines/github/lyngon/redgrease?label=LOC)](https://github.com/lyngon/redgrease/pulse)
-[![Python](https://img.shields.io/github/languages/top/lyngon/redgrease)](https://www.python.org/)
+[![Language Python](https://img.shields.io/github/languages/top/lyngon/redgrease)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Docker Image](https://img.shields.io/docker/v/lyngon/redgrease?label=lyngon%2Fredgrease&logo=docker)](https://hub.docker.com/r/lyngon/redgrease)
+[![Docker Image](https://img.shields.io/docker/v/lyngon/redisgears?label=lyngon%2Fredisgears&logo=docker)](https://hub.docker.com/r/lyngon/redisgears)
 
 [![mushroom, mushroom!](https://img.shields.io/badge/mushroom-mushroom!-green)](https://www.youtube.com/watch?v=hGlyFc79BUE)
 
 ```python
 import redgrease
-from redgrease.client import RedisGears
-from redgrease.reader import KeysReader
+import redgrease.client
+import redgrease.data
+import redgrease.reader
+import redgrease.utils
+
 
 def read_user_permissions(record) -> dict:
     return redgrease.cmd.hget(
-        record.key, 
+        record.key,
         mapping={
-            "active": bool, 
-            "permissions": redgrease.list_of(str)
-        } 
+            "active": bool,
+            "permissions": redgrease.utils.list_parser(str),
+        },
     )
 
+
 # Partial Gear function, w. default run param:
-active_users = KeysOnlyReader("user:*") \
-    .map(redgrease.record) \
-    .map(read_user_permissions) \
+active_users = (
+    redgrease.reader.KeysOnlyReader("user:*")
+    .map(redgrease.data.Record.from_redis)
+    .map(read_user_permissions)
     .filter(lambda usr: usr["active"])
+)
 
 # Partial Gear function re-use:
 active_user_count = active_users.count()
 
-all_issued_permissions = active_users \
-    .flatmap(lambda usr: usr.permissions).
-    .distinct()
+all_issued_permissions = active_users.flatmap(lambda usr: usr.permissions).distinct()
 
 # Redis Client w. Gears
 r = redgrease.client.RedisGears()

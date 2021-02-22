@@ -395,6 +395,11 @@ def list_parser(item_parser: Constructor[T]) -> Callable[[Iterable], List[T]]:
     """
 
     def parser(input_list):
+        if isinstance(isinstance, bytes):
+            input_list = safe_str(input_list)
+        if isinstance(input_list, str):
+            input_list = input_list.strip("][").split(", ")
+
         return list(map(item_parser, input_list))
 
     return parser

@@ -2,12 +2,19 @@ __all__ = []
 
 import sys
 
-from .sugar import KeyType
+from .sugar import FailurePolicy as FailurePolicy
+from .sugar import KeyType as KeyType
 from .sugar import LogLevel as LogLevel
 from .sugar import Reader as Reader
 from .sugar import TriggerMode as TriggerMode
 
-__all__ += ["LogLevel", "Reader", "TriggerMode"]
+__all__ += [
+    "FailurePolicy",
+    "KeyType",
+    "LogLevel",
+    "Reader",
+    "TriggerMode",
+]
 
 # Note: the form "from ... import x as x" is used not to trigger the mypy error
 # "implicit reexport", as described here:
