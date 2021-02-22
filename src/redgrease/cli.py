@@ -134,12 +134,6 @@ args.add_argument(
 )
 
 
-def blah(
-    apanapansson: int = 2, bepanbepansdotter: str = "wut teh hellz", some_value=None
-):
-    ...
-
-
 config = args.parse_args()
 
 redgrease.formatting.initialize_logger(config=config.log_config)

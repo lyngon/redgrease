@@ -1,9 +1,9 @@
-import importlib_metadata
 import os
 import re
 import time
 from pathlib import Path
 
+import importlib_metadata
 import pytest
 import redis.exceptions
 

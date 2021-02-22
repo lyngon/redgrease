@@ -41,12 +41,12 @@ def iteritems(d: Dict[Key, Val]) -> Iterable[Tuple[Key, Val]]:
 # Not a parser
 class CaseInsensitiveDict(dict):
     """Case insensitive dict implementation. Assumes string keys only.
-    Copied as-is, except for this docstring from redis.client, as it is not exported
+    Heavily influenced from redis.client, as it is not exported
     """
 
     def __init__(self, data):
         for k, v in iteritems(data):
-            self[k.upper()] = v
+            self[safe_str_upper(k)] = v
 
     def __contains__(self, k):
         return super(CaseInsensitiveDict, self).__contains__(k.upper())
@@ -248,10 +248,10 @@ def to_list(
 
 def transform(
     value: Any,
-    constuctor: Union[Constructor[T], Dict[Any, Constructor[T]]],
+    constuctor: Union[Constructor[T], Dict[Key, Constructor[T]]],
     key: Key = None,
 ) -> T:
-    """Applies a transformation to a value. The tranformatoin fuction could either be
+    """Applies a transformation to a value. The tranformation fuction could either be
     passed directly or in a dictionary along with a key to look it up.
     This is mostly only useful as a helper functoin for constructors of composite types,
     where the value may need to be transformed differently depending on the field/key.

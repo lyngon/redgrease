@@ -1,12 +1,17 @@
 import logging
-from typing import Any, List, Mapping, Optional, Union
+import os.path
+import sys
+from typing import Any, Iterable, List, Mapping, Optional, Union
 
+import cloudpickle
 import redis
 import redis.client
 import redis.exceptions
 
 import redgrease.config
 import redgrease.data
+import redgrease.gears
+import redgrease.reader
 from redgrease.utils import (
     CaseInsensitiveDict,
     as_is,
@@ -151,12 +156,15 @@ class Gears:
         return self.redis.execute_command("RG.INFOCLUSTER")
 
     def pyexecute(
-        self, function_string: str, unblocking=False, requirements: List[str] = None
+        self,
+        gear_function: Union[str, redgrease.gears.ClosedGearFunction],
+        unblocking=False,
+        requirements: Iterable[str] = None,
     ):
         """Execute Python code
 
         Args:
-            function_string (str): Serialized Gears Python function
+            gear_function (str): Serialized Gears Python function
 
             unblocking (bool, optional): Execute function without waiting for
             it to finish, before returnining.
@@ -180,6 +188,48 @@ class Gears:
             A simple 'OK' string is returned if the function has no output
             (i.e. it doesn't consist of any functions with the run action).
         """
+        requirements = list(requirements) if requirements else []
+
+        pickled_results = False
+        if isinstance(gear_function, redgrease.gears.GearFunction):
+            if isinstance(gear_function, redgrease.reader.GearReader):
+                requirements = gear_function.requirements + requirements
+
+            if isinstance(gear_function, redgrease.gears.ClosedGearFunction):
+                function_string = f"""
+import cloudpickle
+try:
+    log("Got Gear")
+    cloudpickle.loads({cloudpickle.dumps(gear_function, protocol=4)}).compile(GB)
+except Exception as err:
+    log(str(err))
+    import sys
+    def pystr(pyver):
+        return "Python %s.%s" % pyver
+    runtime_version = sys.version_info[:2]
+    function_version = {sys.version_info[:2]}
+    if runtime_version != function_version:
+        raise SystemError(
+            "%s runtime cannot execute Gears functions created in %s. %s" % (
+                pystr(runtime_version),
+                pystr(function_version),
+                "Only matching Python versions are supported"
+            )
+        ) from err
+    raise
+"""
+                pickled_results = True
+            else:
+                raise ValueError(
+                    "Cannot execute partial Gears function. "
+                    "Gears functions must be terminated with either 'run' (batch mode) "
+                    "or 'register' (event mode) operators."
+                )
+        elif os.path.exists(gear_function):
+            function_string = "..."
+        else:
+            function_string = str(gear_function)
+
         params = []
         if unblocking:
             params.append("UNBLOCKING")
@@ -188,7 +238,9 @@ class Gears:
             params.append("REQUIREMENTS")
             params += requirements
 
-        return self.redis.execute_command("RG.PYEXECUTE", function_string, *params)
+        return self.redis.execute_command(
+            "RG.PYEXECUTE", function_string, *params, pickled_results=pickled_results
+        )
 
     def pystats(self) -> redgrease.data.PyStats:
         """Get memory usage statisticy from the Python interpreter
