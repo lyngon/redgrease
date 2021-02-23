@@ -214,5 +214,5 @@ class PyRequirementInfo(RedisObject):
 class Record(RedisObject):
     key: str
     value: Any = None
-    type: Optional(str) = None
-    event: Optional(str) = None
+    type: Optional[str] = None
+    event: Optional[str] = None
