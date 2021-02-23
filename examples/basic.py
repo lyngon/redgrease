@@ -1,22 +1,39 @@
-from redgrease import GearsBuilder, execute, hashtag, log
+import redgrease
+import redgrease.client
+import redgrease.data
+import redgrease.reader
+import redgrease.utils
 
 
-def process(x):
-    """
-    Processes a message from the local expiration stream
-    Note: in this example we simply print to the log, but feel free to replace
-    this logic with your own, e.g. an HTTP request to a REST API or a call to an
-    external data store.
-    """
-    log(f"Key '{x['value']['key']}' expired at {x['id'].split('-')[0]}")
+def read_user_permissions(record) -> dict:
+    return redgrease.cmd.hget(
+        record.key,
+        mapping={
+            "active": bool,
+            "permissions": redgrease.utils.list_parser(str),
+        },
+    )
 
 
-# Capture an expiration event and adds it to the shard's local 'expired' stream
-cap = GearsBuilder("KeysReader")
-cap.foreach(lambda x: execute("XADD", f"expired:{hashtag()}", "*", "key", x["key"]))
-cap.register(prefix="*", mode="sync", eventTypes=["expired"], readValue=False)
+# Partial Gear function, w. default run param:
+active_users = (
+    redgrease.reader.KeysOnlyReader("user:*")
+    .map(redgrease.data.Record.from_redis)
+    .map(read_user_permissions)
+    .filter(lambda usr: usr["active"])
+)
 
-# Consume new messages from expiration streams and process them somehow
-proc = GearsBuilder("StreamReader")
-proc.foreach(process)
-proc.register(prefix="expired:*", batch=100, duration=1)
+# Partial Gear function re-use:
+active_user_count = active_users.count()
+
+all_issued_permissions = active_users.flatmap(lambda usr: usr.permissions).distinct()
+
+# Redis Client w. Gears
+r = redgrease.client.RedisGears()
+
+# Two ways of running:
+count = r.gears.pyexecute(active_user_count.run())
+permissions = all_issued_permissions.run().on(r)
+
+print(f"Count: {count}")
+print(f"Permissions: {permissions}")

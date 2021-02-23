@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import attr
 import cloudpickle
@@ -208,3 +208,11 @@ class PyRequirementInfo(RedisObject):
         if isinstance(wheels, bytes)
         else [safe_str(wheel) for wheel in wheels]
     )
+
+
+@attr.s(auto_attribs=True, frozen=True)
+class Record(RedisObject):
+    key: str
+    value: Any = None
+    type: Optional[str] = None
+    event: Optional[str] = None
