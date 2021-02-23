@@ -19,6 +19,7 @@
 
 [![mushroom, mushroom!](https://img.shields.io/badge/mushroom-mushroom!-green)](https://www.youtube.com/watch?v=hGlyFc79BUE)
 
+<!-- Hopefuully true soon.
 ```python
 import redgrease
 import redgrease.client
@@ -57,7 +58,7 @@ r = redgrease.client.RedisGears()
 count = r.gears.pyexecute(active_user_count.run())
 permissions = all_issued_permissions.run().on(r)
 ```
-
+-->
 # RedGrease
 RedGrease is a Python package and set of tools to facilitate development against [Redis](https://redis.io/) in general and [Redis Gears](https://redislabs.com/modules/redis-gears/) in particular.
 
