@@ -2,16 +2,12 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 if TYPE_CHECKING:
-    from redgrease.gears import PartialGearFunction
     import redgrease.typing as optype
-
-from redgrease.sugar import TriggerMode
+    from redgrease.gears import PartialGearFunction
 
 
 @dataclass
 class Operation:
-    pass
-
     def add_to(self, function):
         raise NotImplementedError("Cannot add genric operation to Gear function")
 
@@ -114,8 +110,6 @@ class Limit(Operation):
 
 @dataclass
 class Collect(Operation):
-    pass
-
     def add_to(self, function: "PartialGearFunction"):
         return function.collect()
 
@@ -177,16 +171,12 @@ class Sort(Operation):
 
 @dataclass
 class Distinct(Operation):
-    pass
-
     def add_to(self, function: "PartialGearFunction"):
         return function.distinct()
 
 
 @dataclass
 class Count(Operation):
-    pass
-
     def add_to(self, function: "PartialGearFunction"):
         return function.count()
 

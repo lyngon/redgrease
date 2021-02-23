@@ -43,20 +43,21 @@ class GearsBuilder(PartialGearFunction):
 
 GB = GearsBuilder
 
-
+# # Suppress warnings for missing redisgears packagae
+# # As this package only lives on the Redis Gears server
+# pyright: reportMissingImports=false
 class atomic:
     def __init__(self):
         from redisgears import atomicCtx as redisAtomic
 
         self.atomic = redisAtomic()
-        pass
 
     def __enter__(self):
         self.atomic.__enter__()
         return self
 
-    def __exit__(self, type, value, traceback):
-        self.atomic.__exit__()
+    def __exit__(self, *args, **kwargs):
+        self.atomic.__exit__(*args, **kwargs)
 
 
 def execute(command: str, *args) -> bytes:
