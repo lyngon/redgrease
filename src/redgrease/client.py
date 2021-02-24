@@ -1,12 +1,10 @@
 import logging
 import os.path
-import sys
 from typing import Any, Iterable, List, Mapping, Optional, Union
 
-import cloudpickle
 import redis
-import redis.client
-import redis.exceptions
+import redis.client  # Not used?
+import redis.exceptions  # Not used?
 
 import redgrease.config
 import redgrease.data
@@ -23,6 +21,29 @@ from redgrease.utils import (
 )
 
 log = logging.getLogger(__name__)
+
+
+# """import cloudpickle
+# try:
+#     log("Got Gear")
+#     cloudpickle.loads({cloudpickle.dumps(gear_function, protocol=4)}).compile(GB)
+# except Exception as err:
+#     log(str(err))
+#     import sys
+#     def pystr(pyver):
+#         return "Python %s.%s" % pyver
+#     runtime_version = sys.version_info[:2]
+#     function_version = {sys.version_info[:2]}
+#     if runtime_version != function_version:
+#         raise SystemError(
+#             "%s runtime cannot execute Gears functions created in %s. %s" % (
+#                 pystr(runtime_version),
+#                 pystr(function_version),
+#                 "Only matching Python versions are supported"
+#             )
+#         ) from err
+#     raise
+# """
 
 
 class Gears:
@@ -196,28 +217,7 @@ class Gears:
                 requirements = gear_function.requirements + requirements
 
             if isinstance(gear_function, redgrease.gears.ClosedGearFunction):
-                function_string = f"""
-import cloudpickle
-try:
-    log("Got Gear")
-    cloudpickle.loads({cloudpickle.dumps(gear_function, protocol=4)}).compile(GB)
-except Exception as err:
-    log(str(err))
-    import sys
-    def pystr(pyver):
-        return "Python %s.%s" % pyver
-    runtime_version = sys.version_info[:2]
-    function_version = {sys.version_info[:2]}
-    if runtime_version != function_version:
-        raise SystemError(
-            "%s runtime cannot execute Gears functions created in %s. %s" % (
-                pystr(runtime_version),
-                pystr(function_version),
-                "Only matching Python versions are supported"
-            )
-        ) from err
-    raise
-"""
+                function_string = redgrease.data.seralize_gear_function(gear_function)
                 pickled_results = True
             else:
                 raise ValueError(

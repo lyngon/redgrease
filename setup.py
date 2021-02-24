@@ -16,7 +16,6 @@ common_extras = ["attrs", "redis", "cloudpickle", "packaging"]
 
 runtime_extras = common_extras + []
 client_extras = common_extras + [
-    "dataclasses",
     "typing-extensions",
 ]
 cli_extras = client_extras + [

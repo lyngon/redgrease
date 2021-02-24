@@ -1,13 +1,12 @@
 import logging
 
-import redgrease.operation as gearop
+import redgrease.gears
 import redgrease.sugar as sugar
-from redgrease.gears import PartialGearFunction
 
 logger = logging.getLogger(__name__)
 
 
-class GearsBuilder(PartialGearFunction):
+class GearsBuilder(redgrease.gears.PartialGearFunction):
     def __init__(
         self,
         reader: str = sugar.Reader.KeysReader,
@@ -37,26 +36,28 @@ class GearsBuilder(PartialGearFunction):
             desc (str, optional): An optional description.
                 Defaults to None.
         """
-        reader_op = gearop.Reader(reader, defaultArg, desc)
+        reader_op = redgrease.gears.Reader(reader, defaultArg, desc)
         super().__init__(operation=reader_op, input_function=None)
 
 
 GB = GearsBuilder
 
 
+# # Suppress warnings for missing redisgears packagae
+# # As this package only lives on the Redis Gears server
+# pyright: reportMissingImports=false
 class atomic:
     def __init__(self):
         from redisgears import atomicCtx as redisAtomic
 
         self.atomic = redisAtomic()
-        pass
 
     def __enter__(self):
         self.atomic.__enter__()
         return self
 
-    def __exit__(self, type, value, traceback):
-        self.atomic.__exit__()
+    def __exit__(self, *args, **kwargs):
+        self.atomic.__exit__(*args, **kwargs)
 
 
 def execute(command: str, *args) -> bytes:
@@ -123,3 +124,15 @@ def gearsConfigGet(key: str, default=None) -> bytes:
     from __main__ import gearsConfigGet as redisGearsConfigGet
 
     return redisGearsConfigGet(key)
+
+
+def run(
+    function: redgrease.gears.GearFunction,
+    builder: GearsBuilder,
+):
+    if function.input_function:
+        input_builder = run(function.input_function, builder)
+    else:
+        input_builder = builder
+
+    return function.operation.add_to(input_builder)

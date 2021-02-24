@@ -23,7 +23,7 @@ def test_map(rg):
     rg.set("z", "3")
 
     gear_fun = GearsBuilder().map(lambda x: x["value"]).sort().run()
-    res = rg.gears.pyexecute(gear_fun, requirements=["redgrease[runtime]"])
+    res = rg.gears.pyexecute(gear_fun)
     assert res.results == ["1", "2", "3"]
     assert res.errors == []
 

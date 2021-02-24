@@ -1,7 +1,7 @@
 import logging
+import pathlib
 import re
 import time
-from pathlib import Path
 
 import configargparse
 
@@ -20,7 +20,7 @@ args.add_argument(
     "directories",
     metavar="dir_path",
     nargs="+",
-    type=Path,
+    type=pathlib.Path,
     help="One or more directories containing Redis Gears scripts to watch",
 )
 

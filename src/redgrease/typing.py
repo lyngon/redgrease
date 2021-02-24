@@ -1,9 +1,22 @@
-from typing import Any, Callable, Dict, Iterable, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
-try:
-    from typing import Protocol
-except ImportError:
-    from typing_extensions import Protocol  # type: ignore
+if TYPE_CHECKING:
+    try:
+        from typing import Protocol
+    except ImportError:
+        from typing_extensions import Protocol  # type: ignore
+else:
+    Protocol = Tuple  # Hack 2000
 
 # Type aliases for type hints
 

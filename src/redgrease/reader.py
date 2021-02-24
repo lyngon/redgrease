@@ -2,8 +2,8 @@ from typing import Iterable, Union
 
 from packaging.version import Version
 
-import redgrease
 import redgrease.runtime
+import redgrease.sugar
 
 
 class GearReader(redgrease.runtime.GearsBuilder):
@@ -74,7 +74,7 @@ class KeysReader(GearReader):
         default_key_pattern: str = "*",
     ):
         super().__init__(
-            reader=redgrease.Reader.KeysReader, defaultArg=default_key_pattern
+            reader=redgrease.sugar.Reader.KeysReader, defaultArg=default_key_pattern
         )
         self.default_key_pattern = default_key_pattern
 
@@ -85,7 +85,7 @@ class KeysOnlyReader(GearReader):
         default_key_pattern: str = "*",
     ):
         super().__init__(
-            reader=redgrease.Reader.KeysOnlyReader, defaultArg=default_key_pattern
+            reader=redgrease.sugar.Reader.KeysOnlyReader, defaultArg=default_key_pattern
         )
         self.default_key_pattern = default_key_pattern
 
@@ -96,21 +96,21 @@ class StreamReader(GearReader):
         default_key_pattern: str = "*",
     ):
         super().__init__(
-            reader=redgrease.Reader.StreamReader, defaultArg=default_key_pattern
+            reader=redgrease.sugar.Reader.StreamReader, defaultArg=default_key_pattern
         )
         self.default_key_pattern = default_key_pattern
 
 
 class PythonReader(GearReader):
     def __init__(self):
-        super().__init__(reader=redgrease.Reader.PythonReader)
+        super().__init__(reader=redgrease.sugar.Reader.PythonReader)
 
 
 class ShardsIDReader(GearReader):
     def __init__(self):
-        super().__init__(reader=redgrease.Reader.ShardsIDReader)
+        super().__init__(reader=redgrease.sugar.Reader.ShardsIDReader)
 
 
 class CommandReader(GearReader):
     def __init__(self):
-        super().__init__(reader=redgrease.Reader.CommandReader)
+        super().__init__(reader=redgrease.sugar.Reader.CommandReader)

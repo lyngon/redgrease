@@ -1,8 +1,5 @@
 import logging
 
-import redgrease
-from redgrease.typing import Callback
-
 # Various "sugar" constructs, such as:
 # - Helper enums, instead of "magic" strings.
 # - Function decorators for boilerplate gears constructs
@@ -91,28 +88,3 @@ class LogLevel:
             return logging.ERROR  # Maybe a little unintuitive ;)
         else:
             return logging.INFO
-
-
-def trigger(
-    trigger: str,
-    prefix: str = "*",
-    convertToStr: bool = True,
-    collect: bool = True,
-    mode: str = TriggerMode.Async,
-    onRegistered: Callback = None,
-    **kargs,
-):
-    def gear(func):
-        redgrease.GearsBuilder("CommandReader").map(
-            lambda params: func(params[1:])
-        ).register(
-            prefix=prefix,
-            convertToStr=convertToStr,
-            collect=collect,
-            mode=mode,
-            onRegistered=onRegistered,
-            trigger=trigger,
-            **kargs,
-        )
-
-    return gear

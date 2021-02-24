@@ -1,9 +1,13 @@
 import ast
+import sys
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import attr
 import cloudpickle
 
+import redgrease.data
+import redgrease.gears
+import redgrease.runtime
 from redgrease.utils import (
     REnum,
     bool_ok,
@@ -216,3 +220,37 @@ class Record(RedisObject):
     value: Any = None
     type: Optional[str] = None
     event: Optional[str] = None
+
+
+def deseralize_gear_function(
+    serialized_gear: str, python_version: str
+) -> redgrease.gears.GearFunction:
+    try:
+        return cloudpickle.loads(serialized_gear)
+    except Exception as err:
+        import sys
+
+        def pystr(pyver):
+            return "Python %s.%s" % pyver
+
+        runtime_python_version = sys.version_info[:2]
+        function_python_version = ast.literal_eval(str(python_version))[:2]
+        if runtime_python_version != function_python_version:
+            raise SystemError(
+                f"{pystr(runtime_python_version)} runtime cannot execute "
+                f"Gears functions created in {function_python_version}. "
+                "Only matching Python versions are supported"
+            ) from err
+        raise
+
+
+def seralize_gear_function(gear_function: redgrease.gears.ClosedGearFunction) -> str:
+    return f"""
+import redgrease.data
+import redgrease.runtime
+gear_function = redgrease.data.deseralize_gear_function(
+    {cloudpickle.dumps(gear_function, protocol=4)},
+    python_version={tuple(sys.version_info)},
+)
+redgrease.runtime.run(gear_function, GearsBuilder)
+"""
