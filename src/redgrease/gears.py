@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Generic, Hashable, Iterable, Optional
+from typing import TYPE_CHECKING, Dict, Generic, Hashable, Iterable, Optional, TypeVar
 
 import redgrease.operation as gearop
 import redgrease.sugar as sugar
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     import redgrease.runtime as runtime
     import redgrease.typing as optype
 
-from redgrease.typing import Key, T
+T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
@@ -117,9 +117,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             raise TypeError(f"Batch mode (run) is not supporterd for '{self.reader}'")
 
         return ClosedGearFunction(
-            gearop.Run(
-                arg=arg, convertToStr=convertToStr, collect=collect, kwargs=kwargs
-            ),
+            gearop.Run(arg=arg, convertToStr=convertToStr, collect=collect, **kwargs),
             input_function=self,
         )
 
@@ -224,13 +222,15 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
                 prefix=prefix,
                 convertToStr=convertToStr,
                 collect=collect,
-                kwargs=kwargs,
+                **kwargs,
             ),
             input_function=self,
         )
 
     def map(
-        self, op: "optype.Mapper[optype.InputRecord, optype.OutputRecord]"
+        self,
+        op: "optype.Mapper[optype.InputRecord, optype.OutputRecord]",
+        **kwargs,
     ) -> "PartialGearFunction[optype.OutputRecord]":
         """Instance-local Map operation that performs a one-to-one
         (1:1) mapping of records.
@@ -239,10 +239,15 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             A gear flow outputting the transformed records
         """
-        return PartialGearFunction(gearop.Map(op=op), input_function=self)
+        return PartialGearFunction(
+            gearop.Map(op=op, **kwargs),
+            input_function=self,
+        )
 
     def flatmap(
-        self, op: "optype.Expander[optype.InputRecord, optype.OutputRecord]"
+        self,
+        op: "optype.Expander[optype.InputRecord, optype.OutputRecord]",
+        **kwargs,
     ) -> "PartialGearFunction[Iterable[optype.OutputRecord]]":
         """Instance-local FlatMap operation that performs one-to-many
         (1:N) mapping of records.
@@ -256,10 +261,13 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             A gear flow outputting the expanded records
         """
-        return PartialGearFunction(gearop.FlatMap(op=op), input_function=self)
+        return PartialGearFunction(
+            gearop.FlatMap(op=op, **kwargs),
+            input_function=self,
+        )
 
     def foreach(
-        self, op: "optype.Processor[optype.InputRecord]"
+        self, op: "optype.Processor[optype.InputRecord]", **kwargs
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Instance-local ForEach operation performs one-to-the-same
         (1=1) mapping.
@@ -272,10 +280,13 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             A gear flow outputting the **input** records unmodified
         """
-        return PartialGearFunction(gearop.ForEach(op=op), input_function=self)
+        return PartialGearFunction(
+            gearop.ForEach(op=op, **kwargs),
+            input_function=self,
+        )
 
     def filter(
-        self, op: "optype.Filterer[optype.InputRecord]"
+        self, op: "optype.Filterer[optype.InputRecord]", **kwargs
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Instance-local Filter operation performs one-to-zero-or-one
         (1:bool) filtering of records.
@@ -288,10 +299,13 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting only the records tha pass the
             filter (i.e evaluates to 'True')
         """
-        return PartialGearFunction(gearop.Filter(op=op), input_function=self)
+        return PartialGearFunction(
+            gearop.Filter(op=op, **kwargs),
+            input_function=self,
+        )
 
     def accumulate(
-        self, op: "optype.Accumulator[T, optype.InputRecord]"
+        self, op: "optype.Accumulator[T, optype.InputRecord]", **kwargs
     ) -> "PartialGearFunction[T]":
         """Instance-local Accumulate operation performs many-to-one
         mapping (N:1) of records.
@@ -303,13 +317,17 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             A gear flow outputting the final accumulated value
         """
-        return PartialGearFunction(gearop.Accumulate(op=op), input_function=self)
+        return PartialGearFunction(
+            gearop.Accumulate(op=op, **kwargs),
+            input_function=self,
+        )
 
     def localgroupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, Key]",
-        reducer: "optype.Reducer[Key, T, optype.InputRecord]",
-    ) -> "PartialGearFunction[Dict[Key, T]]":
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        **kwargs,
+    ) -> "PartialGearFunction[Dict[optype.Key, T]]":
         """Instance-local LocalGroupBy operation performs many-to-less
         mapping (N:M) of records.
         The operation requires two callbacks: an extractor and a reducer.
@@ -324,12 +342,12 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting each group and its reduced value
         """
         return PartialGearFunction(
-            gearop.LocalGroupBy(extractor=extractor, reducer=reducer),
+            gearop.LocalGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
         )
 
     def limit(
-        self, length: int, start: int = 0
+        self, length: int, start: int = 0, **kwargs
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Instance-local Limit operation limits the number of records.
         It accepts two numeric arguments: a starting position in the input
@@ -345,19 +363,23 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             (exclusive).
         """
         return PartialGearFunction(
-            gearop.Limit(length=length, start=start), input_function=self
+            gearop.Limit(length=length, start=start, **kwargs),
+            input_function=self,
         )
 
-    def collect(self) -> "PartialGearFunction[optype.InputRecord]":
+    def collect(self, **kwargs) -> "PartialGearFunction[optype.InputRecord]":
         """Cluster-global Collect operation collects the result records
         It has no arguments.
         Returns:
             A gear flow outputting the input records across all shards.
         """
-        return PartialGearFunction(gearop.Collect(), input_function=self)
+        return PartialGearFunction(
+            gearop.Collect(**kwargs),
+            input_function=self,
+        )
 
     def repartition(
-        self, extractor: "optype.Extractor[optype.InputRecord, Hashable]"
+        self, extractor: "optype.Extractor[optype.InputRecord, Hashable]", **kwargs
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Cluster-global Repartition operation repartitions the records
         by them shuffling between shards.
@@ -373,7 +395,8 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             is repartitioned to the shards as per the extractor function.
         """
         return PartialGearFunction(
-            gearop.Repartition(extractor=extractor), input_function=self
+            gearop.Repartition(extractor=extractor, **kwargs),
+            input_function=self,
         )
 
     def aggregate(
@@ -381,6 +404,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         zero: T,
         seqOp: "optype.Accumulator[T, optype.InputRecord]",
         combOp: "optype.Accumulator[T, T]",
+        **kwargs,
     ) -> "PartialGearFunction[T]":
         """Perform aggregation on all the execution data.
         Args:
@@ -395,17 +419,18 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             'combOp' aggregation as output.
         """
         return PartialGearFunction(
-            gearop.Aggregate(zero=zero, seqOp=seqOp, combOp=combOp),
+            gearop.Aggregate(zero=zero, seqOp=seqOp, combOp=combOp, **kwargs),
             input_function=self,
         )
 
     def aggregateby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, Key]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
         zero: T,
-        seqOp: "optype.Reducer[Key, T, optype.InputRecord]",
-        combOp: "optype.Reducer[Key, T, T]",
-    ) -> "PartialGearFunction[Dict[Key, T]]":
+        seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        combOp: "optype.Reducer[optype.Key, T, T]",
+        **kwargs,
+    ) -> "PartialGearFunction[Dict[optype.Key, T]]":
         """Like aggregate, but on each key, the key is extracted using the extractor.
         Args:
             extractor (Extractor[Key]): A function that get as input the
@@ -422,16 +447,17 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         """
         return PartialGearFunction(
             gearop.AggregateBy(
-                extractor=extractor, zero=zero, seqOp=seqOp, combOp=combOp
+                extractor=extractor, zero=zero, seqOp=seqOp, combOp=combOp, **kwargs
             ),
             input_function=self,
         )
 
     def groupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, Key]",
-        reducer: "optype.Reducer[Key, T, optype.InputRecord]",
-    ) -> "PartialGearFunction[Dict[Key, T]]":
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        **kwargs,
+    ) -> "PartialGearFunction[Dict[optype.Key, T]]":
         """performs a many-to-less (N:M) grouping of records.
         It is similar to AggregateBy but uses only a global reducer.
         It can be used in cases where locally reducing the data isn't
@@ -450,14 +476,16 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             respective accumulator's value.
         """
         return PartialGearFunction(
-            gearop.GroupBy(extractor=extractor, reducer=reducer), input_function=self
+            gearop.GroupBy(extractor=extractor, reducer=reducer, **kwargs),
+            input_function=self,
         )
 
     def batchgroupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, Key]",
-        reducer: "optype.BatchReducer[Key, T, optype.InputRecord]",
-    ) -> "PartialGearFunction[Dict[Key, T]]":
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]",
+        **kwargs,
+    ) -> "PartialGearFunction[Dict[optype.Key, T]]":
         """Many-to-less (N:M) grouping of records.
         Note: Using this operation may cause a substantial increase in
         memory usage during runtime.
@@ -479,11 +507,13 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         and its respective accumulator value.
         """
         return PartialGearFunction(
-            gearop.BatchGroupBy(extractor=extractor, reducer=reducer),
+            gearop.BatchGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
         )
 
-    def sort(self, reverse: bool = True) -> "PartialGearFunction[optype.InputRecord]":
+    def sort(
+        self, reverse: bool = True, **kwargs
+    ) -> "PartialGearFunction[optype.InputRecord]":
         """Sorting the records
         Note: Using this operation may cause an increase in memory usage
         during runtime due to the list being copied during the sorting
@@ -499,9 +529,12 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             A gear flow outputting the input recods in sorted order.
         """
-        return PartialGearFunction(gearop.Sort(reverse=reverse), input_function=self)
+        return PartialGearFunction(
+            gearop.Sort(reverse=reverse, **kwargs),
+            input_function=self,
+        )
 
-    def distinct(self) -> "PartialGearFunction[optype.InputRecord]":
+    def distinct(self, **kwargs) -> "PartialGearFunction[optype.InputRecord]":
         """Keep only the distinct values in the data.
         It requires no arguments.
         The operation is made of the following steps:
@@ -511,9 +544,12 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             A gear flow outputting the unique records, discaring duplicates
         """
-        return PartialGearFunction(gearop.Distinct(), input_function=self)
+        return PartialGearFunction(
+            gearop.Distinct(**kwargs),
+            input_function=self,
+        )
 
-    def count(self) -> "PartialGearFunction[int]":
+    def count(self, **kwargs) -> "PartialGearFunction[int]":
         """Count the number of records in the execution
         It requires no arguments.
         The operation is made of an aggregate operation that uses local
@@ -521,11 +557,15 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             A gear flow outputting the number of input recods (int)
         """
-        return PartialGearFunction(gearop.Count(), input_function=self)
+        return PartialGearFunction(
+            gearop.Count(**kwargs),
+            input_function=self,
+        )
 
     def countby(
         self,
         extractor: "optype.Extractor[optype.InputRecord, Hashable]" = lambda x: str(x),
+        **kwargs,
     ) -> "PartialGearFunction[Dict[Hashable, int]]":
         """Counts the records grouped by key.
         It requires a single extractor function callback.
@@ -541,12 +581,14 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             per extracted value.
         """
         return PartialGearFunction(
-            gearop.CountBy(extractor=extractor), input_function=self
+            gearop.CountBy(extractor=extractor, **kwargs),
+            input_function=self,
         )
 
     def avg(
         self,
         extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(x),
+        **kwargs,
     ) -> "PartialGearFunction[float]":
         """Calculating arithmetic average of the records
         It accepts an optional value extractor function callback.
@@ -563,4 +605,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             [float]: A gear flow outputting the average
             of the extracted values
         """
-        return PartialGearFunction(gearop.Avg(extractor=extractor), input_function=self)
+        return PartialGearFunction(
+            gearop.Avg(extractor=extractor, **kwargs),
+            input_function=self,
+        )

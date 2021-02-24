@@ -5,8 +5,8 @@ from typing import Any, Iterable, List, Mapping, Optional, Union
 
 import cloudpickle
 import redis
-import redis.client
-import redis.exceptions
+import redis.client  # Not used?
+import redis.exceptions  # Not used?
 
 import redgrease.config
 import redgrease.data
