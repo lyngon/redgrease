@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type
+from typing import TYPE_CHECKING, Any, Optional, Type
 
 if TYPE_CHECKING:
     import redgrease.typing as optype

@@ -1,13 +1,13 @@
 import logging
 
+import redgrease.gears
 import redgrease.operation as gearop
 import redgrease.sugar as sugar
-from redgrease.gears import PartialGearFunction
 
 logger = logging.getLogger(__name__)
 
 
-class GearsBuilder(PartialGearFunction):
+class GearsBuilder(redgrease.gears.PartialGearFunction):
     def __init__(
         self,
         reader: str = sugar.Reader.KeysReader,
@@ -42,6 +42,7 @@ class GearsBuilder(PartialGearFunction):
 
 
 GB = GearsBuilder
+
 
 # # Suppress warnings for missing redisgears packagae
 # # As this package only lives on the Redis Gears server
@@ -124,3 +125,15 @@ def gearsConfigGet(key: str, default=None) -> bytes:
     from __main__ import gearsConfigGet as redisGearsConfigGet
 
     return redisGearsConfigGet(key)
+
+
+def run(
+    function: redgrease.gears.GearFunction,
+    builder: GearsBuilder,
+):
+    if function.input_function:
+        input_builder = run(function.input_function, builder)
+    else:
+        input_builder = builder
+
+    return function.operation.add_to(input_builder)

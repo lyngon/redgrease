@@ -5,7 +5,6 @@ import redgrease.operation as gearop
 import redgrease.sugar as sugar
 
 if TYPE_CHECKING:
-    import redgrease.runtime as runtime
     import redgrease.typing as optype
 
 T = TypeVar("T")
@@ -49,20 +48,7 @@ class GearFunction(Generic[T]):
         ]
 
 
-def runtime_build(function: GearFunction, builder):
-
-    if function.input_function:
-        input_builder = runtime_build(function.input_function, builder)
-    else:
-        input_builder = builder
-
-    return function.operation.add_to(input_builder)
-
-
 class ClosedGearFunction(GearFunction[T]):
-    def compile(self, builder: "runtime.GearsBuilder"):
-        return runtime_build(self, builder)
-
     def on(
         self,
         gears_server,
