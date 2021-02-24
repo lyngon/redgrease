@@ -1,7 +1,6 @@
 import logging
 
 import redgrease.gears
-import redgrease.operation as gearop
 import redgrease.sugar as sugar
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
             desc (str, optional): An optional description.
                 Defaults to None.
         """
-        reader_op = gearop.Reader(reader, defaultArg, desc)
+        reader_op = redgrease.gears.Reader(reader, defaultArg, desc)
         super().__init__(operation=reader_op, input_function=None)
 
 

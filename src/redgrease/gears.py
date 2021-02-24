@@ -1,7 +1,18 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Generic, Hashable, Iterable, Optional, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Generic,
+    Hashable,
+    Iterable,
+    Optional,
+    Type,
+    TypeVar,
+)
 
-import redgrease.operation as gearop
+#
+# import redgrease.operation as gearop
 import redgrease.sugar as sugar
 
 if TYPE_CHECKING:
@@ -12,16 +23,268 @@ T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
-class GearFunction(Generic[T]):
+class Operation:
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+    def add_to(self, function):
+        raise NotImplementedError(f"Cannot add {self.__class__.__name__} to {function}")
+
+
+class Reader(Operation):
     def __init__(
-        self, operation: gearop.Operation, input_function: "GearFunction" = None
-    ):
+        self,
+        reader: str,
+        defaultArg: str,
+        desc: Optional[str],
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.reader = reader
+        self.defaultArg = defaultArg
+        self.desc = desc
+
+    def add_to(self, builder: Type):
+        return builder(self.reader, self.defaultArg, self.desc, **self.kwargs)
+
+
+class Run(Operation):
+    def __init__(
+        self,
+        arg: Optional[str] = None,
+        convertToStr: bool = True,
+        collect: bool = True,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.arg = arg
+        self.convertToStr = convertToStr
+        self.collect = collect
+
+    def add_to(self, function: "PartialGearFunction"):
+        import cloudpickle
+
+        return function.map(lambda x: cloudpickle.dumps(x, protocol=4)).run(
+            self.arg, False, self.collect, **self.kwargs
+        )
+
+
+class Register(Operation):
+    def __init__(
+        self,
+        prefix: str = "*",
+        convertToStr: bool = True,
+        collect: bool = True,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.prefix = prefix
+        self.convertToStr = convertToStr
+        self.collect = collect
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.register(
+            self.prefix, self.convertToStr, self.collect, **self.kwargs
+        )
+
+
+class Map(Operation):
+    def __init__(self, op: "optype.Mapper", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.op = op
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.map(self.op, **self.kwargs)
+
+
+class FlatMap(Operation):
+    def __init__(self, op: "optype.Expander", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.op = op
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.flatmap(self.op, **self.kwargs)
+
+
+class ForEach(Operation):
+    def __init__(self, op: "optype.Processor", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.op = op
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.foreach(self.op, **self.kwargs)
+
+
+class Filter(Operation):
+    def __init__(self, op: "optype.Filterer", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.op = op
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.filter(self.op, **self.kwargs)
+
+
+class Accumulate(Operation):
+    def __init__(self, op: "optype.Accumulator", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.op = op
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.accumulate(self.op, **self.kwargs)
+
+
+class LocalGroupBy(Operation):
+    def __init__(
+        self, extractor: "optype.Extractor", reducer: "optype.Reducer", **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
+        self.extractor = extractor
+        self.reducer = reducer
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.localgroupby(self.extractor, self.reducer, **self.kwargs)
+
+
+class Limit(Operation):
+    def __init__(self, length: int, start: int, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.length = length
+        self.start = start
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.limit(self.length, self.start, **self.kwargs)
+
+
+class Collect(Operation):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.collect(**self.kwargs)
+
+
+class Repartition(Operation):
+    def __init__(self, extractor: "optype.Extractor", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.extractor = extractor
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.repartition(self.extractor, **self.kwargs)
+
+
+class Aggregate(Operation):
+    def __init__(
+        self,
+        zero: Any,
+        seqOp: "optype.Accumulator",
+        combOp: "optype.Accumulator",
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.zero = zero
+        self.seqOp = seqOp
+        self.combOp = combOp
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.aggregate(self.zero, self.seqOp, self.combOp, **self.kwargs)
+
+
+class AggregateBy(Operation):
+    def __init__(
+        self,
+        extractor: "optype.Extractor",
+        zero: Any,
+        seqOp: "optype.Reducer",
+        combOp: "optype.Reducer",
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.extractor = extractor
+        self.zero = zero
+        self.seqOp = seqOp
+        self.combOp = combOp
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.aggregateby(
+            self.extractor, self.zero, self.seqOp, self.combOp, **self.kwargs
+        )
+
+
+class GroupBy(Operation):
+    def __init__(
+        self, extractor: "optype.Extractor", reducer: "optype.Reducer", **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
+        self.extractor = extractor
+        self.reducer = reducer
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.groupby(self.extractor, self.reducer, **self.kwargs)
+
+
+class BatchGroupBy(Operation):
+    def __init__(
+        self, extractor: "optype.Extractor", reducer: "optype.BatchReducer", **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
+        self.extractor = extractor
+        self.reducer = reducer
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.batchgroupby(self.extractor, self.reducer, **self.kwargs)
+
+
+class Sort(Operation):
+    def __init__(self, reverse: bool = True, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.reverse = reverse
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.sort(self.reverse, **self.kwargs)
+
+
+class Distinct(Operation):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.distinct(**self.kwargs)
+
+
+class Count(Operation):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.count(**self.kwargs)
+
+
+class CountBy(Operation):
+    def __init__(self, extractor: "optype.Extractor", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.extractor = extractor
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.countby(self.extractor, **self.kwargs)
+
+
+class Avg(Operation):
+    def __init__(self, extractor: "optype.Extractor", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.extractor = extractor
+
+    def add_to(self, function: "PartialGearFunction"):
+        return function.avg(self.extractor, **self.kwargs)
+
+
+class GearFunction(Generic[T]):
+    def __init__(self, operation: Operation, input_function: "GearFunction" = None):
         self.input_function: Optional[GearFunction] = input_function
         self.operation = operation
 
     @property
     def reader(self):
-        if isinstance(self.operation, gearop.Reader):
+        if isinstance(self.operation, Reader):
             return self.operation.reader
 
         if self.input_function:
@@ -103,7 +366,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             raise TypeError(f"Batch mode (run) is not supporterd for '{self.reader}'")
 
         return ClosedGearFunction(
-            gearop.Run(arg=arg, convertToStr=convertToStr, collect=collect, **kwargs),
+            Run(arg=arg, convertToStr=convertToStr, collect=collect, **kwargs),
             input_function=self,
         )
 
@@ -204,7 +467,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             kwargs["trigger"] = trigger
 
         return ClosedGearFunction(
-            gearop.Register(
+            Register(
                 prefix=prefix,
                 convertToStr=convertToStr,
                 collect=collect,
@@ -226,7 +489,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting the transformed records
         """
         return PartialGearFunction(
-            gearop.Map(op=op, **kwargs),
+            Map(op=op, **kwargs),
             input_function=self,
         )
 
@@ -248,7 +511,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting the expanded records
         """
         return PartialGearFunction(
-            gearop.FlatMap(op=op, **kwargs),
+            FlatMap(op=op, **kwargs),
             input_function=self,
         )
 
@@ -267,7 +530,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting the **input** records unmodified
         """
         return PartialGearFunction(
-            gearop.ForEach(op=op, **kwargs),
+            ForEach(op=op, **kwargs),
             input_function=self,
         )
 
@@ -286,7 +549,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             filter (i.e evaluates to 'True')
         """
         return PartialGearFunction(
-            gearop.Filter(op=op, **kwargs),
+            Filter(op=op, **kwargs),
             input_function=self,
         )
 
@@ -304,7 +567,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting the final accumulated value
         """
         return PartialGearFunction(
-            gearop.Accumulate(op=op, **kwargs),
+            Accumulate(op=op, **kwargs),
             input_function=self,
         )
 
@@ -328,7 +591,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting each group and its reduced value
         """
         return PartialGearFunction(
-            gearop.LocalGroupBy(extractor=extractor, reducer=reducer, **kwargs),
+            LocalGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
         )
 
@@ -349,7 +612,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             (exclusive).
         """
         return PartialGearFunction(
-            gearop.Limit(length=length, start=start, **kwargs),
+            Limit(length=length, start=start, **kwargs),
             input_function=self,
         )
 
@@ -360,7 +623,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting the input records across all shards.
         """
         return PartialGearFunction(
-            gearop.Collect(**kwargs),
+            Collect(**kwargs),
             input_function=self,
         )
 
@@ -381,7 +644,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             is repartitioned to the shards as per the extractor function.
         """
         return PartialGearFunction(
-            gearop.Repartition(extractor=extractor, **kwargs),
+            Repartition(extractor=extractor, **kwargs),
             input_function=self,
         )
 
@@ -405,7 +668,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             'combOp' aggregation as output.
         """
         return PartialGearFunction(
-            gearop.Aggregate(zero=zero, seqOp=seqOp, combOp=combOp, **kwargs),
+            Aggregate(zero=zero, seqOp=seqOp, combOp=combOp, **kwargs),
             input_function=self,
         )
 
@@ -432,7 +695,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             'combOp' aggregation as output.
         """
         return PartialGearFunction(
-            gearop.AggregateBy(
+            AggregateBy(
                 extractor=extractor, zero=zero, seqOp=seqOp, combOp=combOp, **kwargs
             ),
             input_function=self,
@@ -462,7 +725,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             respective accumulator's value.
         """
         return PartialGearFunction(
-            gearop.GroupBy(extractor=extractor, reducer=reducer, **kwargs),
+            GroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
         )
 
@@ -493,7 +756,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         and its respective accumulator value.
         """
         return PartialGearFunction(
-            gearop.BatchGroupBy(extractor=extractor, reducer=reducer, **kwargs),
+            BatchGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
         )
 
@@ -516,7 +779,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting the input recods in sorted order.
         """
         return PartialGearFunction(
-            gearop.Sort(reverse=reverse, **kwargs),
+            Sort(reverse=reverse, **kwargs),
             input_function=self,
         )
 
@@ -531,7 +794,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting the unique records, discaring duplicates
         """
         return PartialGearFunction(
-            gearop.Distinct(**kwargs),
+            Distinct(**kwargs),
             input_function=self,
         )
 
@@ -544,7 +807,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             A gear flow outputting the number of input recods (int)
         """
         return PartialGearFunction(
-            gearop.Count(**kwargs),
+            Count(**kwargs),
             input_function=self,
         )
 
@@ -567,7 +830,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             per extracted value.
         """
         return PartialGearFunction(
-            gearop.CountBy(extractor=extractor, **kwargs),
+            CountBy(extractor=extractor, **kwargs),
             input_function=self,
         )
 
@@ -592,6 +855,6 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
             of the extracted values
         """
         return PartialGearFunction(
-            gearop.Avg(extractor=extractor, **kwargs),
+            Avg(extractor=extractor, **kwargs),
             input_function=self,
         )
