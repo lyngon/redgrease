@@ -1,4 +1,3 @@
-import redgrease
 import redgrease.client
 import redgrease.data
 import redgrease.reader
