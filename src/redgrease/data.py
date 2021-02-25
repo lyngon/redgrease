@@ -6,7 +6,6 @@ import attr
 import cloudpickle
 
 import redgrease.gears
-import redgrease.runtime
 from redgrease.utils import (
     REnum,
     bool_ok,

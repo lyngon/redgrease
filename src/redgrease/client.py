@@ -3,8 +3,6 @@ import os.path
 from typing import Any, Iterable, List, Mapping, Optional, Union
 
 import redis
-import redis.client  # Not used?
-import redis.exceptions  # Not used?
 
 import redgrease.config
 import redgrease.data
