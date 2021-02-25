@@ -395,7 +395,7 @@ def list_parser(item_parser: Constructor[T]) -> Callable[[Iterable], List[T]]:
     """
 
     def parser(input_list):
-        if isinstance(isinstance, bytes):
+        if isinstance(input_list, bytes):
             input_list = safe_str(input_list)
         if isinstance(input_list, str):
             input_list = input_list.strip("][").split(", ")
@@ -443,3 +443,29 @@ def dict_of(
         }
 
     return parser
+
+
+class Record:
+    def __init__(
+        self,
+        key: str,
+        value: Any = None,
+        type: str = None,
+        event: str = None,
+    ):
+
+        self.key = key
+        self.value = value
+        self.type = type
+        self.event = event
+
+
+def record(rec: Union[str, dict]) -> Record:
+    if isinstance(rec, Record):
+        return rec
+
+    if isinstance(rec, dict):
+        return Record(**rec)
+
+    if isinstance(rec, str):
+        return Record(rec)
