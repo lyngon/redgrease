@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class GearsBuilder(redgrease.gears.PartialGearFunction):
     def __init__(
         self,
-        reader: str = sugar.Reader.KeysReader,
+        reader: str = sugar.ReaderType.KeysReader,
         defaultArg: str = "*",
         desc: str = None,
     ):

@@ -1,11 +1,5 @@
-from typing import Callable, Dict
-
 import redgrease
-import redgrease.client
-import redgrease.reader
-import redgrease.runtime
 import redgrease.utils
-from redgrease.typing import Constructor
 
 mapping = {
     "active": bool,
@@ -13,8 +7,8 @@ mapping = {
 }
 
 
-def hash_to_dict(mapping: Dict[str, Constructor]) -> Callable[[str], Dict]:
-    def parser(hash_key: str) -> Dict:
+def hash_to_dict(mapping):
+    def parser(hash_key: str):
         vals = redgrease.cmd.hmget(hash_key, mapping.keys())
         return redgrease.utils.dict_of(mapping)(vals, mapping.keys())
 

@@ -1,30 +1,74 @@
-__all__ = []
-
 import sys
 
-from .sugar import FailurePolicy as FailurePolicy
-from .sugar import KeyType as KeyType
-from .sugar import LogLevel as LogLevel
-from .sugar import Reader as Reader
-from .sugar import TriggerMode as TriggerMode
+from .func import trigger as trigger
+from .gears import ClosedGearFunction, GearFunction, PartialGearFunction
+from .requirements import read_requirements
+from .sugar import FailurePolicy, KeyType, LogLevel, ReaderType, TriggerMode
 
-__all__ += [
+__all__ = [
+    "trigger",
+    "ClosedGearFunction",
+    "GearFunction",
+    "PartialGearFunction",
+    "read_requirements",
     "FailurePolicy",
     "KeyType",
     "LogLevel",
-    "Reader",
+    "ReaderType",
     "TriggerMode",
+    "utils",
+    "typing",
 ]
 
-# Note: the form "from ... import x as x" is used not to trigger the mypy error
-# "implicit reexport", as described here:
-# https://mypy.readthedocs.io/en/stable/config_file.html#confval-implicit_reexport
+# Dynamic / Conditional imports below. (depends on installed packa)
+
+try:
+    # This will fail if redis package is not installed
+    from .client import Gears, Redis, RedisGears
+
+    __all__ += ["Gears", "Redis", "RedisGears"]
+except ModuleNotFoundError:
+    pass
 
 try:
     # This will fail if redis package is not installed
     from .command import redis as cmd
 
     __all__ += ["cmd"]
+except ModuleNotFoundError:
+    pass
+
+
+try:
+    # this will fail if either redis, watchdog or pyaml packages are not installed
+    from .loader import GearsLoader
+
+    __all__ += ["GearsLoader"]
+except ModuleNotFoundError:
+    pass
+
+
+try:
+    # this will fail if either redis or packaging packages are not installed
+    from .reader import (
+        CommandReader,
+        GearReader,
+        KeysOnlyReader,
+        KeysReader,
+        PythonReader,
+        ShardsIDReader,
+        StreamReader,
+    )
+
+    __all__ += [
+        "CommandReader",
+        "GearReader",
+        "KeysOnlyReader",
+        "KeysReader",
+        "PythonReader",
+        "ShardsIDReader",
+        "StreamReader",
+    ]
 except ModuleNotFoundError:
     pass
 
@@ -47,14 +91,16 @@ if "redisgears" in sys.modules:
 else:
     # Dev or Client environment
     # Import placeholder functions and
-    from .runtime import GB as GB
-    from .runtime import GearsBuilder as GearsBuilder
-    from .runtime import atomic as atomic
-    from .runtime import configGet as configGet
-    from .runtime import execute as execute
-    from .runtime import gearsConfigGet as gearsConfigGet
-    from .runtime import hashtag as hashtag
-    from .runtime import log as log
+    from .runtime import (
+        GB,
+        GearsBuilder,
+        atomic,
+        configGet,
+        execute,
+        gearsConfigGet,
+        hashtag,
+        log,
+    )
 
 __all__ += [
     "GB",

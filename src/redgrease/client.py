@@ -21,29 +21,6 @@ from redgrease.utils import (
 log = logging.getLogger(__name__)
 
 
-# """import cloudpickle
-# try:
-#     log("Got Gear")
-#     cloudpickle.loads({cloudpickle.dumps(gear_function, protocol=4)}).compile(GB)
-# except Exception as err:
-#     log(str(err))
-#     import sys
-#     def pystr(pyver):
-#         return "Python %s.%s" % pyver
-#     runtime_version = sys.version_info[:2]
-#     function_version = {sys.version_info[:2]}
-#     if runtime_version != function_version:
-#         raise SystemError(
-#             "%s runtime cannot execute Gears functions created in %s. %s" % (
-#                 pystr(runtime_version),
-#                 pystr(function_version),
-#                 "Only matching Python versions are supported"
-#             )
-#         ) from err
-#     raise
-# """
-
-
 class Gears:
     def __init__(self, redis):
         self.redis = redis

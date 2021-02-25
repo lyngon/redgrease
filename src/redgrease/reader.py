@@ -74,7 +74,7 @@ class KeysReader(GearReader):
         default_key_pattern: str = "*",
     ):
         super().__init__(
-            reader=redgrease.sugar.Reader.KeysReader, defaultArg=default_key_pattern
+            reader=redgrease.sugar.ReaderType.KeysReader, defaultArg=default_key_pattern
         )
         self.default_key_pattern = default_key_pattern
 
@@ -85,7 +85,8 @@ class KeysOnlyReader(GearReader):
         default_key_pattern: str = "*",
     ):
         super().__init__(
-            reader=redgrease.sugar.Reader.KeysOnlyReader, defaultArg=default_key_pattern
+            reader=redgrease.sugar.ReaderType.KeysOnlyReader,
+            defaultArg=default_key_pattern,
         )
         self.default_key_pattern = default_key_pattern
 
@@ -96,21 +97,22 @@ class StreamReader(GearReader):
         default_key_pattern: str = "*",
     ):
         super().__init__(
-            reader=redgrease.sugar.Reader.StreamReader, defaultArg=default_key_pattern
+            reader=redgrease.sugar.ReaderType.StreamReader,
+            defaultArg=default_key_pattern,
         )
         self.default_key_pattern = default_key_pattern
 
 
 class PythonReader(GearReader):
     def __init__(self):
-        super().__init__(reader=redgrease.sugar.Reader.PythonReader)
+        super().__init__(reader=redgrease.sugar.ReaderType.PythonReader)
 
 
 class ShardsIDReader(GearReader):
     def __init__(self):
-        super().__init__(reader=redgrease.sugar.Reader.ShardsIDReader)
+        super().__init__(reader=redgrease.sugar.ReaderType.ShardsIDReader)
 
 
 class CommandReader(GearReader):
     def __init__(self):
-        super().__init__(reader=redgrease.sugar.Reader.CommandReader)
+        super().__init__(reader=redgrease.sugar.ReaderType.CommandReader)
