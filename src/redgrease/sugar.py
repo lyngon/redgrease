@@ -5,7 +5,7 @@ import logging
 # - Function decorators for boilerplate gears constructs
 
 
-class Reader:
+class ReaderType:
     """Redis Gears Reader Types"""
 
     KeysReader = "KeysReader"

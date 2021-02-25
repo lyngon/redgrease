@@ -292,6 +292,7 @@ def transform(
 
 def to_dict(
     items: Iterable,
+    keys: Iterable = None,
     key_transform: Union[Constructor[Key], Dict[Any, Constructor[Key]]] = None,
     val_transform: Union[Constructor[Val], Dict[Key, Constructor[Val]]] = None,
 ) -> Dict[Key, Val]:
@@ -344,9 +345,14 @@ def to_dict(
     if val_transform is None:
         val_transform = as_is
 
-    it = iter(items)
+    if keys:
+        kv_pairs = zip(keys, items)
+    else:
+        it = iter(items)
+        kv_pairs = zip(it, it)
+
     result = {}
-    for key, value in zip(it, it):
+    for key, value in kv_pairs:
         key = transform(key, key_transform, key)
         value = transform(value, val_transform, key)  # type: ignore
         result[key] = value

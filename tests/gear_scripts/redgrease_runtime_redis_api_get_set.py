@@ -29,4 +29,4 @@ def double(record):
         redgrease.cmd.set(key, val)
 
 
-redgrease.GB(redgrease.Reader.KeysReader).foreach(double).run()
+redgrease.GB(redgrease.ReaderType.KeysReader).foreach(double).run()

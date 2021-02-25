@@ -295,19 +295,19 @@ class GearFunction(Generic[T]):
     @property
     def supports_batch_mode(self):
         return self.reader in [
-            sugar.Reader.KeysReader,
-            sugar.Reader.KeysOnlyReader,
-            sugar.Reader.StreamReader,
-            sugar.Reader.PythonReader,
-            sugar.Reader.ShardsIDReader,
+            sugar.ReaderType.KeysReader,
+            sugar.ReaderType.KeysOnlyReader,
+            sugar.ReaderType.StreamReader,
+            sugar.ReaderType.PythonReader,
+            sugar.ReaderType.ShardsIDReader,
         ]
 
     @property
     def supports_event_mode(self):
         return self.reader in [
-            sugar.Reader.KeysReader,
-            sugar.Reader.StreamReader,
-            sugar.Reader.CommandReader,
+            sugar.ReaderType.KeysReader,
+            sugar.ReaderType.StreamReader,
+            sugar.ReaderType.CommandReader,
         ]
 
 

@@ -3,7 +3,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def read(*requirements_file_paths: str):
+def read_requirements(*requirements_file_paths: str):
     """Extract list of individual requirements from a 'requirements.txt' file
 
     Args:
