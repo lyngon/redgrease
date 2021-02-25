@@ -5,7 +5,6 @@ from typing import Any, Dict, Iterable, List, Union
 import attr
 import cloudpickle
 
-import redgrease.data
 import redgrease.gears
 import redgrease.runtime
 from redgrease.utils import (
