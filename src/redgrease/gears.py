@@ -325,7 +325,9 @@ class ClosedGearFunction(GearFunction[T]):
 
             gears_server = Gears(gears_server)
 
-        gears_server.pyexecute(self, unblocking=unblocking, requirements=requirements)
+        return gears_server.pyexecute(
+            self, unblocking=unblocking, requirements=requirements
+        )
 
 
 class PartialGearFunction(GearFunction["optype.InputRecord"]):

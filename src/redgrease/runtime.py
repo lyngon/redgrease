@@ -98,7 +98,7 @@ def log(message: str, level: str = sugar.LogLevel.Notice):
     """
     from redisgears import log as redisLog
 
-    return redisLog(message, level=level)
+    return redisLog(str(message), level=level)
 
 
 def configGet(key: str) -> bytes:

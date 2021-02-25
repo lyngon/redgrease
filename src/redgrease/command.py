@@ -5,10 +5,9 @@ import redgrease.client
 import redgrease.runtime
 
 
-def runtime_execute_command(self, *args, **options):
+def runtime_execute_command(self, command_name, *args, **options):
     "Execute a command in local Gear runtime and return a parsed response"
-    command_name = args[0]
-    response = redgrease.runtime.execute(*args)
+    response = redgrease.runtime.execute(command_name, *args)
     if command_name in self.response_callbacks:
         return self.response_callbacks[command_name](response, **options)
     return response

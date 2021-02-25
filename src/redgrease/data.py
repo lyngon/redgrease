@@ -1,12 +1,11 @@
 import ast
 import sys
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Union
 
 import attr
 import cloudpickle
 
 import redgrease.gears
-import redgrease.runtime
 from redgrease.utils import (
     REnum,
     bool_ok,
@@ -211,14 +210,6 @@ class PyRequirementInfo(RedisObject):
         if isinstance(wheels, bytes)
         else [safe_str(wheel) for wheel in wheels]
     )
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class Record(RedisObject):
-    key: str
-    value: Any = None
-    type: Optional[str] = None
-    event: Optional[str] = None
 
 
 def deseralize_gear_function(
