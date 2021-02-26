@@ -33,8 +33,8 @@ def test_basic(rg: RedisGears, script):
     script_name, script_contents = script
     # First set no keys
     res_0 = rg.gears.pyexecute(script_contents)
-    assert res_0
-    assert res_0.results == []
+    assert res_0 is not None
+    assert res_0.result == []
 
     orig_val = 13
     key = "NUM"
@@ -42,8 +42,8 @@ def test_basic(rg: RedisGears, script):
     assert rg.set(key, orig_val)
 
     res_1 = rg.gears.pyexecute(script_contents)
-    assert res_1
-    assert res_1.results
+    assert res_1 is not None
+    assert res_1.result
     assert res_1.errors == []
 
     assert float(safe_str(rg.get(key))) == orig_val * 2
