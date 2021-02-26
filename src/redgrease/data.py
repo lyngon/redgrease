@@ -1,6 +1,6 @@
 import ast
 import sys
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import attr
 import cloudpickle
@@ -13,31 +13,10 @@ from redgrease.utils import (
     safe_bool,
     safe_str,
     str_if_bytes,
+    to_bytes,
     to_dict,
     to_kwargs,
 )
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class Execution:
-    results: List
-    errors: List
-
-
-# TODO: Should this be in utils?
-# TODO: Rethink how execution redponses should be handlde
-def parse_execute_response(response, pickled_results=False):
-    if bool_ok(response):
-        return True
-    elif isinstance(response, list) and len(response) == 2:
-        results, errors = response
-        if pickled_results:
-            results = [cloudpickle.loads(result) for result in results]
-        return Execution(results, errors)
-    elif isinstance(response, bytes):
-        return Execution(ExecID.parse(response), [])
-    else:
-        return response
 
 
 @attr.s(frozen=True, auto_attribs=True)
@@ -68,6 +47,79 @@ class ExecID:
         sequence = int(values[1])
 
         return ExecID(shard_id=shard_id, sequence=sequence)
+
+
+class Execution:
+    def __init__(self, result: Any, errors: Optional[List] = None):
+        self.result = result
+        self.errors = errors
+
+    def __bool__(self) -> bool:
+        if self.errors:
+            return False
+        else:
+            return bool(self.result)
+
+    def __iter__(self):
+        try:
+            return iter(self.result)
+        except (TypeError, AttributeError):
+            return iter([] if self.result is None else [self.result])
+
+    def __len__(self) -> int:
+        try:
+            return len(self.result)
+        except (TypeError, AttributeError):
+            return 0 if self.result is None else 1
+
+    def __getitem__(self, *args, **kwargs):
+        try:
+            return self.result.__getitem__(*args, **kwargs)
+        except (TypeError, AttributeError):
+            if args and args[0] == 0:
+                return self.result
+            raise
+
+    def __contains__(self, val) -> bool:
+        try:
+            return self.result.__contains__(val)
+        except (TypeError, AttributeError):
+            return val == self.result
+
+    def __bytes__(self):
+        return to_bytes(self.result)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Execution):
+            return self.result == other.result and self.errors == other.errors
+
+        if self.errors:
+            return False
+
+        return self.result == other
+
+    def __repr__(self) -> str:
+        if self.errors:
+            return f"{self.__class__.__name__}({self.result}, errors={self.errors})"
+        else:
+            return f"{self.__class__.__name__}({self.result})"
+
+    def __str__(self) -> str:
+        return repr(self)
+
+
+def parse_execute_response(response, pickled_results=False) -> Execution:
+    if bool_ok(response):
+        return Execution(True)
+    elif isinstance(response, list) and len(response) == 2:
+        results, errors = response
+        if pickled_results:
+            results = [cloudpickle.loads(result) for result in results]
+        return Execution(results, errors=errors)
+    elif isinstance(response, bytes):
+        return Execution(ExecID.parse(response))
+    else:
+        return Execution(response)
 
 
 class ExecutionStatus(REnum):

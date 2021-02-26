@@ -91,8 +91,9 @@ def test_builtin_runtime_functions(
     while not rg.ping():
         time.sleep(1)
 
-    assert rg.gears.pyexecute(
-        "", requirements=[f"redgrease{extras}=={redgrease_version}"]
+    assert (
+        rg.gears.pyexecute("", requirements=[f"redgrease{extras}=={redgrease_version}"])
+        is not None
     )
 
     _, contents = gears_script
@@ -116,7 +117,7 @@ def test_builtin_runtime_functions(
 
     result = rg.gears.pyexecute(script_str)
 
-    assert result
+    assert result is not None
     assert isinstance(result, redgrease.data.Execution)
     assert not result.errors
 
@@ -133,8 +134,8 @@ GB().run()
         # With any of the extras installed, it should be
         # possibleto run gears that import both
         # 'redgrease.command' as well as 'redis'
-        assert rg.gears.pyexecute(runtime_extras_import)
-        assert rg.gears.pyexecute(redis_import)
+        assert rg.gears.pyexecute(runtime_extras_import) is not None
+        assert rg.gears.pyexecute(redis_import) is not None
     else:
         # If no redgrease extras are installed,
         # then we should not be able to import nither

@@ -1,3 +1,4 @@
+import functools
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -209,6 +210,14 @@ def to_redis_type(value: Any) -> RedisType:
         return value
 
     return to_redis_type(str(value))
+
+
+def to_bytes(value: Any) -> bytes:
+    compat_val = to_redis_type(value)
+    if isinstance(compat_val, bytes):
+        return compat_val
+    else:
+        return str(compat_val).encode()
 
 
 # Not a parser
@@ -475,3 +484,7 @@ def record(rec: Union[str, dict]) -> Record:
 
     if isinstance(rec, str):
         return Record(rec)
+
+
+def compose(*functions):
+    return functools.reduce(lambda f, g: lambda x: f(g(x)), functions, lambda x: x)

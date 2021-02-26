@@ -37,7 +37,7 @@ def test_pydumpreqs(rg: RedisGears, package):
 
     if package not in preexisting:
         # Add a requirement for package
-        assert rg.gears.pyexecute("", requirements=[package]) is True
+        assert rg.gears.pyexecute("", requirements=[package])
 
         new_reqs = rg.gears.pydumpreqs()
 
@@ -60,8 +60,8 @@ def test_trigger(rg: RedisGears, arg_list: List, mode: str):
     )
     assert rg.gears.pyexecute(fun_str, unblocking=unblocking)
     res = rg.gears.trigger(triggger_name, *arg_list)
-    assert res
-    assert isinstance(res, list)
+    assert isinstance(res, redgrease.data.Execution)
+    assert isinstance(res.result, list)
     assert len(res) == len(arg_list) + 1
     # For some reason flatmap seems to reverse the order
     str_res = list(map(safe_str, res))
@@ -166,19 +166,19 @@ def test_getexecution(rg: RedisGears, fun_str: str):
     exec = rg.gears.pyexecute(fun_str, unblocking=True)
     assert exec
     assert isinstance(exec, redgrease.data.Execution)
-    assert exec.results
+    assert exec.result
     assert not exec.errors
-    assert isinstance(exec.results, redgrease.data.ExecID)
-    shard_id = exec.results.shard_id
+    assert isinstance(exec.result, redgrease.data.ExecID)
+    shard_id = exec.result.shard_id
 
     # ! Possibly a race condition that executon is not complete. Ugly AF sln.
     time.sleep(5)
 
-    res = rg.gears.getexecution(exec.results)  # TODO: This is an odd API syntax
+    res = rg.gears.getexecution(exec.result)  # TODO: This is an odd API syntax
     assert res
     assert isinstance(res, dict)
     assert shard_id in res.keys()
-    exe_plan = res[exec.results.shard_id]  # TODO: Real awkward
+    exe_plan = res[exec.result.shard_id]  # TODO: Real awkward
     assert exe_plan
     assert isinstance(exe_plan, redgrease.data.ExecutionPlan)
     assert exe_plan.status
@@ -210,16 +210,16 @@ def test_getresults(rg: RedisGears):
     fun_str = """GB().count().run()"""
 
     exec = rg.gears.pyexecute(fun_str, unblocking=True)
-    assert exec
+    assert exec is not None
     assert isinstance(exec, redgrease.data.Execution)
-    assert exec.results
+    assert exec.result
     assert not exec.errors
-    assert isinstance(exec.results, redgrease.data.ExecID)
+    assert isinstance(exec.result, redgrease.data.ExecID)
 
     # ! Possibly a race condition that executon is not complete. Ugly AF sln.
     time.sleep(5)
 
-    res = rg.gears.getresults(exec.results)  # TODO: is this how we want it to work?
+    res = rg.gears.getresults(exec.result)  # TODO: is this how we want it to work?
     assert res
     assert isinstance(
         res, list
