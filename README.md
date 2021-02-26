@@ -19,136 +19,137 @@
 
 [![mushroom, mushroom!](https://img.shields.io/badge/mushroom-mushroom!-green)](https://www.youtube.com/watch?v=hGlyFc79BUE)
 
-<!-- Hopefuully true soon.
+Example usage:
 ```python
 import redgrease
-import redgrease.client
-import redgrease.data
-import redgrease.reader
 import redgrease.utils
 
+relevant_usr_fields = {
+    "active": bool,
+    "permissions": redgrease.utils.list_parser(str),
+}
 
-def read_user_permissions(record) -> dict:
-    return redgrease.cmd.hget(
-        record.key,
-        mapping={
-            "active": bool,
-            "permissions": redgrease.utils.list_parser(str),
-        },
-    )
-
-
-# Partial Gear function, w. default run param:
+# # Partial Gear function
+# Extracting a dict for every 'active' user
 active_users = (
-    redgrease.reader.KeysOnlyReader("user:*")
-    .map(redgrease.data.Record.from_redis)
-    .map(read_user_permissions)
+    redgrease.KeysOnlyReader("user:*")
+    .map(lambda key: redgrease.cmd.hmget(key, *relevant_usr_fields.keys()))
+    .map(
+        lambda udata: redgrease.utils.to_dict(
+            udata, keys=relevant_usr_fields.keys(), val_transform=relevant_usr_fields
+        )
+    )
     .filter(lambda usr: usr["active"])
 )
-
-# Partial Gear function re-use:
+# # Partial Gear function re-use
+# Count the number of active users
 active_user_count = active_users.count()
 
-all_issued_permissions = active_users.flatmap(lambda usr: usr.permissions).distinct()
+# Get all the distinct user permissions
+all_issued_permissions = active_users.flatmap(lambda usr: usr["permissions"]).distinct()
 
-# Redis Client w. Gears
-r = redgrease.client.RedisGears()
+# # Redis Client w. Gears-features can be created separately
+r = redgrease.RedisGears()
 
-# Two ways of running:
+# # Two ways of running:
+# With 'pyexecute' ...
 count = r.gears.pyexecute(active_user_count.run())
+# ... or with the 'on' metod 
 permissions = all_issued_permissions.run().on(r)
+
+print(f"Count: {count.results}")
+if count.errors:
+    print(count.errors)
+
+print(f"Permissions: {permissions.results}")
+if permissions.errors:
+    print(permissions.errors)
 ```
--->
+
 # RedGrease
 RedGrease is a Python package and set of tools to facilitate development against [Redis](https://redis.io/) in general and [Redis Gears](https://redislabs.com/modules/redis-gears/) in particular.
 
 
 RedGrease consists of the followinig, components:
 
-1. [A Redis / Redis Gears client](https://redgrease.readthedocs.io) (`redgrease.client.RedisGears`), which is an extended version of the [redis](https://pypi.org/project/redis/) client, but with additional pythonic functions, mapping closely (1-to-1) to the Redis Gears command set (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc), outlined [here](https://oss.redislabs.com/redisgears/commands.html)
-```python
-from redgrease.client import RedisGears
-
-gear_script = ... # Some Gear script
-
-rg = RedisGears()
-rg.gears.pyexecute(gear_script)  # <--
-```
-
-2. Some [helper runtime functions](https://redgrease.readthedocs.io) defined in `redgrease.runtime`, but also exposed at 'top-level' (`redgrease`), exposing placeholders for the built-in Redis Gears functions (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc) that are automatically loaded into the server [runtime environment](https://oss.redislabs.com/redisgears/runtime.html). These placeholder versions provide auto completion and type hints during development, and does not clash with the actual runtime, i.e does not require redgrease to be installed on the server.
-![basic hints](docs/images/basic_usage_hints.jpg)
-
-3. [Syntactic sugar](https://redgrease.readthedocs.io) for various things like 'magic' values and strings, like the different reader names (e.g `redgrease.Reader.CommandReader`), trigger modes (e.g. `redgrease.TriggerMode.AsyncLocal`) and log levels (e.g. `redgrease.LogLevel.Notice`). 
-```python
-from redgrease import GB, execute, hashtag, Reader, TriggerMode, cmd
-
-
-cap = GB(Reader.StreamReader)  # <--
-cap.foreach(lambda x:
-            cmd.xadd(f'expired:{hashtag()}', '*', 'key', x['key']))
-cap.register(prefix='*',
-             mode=TriggerMode.Async,  # <-- 
-             eventTypes=['expired'],
-             readValue=False)
-```
-
-4. [Servers-side Redis commands](https://redgrease.readthedocs.io), allowing for **all** Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of 'manually' invoking the `execute()`. It is basically the [redis](https://pypi.org/project/redis/) client, but with `execute_command()` rewired to use the Gears-native `execute()` instead under the hood. 
+1. [A Redis / Redis Gears client](https://redgrease.readthedocs.io), which is an extended version of the [redis](https://pypi.org/project/redis/) client, but with additional pythonic functions, mapping closely (1-to-1) to the Redis Gears command set (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc), outlined [here](https://oss.redislabs.com/redisgears/commands.html)
 ```python
 import redgrease
 
+gear_script = ... # Some vanilla Gear script string, a GearFunction object or a script file path.
 
-def double(record):
-    try:
-        key = record["key"]
-        val = redgrease.cmd.get(key)  # <--
-        newval = float(val)
-    except Exception as ex:
-        err_msg = f"The value of the key {key} did not float very well"
-        redgrease.log(err_msg + f": {ex}. Blubb, blubb!")
-        raise TypeError(err_msg) from ex
-    else:
-        val *= 2
-        redgrease.cmd.set(key, val)  # <--
-
-
-redgrease.GB(redgrease.Reader.KeysReader).foreach(double).run()
+rg = redgrease.RedisGears()
+rg.gears.pyexecute(gear_script)  # <--
 ```
 
-4. [Loader CLI](https://redgrease.readthedocs.io) and Docker image, for automatic loading of Gears scripts, mainly "trigger-based" CommandReader Gears, into a Redis Gears cluster. It also provides a simple form of 'hot-reloading' of Redis Gears scripts, by continously monitoring directories containing Redis Gears scripts and automatically 'pyexecute' them on a Redis Gear instance if it detects modifications. 
+2. Wrappers for the [runtime functions](https://redgrease.readthedocs.io) (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc) that are automatically loaded into the server [runtime environment](https://oss.redislabs.com/redisgears/runtime.html). These placeholder versions provide **docstrings**, **auto completion** and **type hints** during development, and does not clash with the actual runtime, i.e does not require redgrease to be installed on the server.
+![basic hints](docs/images/basic_usage_hints.jpg)
+
+3. [Servers-side Redis commands](https://redgrease.readthedocs.io), allowing for **all** Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of 'manually' invoking the `execute()`. It is basically the [redis](https://pypi.org/project/redis/) client, but with `execute_command()` rewired to use the Gears-native `execute()` instead under the hood. 
+```python
+import redgrease
+import redgrease.utils
+import requests
+
+def download_image(record):
+    image_key = record.value["image"]
+    if redgrese.cmd.hget(image_key, "image_data"): # <-
+        # image already downloaded
+        return image_key
+    image_url = redgrease.cmd.hget(image_key,"url") # <-
+    image_data = requests.get(image_url)
+    redgrease.cmd.hset(image_key, "image_data", # <-
+     images_data)
+    return image_key
+
+redgrease.GB(redgrease.ReaderType.KeysReader, "annotation:*").map(redgrease.utils.record).foreach(download_image).run()
+```
+
+4. [CLI tool](https://redgrease.readthedocs.io) running and or loading of Gears scripts onto a Redis Gears cluster. Particularls useful for "trigger-based" CommandReader Gears.
+It also provides a simple form of 'hot-reloading' of Redis Gears scripts, by continously monitoring directories containing Redis Gears scripts and automatically 'pyexecute' them on a Redis Gear instance if it detects modifications. 
 The purpose is mainly to streamline development of 'trigger-style' Gear scripts by providing a form of hot-reloading functionality.
 ```
 redgrease --server 10.0.2.21 --watch scripts/
 ```
 This will 'pyexecute' the gears scripts in the 'scripts' directory against the server. It will also watch the directors for changes and re-execute the scripts if they have been modified.
 
-5. **[Work-in-Progress]** A [remote GearsBuilder](https://redgrease.readthedocs.io), inspired by the official [redisgears-py](https://github.com/RedisGears/redisgears-py) client, but with some differences.
+5. First class [GearFunction objects](https://redgrease.readthedocs.io), inspired by the remote builders of the official [redisgears-py](https://github.com/RedisGears/redisgears-py) client, but with some differences.
 ```python
-from redgrease.client import RedisGears
-from redgrease.reader import CommandReader
-from redgrease import log
+import redgrease
+from redgrease.utils import as_is
 
+# Dummy processing of command argument
 def process(x):
-    log(f"Processing '{x}'")
-    return x
+    log(f"Processing argument '{x}'")
+    return len(str(x))
 
-my_command = CommandReader().flatmap(lambda x: x)
-my_command.register(trigger="bang")
+# Gear Function object
+gear = CommandReader().flatmap(as_is).map(process).register(trigger="launch")
 
+# Redis client with Gears
 rg = RedisGears()
-my_command.on(rg)
 
-rg.gears.trigger("bang")
+# Register the gear function on a cluster
+gear.on(rg) 
+# same as rg.gears.pyexecute(gear)
+
+# Trigger the function
+rg.gears.trigger("launch", "the", "missiles!")
+# [8, 3, 6]
 ```
+:warning: As with the official package, this require that the server runtime Python version matches the client runtime that defined the function. As of writing this is Only for Python 3.7.
 
-6. **[In Backlog]** Other boilerplate or otherwise functions, that may commonly be used in gears. e.g:
-    - A simple `records()` function  that can be used to transform the default `KeysReader` dict to an `Records` object with the appropriate attributes. Maybe even sertter for the value (?)
+6. Other boilerplate or otherwise functions and utilities (`redgrease.utils`), that are commonly used in gears. e.g:
+    - A simple `record` function  that can be used to transform the default `KeysReader` dict to an `Records` object with the appropriate attributes. Maybe even sertter for the value (?)
     ```python
-    KeysReader().map(redgrease.record).foreach(lambda r: log(f"The key '{r[.key]}' is of type '{r.type}' with value '{r.value}'")
+    KeysReader().map(redgrease.utils.record).foreach(lambda r: log(f"The key '{r[.key]}' is of type '{r.type}' with value '{r.value}'")
     ```
     - Helpers to aid debugging and/ or testing of gears. 
     - ...
 
 Suggestions appriciated.
+
+7. **[WIP]** Docker images with redgrease pre-installed as well as, hopefully, variants for all python versions 3.6 or later.
 
 # Installation
 Redgrease may be installed either as a developmet tool only, a client library and/or as a runtime library on the Redis Gears server.
