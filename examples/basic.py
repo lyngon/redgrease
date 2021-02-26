@@ -1,7 +1,7 @@
 import redgrease
 import redgrease.utils
 
-user_structure = {
+relevant_usr_fields = {
     "active": bool,
     "permissions": redgrease.utils.list_parser(str),
 }
@@ -9,10 +9,10 @@ user_structure = {
 # Partial Gear function, w. default run param:
 active_users = (
     redgrease.KeysOnlyReader("user:*")
-    .map(lambda key: redgrease.cmd.hmget(key, *user_structure.keys()))
+    .map(lambda key: redgrease.cmd.hmget(key, *relevant_usr_fields.keys()))
     .map(
         lambda udata: redgrease.utils.to_dict(
-            udata, keys=user_structure.keys(), val_transform=user_structure
+            udata, keys=relevant_usr_fields.keys(), val_transform=relevant_usr_fields
         )
     )
     .filter(lambda usr: usr["active"])
