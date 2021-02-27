@@ -1,9 +1,10 @@
 import ast
 import sys
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
 import attr
 import cloudpickle
+import wrapt
 
 import redgrease.gears
 from redgrease.utils import (
@@ -17,6 +18,8 @@ from redgrease.utils import (
     to_dict,
     to_kwargs,
 )
+
+T = TypeVar("T")
 
 
 @attr.s(frozen=True, auto_attribs=True)
@@ -49,77 +52,72 @@ class ExecID:
         return ExecID(shard_id=shard_id, sequence=sequence)
 
 
-class Execution:
-    def __init__(self, result: Any, errors: Optional[List] = None):
-        self.result = result
-        self.errors = errors
+class ExecutionResult(wrapt.ObjectProxy, Generic[T]):
+    def __init__(self, value: T, errors: Optional[List] = None):
+        wrapt.ObjectProxy.__init__(self, value)
+        self._self_errors: Optional[List] = errors
 
-    def __bool__(self) -> bool:
-        if self.errors:
-            return False
-        else:
-            return bool(self.result)
+    @property
+    def value(self):
+        return self.__wrapped__
 
-    def __iter__(self):
-        try:
-            return iter(self.result)
-        except (TypeError, AttributeError):
-            return iter([] if self.result is None else [self.result])
-
-    def __len__(self) -> int:
-        try:
-            return len(self.result)
-        except (TypeError, AttributeError):
-            return 0 if self.result is None else 1
-
-    def __getitem__(self, *args, **kwargs):
-        try:
-            return self.result.__getitem__(*args, **kwargs)
-        except (TypeError, AttributeError):
-            if args and args[0] == 0:
-                return self.result
-            raise
-
-    def __contains__(self, val) -> bool:
-        try:
-            return self.result.__contains__(val)
-        except (TypeError, AttributeError):
-            return val == self.result
-
-    def __bytes__(self):
-        return to_bytes(self.result)
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, Execution):
-            return self.result == other.result and self.errors == other.errors
-
-        if self.errors:
-            return False
-
-        return self.result == other
+    @property
+    def errors(self):
+        return self._self_errors
 
     def __repr__(self) -> str:
-        if self.errors:
-            return f"{self.__class__.__name__}({self.result}, errors={self.errors})"
+        cls_nm = "ExecutionResult"
+        val_typ_nm = self.__class__.__name__
+        if self._self_errors:
+            err = f", errors={repr(self._self_errors)}"
         else:
-            return f"{self.__class__.__name__}({self.result})"
+            err = ""
 
-    def __str__(self) -> str:
-        return repr(self)
+        return f"{cls_nm}[{val_typ_nm}]({self.__wrapped__.__repr__()}{err})"
+
+    def __iter__(self):
+        if hasattr(self.value, "__iter__"):
+            return iter(self.value)
+        else:
+            return iter([] if self.value is None else [self.value])
+
+    def __len__(self) -> int:
+        if hasattr(self.value, "__len__"):
+            return len(self.value)
+        else:
+            return 0 if self.value is None else 1
+
+    def __getitem__(self, *args, **kwargs):
+        if hasattr(self.value, "__getitem__"):
+            return self.value.__getitem__(*args, **kwargs)
+        else:
+            if args and args[0] == 0:
+                return self.value
+            else:
+                raise TypeError(f"{self} is not subscriptable")
+
+    def __contains__(self, val) -> bool:
+        if hasattr(self.value, "__contains__"):
+            return val in self.value
+        else:
+            return self.value == val
+
+    def __bytes__(self) -> bytes:
+        return to_bytes(self.value)
 
 
-def parse_execute_response(response, pickled_results=False) -> Execution:
+def parse_execute_response(response, pickled_results=False) -> ExecutionResult:
     if bool_ok(response):
-        return Execution(True)
+        return ExecutionResult(True)
     elif isinstance(response, list) and len(response) == 2:
-        results, errors = response
+        values, errors = response
         if pickled_results:
-            results = [cloudpickle.loads(result) for result in results]
-        return Execution(results, errors=errors)
+            values = [cloudpickle.loads(value) for value in values]
+        return ExecutionResult(values, errors=errors)
     elif isinstance(response, bytes):
-        return Execution(ExecID.parse(response))
+        return ExecutionResult(ExecID.parse(response))
     else:
-        return Execution(response)
+        return ExecutionResult(response)
 
 
 class ExecutionStatus(REnum):

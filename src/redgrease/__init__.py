@@ -1,6 +1,6 @@
 import sys
 
-from .func import trigger as trigger
+from .func import trigger
 from .gears import ClosedGearFunction, GearFunction, PartialGearFunction
 from .requirements import read_requirements
 from .sugar import FailurePolicy, KeyType, LogLevel, ReaderType, TriggerMode

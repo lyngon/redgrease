@@ -60,8 +60,8 @@ def test_trigger(rg: RedisGears, arg_list: List, mode: str):
     )
     assert rg.gears.pyexecute(fun_str, unblocking=unblocking)
     res = rg.gears.trigger(triggger_name, *arg_list)
-    assert isinstance(res, redgrease.data.Execution)
-    assert isinstance(res.result, list)
+    assert isinstance(res, redgrease.data.ExecutionResult)
+    assert isinstance(res.value, list)
     assert len(res) == len(arg_list) + 1
     # For some reason flatmap seems to reverse the order
     str_res = list(map(safe_str, res))
@@ -165,20 +165,20 @@ def test_getexecution(rg: RedisGears, fun_str: str):
 
     exec = rg.gears.pyexecute(fun_str, unblocking=True)
     assert exec
-    assert isinstance(exec, redgrease.data.Execution)
-    assert exec.result
+    assert isinstance(exec, redgrease.data.ExecutionResult)
+    assert exec.value
     assert not exec.errors
-    assert isinstance(exec.result, redgrease.data.ExecID)
-    shard_id = exec.result.shard_id
+    assert isinstance(exec.value, redgrease.data.ExecID)
+    shard_id = exec.value.shard_id
 
     # ! Possibly a race condition that executon is not complete. Ugly AF sln.
     time.sleep(5)
 
-    res = rg.gears.getexecution(exec.result)  # TODO: This is an odd API syntax
+    res = rg.gears.getexecution(exec.value)  # TODO: This is an odd API syntax
     assert res
     assert isinstance(res, dict)
     assert shard_id in res.keys()
-    exe_plan = res[exec.result.shard_id]  # TODO: Real awkward
+    exe_plan = res[exec.value.shard_id]  # TODO: Real awkward
     assert exe_plan
     assert isinstance(exe_plan, redgrease.data.ExecutionPlan)
     assert exe_plan.status
@@ -211,15 +211,15 @@ def test_getresults(rg: RedisGears):
 
     exec = rg.gears.pyexecute(fun_str, unblocking=True)
     assert exec is not None
-    assert isinstance(exec, redgrease.data.Execution)
-    assert exec.result
+    assert isinstance(exec, redgrease.data.ExecutionResult)
+    assert exec.value
     assert not exec.errors
-    assert isinstance(exec.result, redgrease.data.ExecID)
+    assert isinstance(exec.value, redgrease.data.ExecID)
 
     # ! Possibly a race condition that executon is not complete. Ugly AF sln.
     time.sleep(5)
 
-    res = rg.gears.getresults(exec.result)  # TODO: is this how we want it to work?
+    res = rg.gears.getresults(exec.value)  # TODO: is this how we want it to work?
     assert res
     assert isinstance(
         res, list

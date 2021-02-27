@@ -118,7 +118,7 @@ def test_builtin_runtime_functions(
     result = rg.gears.pyexecute(script_str)
 
     assert result is not None
-    assert isinstance(result, redgrease.data.Execution)
+    assert isinstance(result, redgrease.data.ExecutionResult)
     assert not result.errors
 
     runtime_extras_import = """

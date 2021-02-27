@@ -299,7 +299,7 @@ class Redis(redis.Redis):
             "RG.PYSTATS": redgrease.data.PyStats.from_redis,
             "RG.PYDUMPREQS": list_parser(redgrease.data.PyRequirementInfo.from_redis),
             "RG.REFRESHCLUSTER": bool_ok,
-            "RG.TRIGGER": redgrease.data.Execution,
+            "RG.TRIGGER": redgrease.data.ExecutionResult,
             "RG.UNREGISTER": bool_ok,
         },
     }
