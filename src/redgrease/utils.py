@@ -1,3 +1,4 @@
+import ast
 import functools
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
@@ -413,7 +414,7 @@ def list_parser(item_parser: Constructor[T]) -> Callable[[Iterable], List[T]]:
         if isinstance(input_list, bytes):
             input_list = safe_str(input_list)
         if isinstance(input_list, str):
-            input_list = input_list.strip("][").split(", ")
+            input_list = list(ast.literal_eval(input_list))
 
         return list(map(item_parser, input_list))
 

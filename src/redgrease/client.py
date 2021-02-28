@@ -10,7 +10,6 @@ import redgrease.gears
 import redgrease.reader
 from redgrease.utils import (
     CaseInsensitiveDict,
-    as_is,
     bool_ok,
     dict_of,
     list_parser,
@@ -292,14 +291,14 @@ class Redis(redis.Redis):
             "RG.DUMPEXECUTIONS": list_parser(redgrease.data.Registration.from_redis),
             "RG.DUMPREGISTRATIONS": list_parser(redgrease.data.Registration.from_redis),
             "RG.GETEXECUTION": redgrease.data.ExecutionPlan.parse,
-            "RG.GETRESULTS": as_is,
-            "RG.GETRESULTSBLOCKING": as_is,
+            "RG.GETRESULTS": redgrease.data.parse_execute_response,
+            "RG.GETRESULTSBLOCKING": redgrease.data.parse_execute_response,
             "RG.INFOCLUSTER": redgrease.data.ClusterInfo.parse,
             "RG.PYEXECUTE": redgrease.data.parse_execute_response,
             "RG.PYSTATS": redgrease.data.PyStats.from_redis,
             "RG.PYDUMPREQS": list_parser(redgrease.data.PyRequirementInfo.from_redis),
             "RG.REFRESHCLUSTER": bool_ok,
-            "RG.TRIGGER": redgrease.data.Execution,
+            "RG.TRIGGER": redgrease.data.parse_trigger_response,
             "RG.UNREGISTER": bool_ok,
         },
     }

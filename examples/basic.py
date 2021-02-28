@@ -29,10 +29,16 @@ r = redgrease.client.RedisGears()
 count = r.gears.pyexecute(active_user_count.run())
 permissions = all_issued_permissions.run().on(r)
 
-print(f"Count: {count.results}")
-if count.errors:
-    print(count.errors)
+# Result values are directly accessible
+print(f"Count: {count}")
+if count > 100:
+    print("So many users!")
+print(permissions)
+if "root" in permissions:
+    print("Someone has root permissions")
 
-print(f"Permissions: {permissions.results}")
+# Errors can be acceessed too
+if count.errors:
+    print(f"Errors counting users: {count.errors}")
 if permissions.errors:
-    print(permissions.errors)
+    print(f"Errors collecting permissions: {permissions.errors}")
