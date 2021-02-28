@@ -120,7 +120,7 @@ def test_avg(rg: RedisGears):
     rg.set("t", "2")
     gear_fun = GearsBuilder().map(lambda x: x["value"]).avg().run()
     res = rg.gears.pyexecute(gear_fun)
-    assert res == [1.5]
+    assert res == 1.5
     assert res.errors == []
 
 
@@ -136,7 +136,7 @@ def test_count(rg: RedisGears):
     rg.set("t", "2")
     gear_fun = GearsBuilder().count().run()
     res = rg.gears.pyexecute(gear_fun)
-    assert res == [4]
+    assert res == 4
     assert res.errors == []
 
 
@@ -152,7 +152,7 @@ def test_distinct(rg: RedisGears):
     rg.set("t", "2")
     gear_fun = GearsBuilder().map(lambda x: x["value"]).distinct().count().run()
     res = rg.gears.pyexecute(gear_fun)
-    assert res == [2]
+    assert res == 2
     assert res.errors == []
 
 
@@ -173,7 +173,7 @@ def test_aggregate(rg: RedisGears):
         .run()
     )
     res = rg.gears.pyexecute(gear_fun)
-    assert res == [6]
+    assert res == 6
     assert res.errors == []
 
 
@@ -212,7 +212,7 @@ def test_limit(rg: RedisGears):
     rg.set("t", "2")
     gear_fun = GearsBuilder().map(lambda x: x["value"]).sort().limit(1).run()
     res = rg.gears.pyexecute(gear_fun)
-    assert res == ["1"]
+    assert res == "1"
     assert res.errors == []
 
 
@@ -240,7 +240,7 @@ def test_sort(rg: RedisGears):
 def test_hashtag(rg: RedisGears):
     gear_fun = GearsBuilder("ShardsIDReader").map(lambda _: hashtag()).run()
     res = rg.gears.pyexecute(gear_fun)
-    assert res == ["06S"]
+    assert res == "06S"
     assert res.errors == []
 
 
@@ -255,6 +255,5 @@ def test_register(rg: RedisGears):
     assert res
     res = rg.gears.trigger("test", "this", "is", "a", "test")
     assert res
-    print(res)
     # Todo: Is this the desired output?
-    assert res == [[b"test", b"this", b"is", b"a", b"test"]]
+    assert res == [b"test", b"this", b"is", b"a", b"test"]

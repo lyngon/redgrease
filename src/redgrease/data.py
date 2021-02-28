@@ -82,10 +82,16 @@ class ExecutionResult(wrapt.ObjectProxy, Generic[T]):
             return iter([] if self.value is None else [self.value])
 
     def __len__(self) -> int:
-        if hasattr(self.value, "__len__"):
+        if hasattr(self.value, "__len__") and not isinstance(self.value, (str, bytes)):
             return len(self.value)
         else:
             return 0 if self.value is None else 1
+
+    def __eq__(self, other):
+        if not isinstance(self.value, list) and isinstance(other, list):
+            return [self.value] == other
+        else:
+            return self.value == other
 
     def __getitem__(self, *args, **kwargs):
         if hasattr(self.value, "__getitem__"):
@@ -110,14 +116,26 @@ def parse_execute_response(response, pickled_results=False) -> ExecutionResult:
     if bool_ok(response):
         return ExecutionResult(True)
     elif isinstance(response, list) and len(response) == 2:
-        values, errors = response
-        if pickled_results:
-            values = [cloudpickle.loads(value) for value in values]
-        return ExecutionResult(values, errors=errors)
+        result, errors = response
+        if isinstance(result, list):
+            if pickled_results:
+                result = [cloudpickle.loads(value) for value in result]
+            if len(result) == 1:
+                result = result[0]
+        return ExecutionResult(result, errors=errors)
     elif isinstance(response, bytes):
         return ExecutionResult(ExecID.parse(response))
     else:
         return ExecutionResult(response)
+
+
+def parse_trigger_response(response, pickled_results=False) -> ExecutionResult:
+    if pickled_results:
+        response = [cloudpickle.loads(value) for value in response]
+
+    if len(response) == 1:
+        response = response[0]
+    return ExecutionResult(response)
 
 
 class ExecutionStatus(REnum):
@@ -288,6 +306,7 @@ def seralize_gear_function(gear_function: redgrease.gears.ClosedGearFunction) ->
     return f"""
 import redgrease.data
 import redgrease.runtime
+
 gear_function = redgrease.data.deseralize_gear_function(
     {cloudpickle.dumps(gear_function, protocol=4)},
     python_version={tuple(sys.version_info)},

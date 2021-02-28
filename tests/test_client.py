@@ -61,7 +61,7 @@ def test_trigger(rg: RedisGears, arg_list: List, mode: str):
     assert rg.gears.pyexecute(fun_str, unblocking=unblocking)
     res = rg.gears.trigger(triggger_name, *arg_list)
     assert isinstance(res, redgrease.data.ExecutionResult)
-    assert isinstance(res.value, list)
+    # assert isinstance(res.value, list)
     assert len(res) == len(arg_list) + 1
     # For some reason flatmap seems to reverse the order
     str_res = list(map(safe_str, res))
@@ -174,11 +174,11 @@ def test_getexecution(rg: RedisGears, fun_str: str):
     # ! Possibly a race condition that executon is not complete. Ugly AF sln.
     time.sleep(5)
 
-    res = rg.gears.getexecution(exec.value)  # TODO: This is an odd API syntax
+    res = rg.gears.getexecution(exec)
     assert res
     assert isinstance(res, dict)
     assert shard_id in res.keys()
-    exe_plan = res[exec.value.shard_id]  # TODO: Real awkward
+    exe_plan = res[exec.shard_id]  # TODO: Awkward syntax?
     assert exe_plan
     assert isinstance(exe_plan, redgrease.data.ExecutionPlan)
     assert exe_plan.status
@@ -202,7 +202,6 @@ def test_getexecution(rg: RedisGears, fun_str: str):
         assert isinstance(exe_step.arg, str)
 
 
-# TODO: rethink how execution results should be represented
 def test_getresults(rg: RedisGears):
     rg.set("AKEY", 42)
     rg.set("ANOTHERKEY", 1)
@@ -219,12 +218,10 @@ def test_getresults(rg: RedisGears):
     # ! Possibly a race condition that executon is not complete. Ugly AF sln.
     time.sleep(5)
 
-    res = rg.gears.getresults(exec.value)  # TODO: is this how we want it to work?
+    res = rg.gears.getresults(exec)
     assert res
-    assert isinstance(
-        res, list
-    )  # TODO: should this not be same as pyexetute returns when bocking?
-    assert int(res[0][0]) == 2
+    print(f"test_get_results res: {repr(res)}")
+    assert int(res) == 2
 
 
 @pytest.mark.xfail(reason="Testcase not implemented")
