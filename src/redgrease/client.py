@@ -10,7 +10,6 @@ import redgrease.gears
 import redgrease.reader
 from redgrease.utils import (
     CaseInsensitiveDict,
-    as_is,
     bool_ok,
     dict_of,
     list_parser,
