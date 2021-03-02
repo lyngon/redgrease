@@ -11,11 +11,11 @@ before_install:
 install:
   - pip install -r src/requirements-test.txt
 script:
-  - python -m isort ./**/*.py --check-only
-  - python -m flake8 ./src/
-  - python -m black ./src/ --check
-  - python -m mypy ./src/
-  - python -m pytest --cov=redgrease --cov-report=xml
+  - python3 -m isort ./**/*.py --check-only
+  - python3 -m flake8 ./src/
+  - python3 -m black ./src/ --check
+  - python3 -m mypy ./src/
+  - python3 -m pytest --cov=redgrease --cov-report=xml
 after_success:
   - codecov
 
