@@ -9,7 +9,7 @@ services:
 before_install:
   - docker pull redislabs/redisgears
 install:
-  - pip install -r src/requirements-test.txt
+  - python3 -m pip install -r src/requirements-test.txt
 script:
   - python3 -m isort ./**/*.py --check-only
   - python3 -m flake8 ./src/
