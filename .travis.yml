@@ -9,13 +9,14 @@ services:
 before_install:
   - docker pull redislabs/redisgears
 install:
-  - python3 -m pip install -r src/requirements-test.txt
+  - pip install -r src/requirements-test.txt
+  - pip install .
 script:
-  - python3 -m isort ./**/*.py --check-only
-  - python3 -m flake8 ./src/
-  - python3 -m black ./src/ --check
-  - python3 -m mypy ./src/
-  - python3 -m pytest --cov=redgrease --cov-report=xml
+  - isort ./**/*.py --check-only
+  - flake8 ./src/
+  - black ./src/ --check
+  - mypy ./src/
+  - pytest --cov=redgrease --cov-report=xml
 after_success:
   - codecov
 
