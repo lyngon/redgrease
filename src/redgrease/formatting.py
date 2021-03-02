@@ -35,7 +35,7 @@ log_formatter = UTC_ISO8601_Formatter(fmt=log_message_format)
 
 
 # TODO: Simplify
-def initialize_logger(
+def initialize_logger(  # noqa: C901
     level=logging.DEBUG,
     fmt: Union[logging.Formatter, str] = None,
     config: Union[pathlib.Path, str, Dict[str, Any]] = None,

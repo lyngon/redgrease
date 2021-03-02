@@ -63,6 +63,9 @@ def redgrease_runtime_image(docker_client: DockerClient, redisgears_container):
         ip, port = redisgears_container.get_addr(redis_port)
         r = instantiate(redis.Redis, host=ip, port=port)
 
+        # TODO: Use this approach inst
+        # f"redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@{branch}"
+
         r.execute_command(
             f"RG.PYEXECUTE '' REQUIREMENTS redgrease[runtime]=={redgrease_version}"
         )

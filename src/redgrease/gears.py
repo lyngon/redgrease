@@ -278,9 +278,19 @@ class Avg(Operation):
 
 
 class GearFunction(Generic[T]):
-    def __init__(self, operation: Operation, input_function: "GearFunction" = None):
+    def __init__(
+        self,
+        operation: Operation,
+        input_function: "GearFunction" = None,
+        requirements: Iterable[str] = None,
+    ):
         self.input_function: Optional[GearFunction] = input_function
         self.operation = operation
+
+        self.requirements = set(requirements if requirements else [])
+
+        if input_function:
+            self.requirements = self.requirements.union(input_function.requirements)
 
     @property
     def reader(self):
@@ -317,6 +327,7 @@ class ClosedGearFunction(GearFunction[T]):
         gears_server,
         unblocking: bool = False,
         requirements: Iterable[str] = None,
+        **kwargs,
     ):
         if hasattr(gears_server, "gears"):
             gears_server = gears_server.gears
@@ -326,7 +337,7 @@ class ClosedGearFunction(GearFunction[T]):
             gears_server = Gears(gears_server)
 
         return gears_server.pyexecute(
-            self, unblocking=unblocking, requirements=requirements
+            self, unblocking=unblocking, requirements=requirements, **kwargs
         )
 
 
@@ -337,7 +348,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         convertToStr: bool = False,
         collect: bool = False,
         # Helpers, all must be None
-        # Other args
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        on=None,
+        # Other Redis Gears args
         **kwargs,
         # TODO: Add all the Reader specific args here
     ) -> ClosedGearFunction["optype.InputRecord"]:
@@ -367,12 +381,18 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         if not self.supports_batch_mode:
             raise TypeError(f"Batch mode (run) is not supporterd for '{self.reader}'")
 
-        return ClosedGearFunction(
+        gear_fun: ClosedGearFunction = ClosedGearFunction["optype.InputRecord"](
             Run(arg=arg, convertToStr=convertToStr, collect=collect, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
-    def register(
+        if on:
+            return gear_fun.on(on)
+
+        return gear_fun
+
+    def register(  # noqa: C901
         self,
         prefix: str = "*",
         convertToStr: bool = False,
@@ -389,10 +409,13 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         onFailedRetryInterval: int = None,
         trimStream: bool = None,
         trigger: str = None,  # Reader Specific: CommandReader
-        # Other args
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        on=None,
+        # Other Redis Gears args
         **kwargs,
         # TODO: Add all the Reader specific args here
-    ) -> ClosedGearFunction["optype.OutputRecord"]:
+    ) -> ClosedGearFunction["optype.InputRecord"]:
         """Runs a Gear function as an event handler.
         The function is executed each time an event arrives.
         Each time it is executed, the function operates on the event's
@@ -468,7 +491,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         if trigger is not None:
             kwargs["trigger"] = trigger
 
-        return ClosedGearFunction(
+        gear_fun = ClosedGearFunction["optype.InputRecord"](
             Register(
                 prefix=prefix,
                 convertToStr=convertToStr,
@@ -476,11 +499,20 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
                 **kwargs,
             ),
             input_function=self,
+            requirements=requirements,
         )
+
+        if on:
+            return gear_fun.on(on)
+
+        return gear_fun
 
     def map(
         self,
         op: "optype.Mapper[optype.InputRecord, optype.OutputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[optype.OutputRecord]":
         """Instance-local Map operation that performs a one-to-one
@@ -493,11 +525,15 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             Map(op=op, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def flatmap(
         self,
         op: "optype.Expander[optype.InputRecord, optype.OutputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Iterable[optype.OutputRecord]]":
         """Instance-local FlatMap operation that performs one-to-many
@@ -515,10 +551,16 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             FlatMap(op=op, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def foreach(
-        self, op: "optype.Processor[optype.InputRecord]", **kwargs
+        self,
+        op: "optype.Processor[optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Instance-local ForEach operation performs one-to-the-same
         (1=1) mapping.
@@ -534,10 +576,16 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             ForEach(op=op, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def filter(
-        self, op: "optype.Filterer[optype.InputRecord]", **kwargs
+        self,
+        op: "optype.Filterer[optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Instance-local Filter operation performs one-to-zero-or-one
         (1:bool) filtering of records.
@@ -553,10 +601,16 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             Filter(op=op, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def accumulate(
-        self, op: "optype.Accumulator[T, optype.InputRecord]", **kwargs
+        self,
+        op: "optype.Accumulator[T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
     ) -> "PartialGearFunction[T]":
         """Instance-local Accumulate operation performs many-to-one
         mapping (N:1) of records.
@@ -571,12 +625,16 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             Accumulate(op=op, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def localgroupby(
         self,
         extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
         reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[optype.Key, T]]":
         """Instance-local LocalGroupBy operation performs many-to-less
@@ -595,10 +653,15 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             LocalGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def limit(
-        self, length: int, start: int = 0, **kwargs
+        self,
+        length: int,
+        start: int = 0,
+        # Other Redis Gears args
+        **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Instance-local Limit operation limits the number of records.
         It accepts two numeric arguments: a starting position in the input
@@ -630,7 +693,12 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         )
 
     def repartition(
-        self, extractor: "optype.Extractor[optype.InputRecord, Hashable]", **kwargs
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, Hashable]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Cluster-global Repartition operation repartitions the records
         by them shuffling between shards.
@@ -648,6 +716,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             Repartition(extractor=extractor, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def aggregate(
@@ -655,6 +724,9 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         zero: T,
         seqOp: "optype.Accumulator[T, optype.InputRecord]",
         combOp: "optype.Accumulator[T, T]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[T]":
         """Perform aggregation on all the execution data.
@@ -672,6 +744,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             Aggregate(zero=zero, seqOp=seqOp, combOp=combOp, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def aggregateby(
@@ -680,6 +753,9 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         zero: T,
         seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]",
         combOp: "optype.Reducer[optype.Key, T, T]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[optype.Key, T]]":
         """Like aggregate, but on each key, the key is extracted using the extractor.
@@ -701,12 +777,16 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
                 extractor=extractor, zero=zero, seqOp=seqOp, combOp=combOp, **kwargs
             ),
             input_function=self,
+            requirements=requirements,
         )
 
     def groupby(
         self,
         extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
         reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[optype.Key, T]]":
         """performs a many-to-less (N:M) grouping of records.
@@ -729,12 +809,16 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             GroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def batchgroupby(
         self,
         extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
         reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[optype.Key, T]]":
         """Many-to-less (N:M) grouping of records.
@@ -760,10 +844,16 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             BatchGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def sort(
-        self, reverse: bool = True, **kwargs
+        self,
+        reverse: bool = True,
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
         """Sorting the records
         Note: Using this operation may cause an increase in memory usage
@@ -783,6 +873,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             Sort(reverse=reverse, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def distinct(self, **kwargs) -> "PartialGearFunction[optype.InputRecord]":
@@ -816,6 +907,9 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
     def countby(
         self,
         extractor: "optype.Extractor[optype.InputRecord, Hashable]" = lambda x: str(x),
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[Hashable, int]]":
         """Counts the records grouped by key.
@@ -834,11 +928,15 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             CountBy(extractor=extractor, **kwargs),
             input_function=self,
+            requirements=requirements,
         )
 
     def avg(
         self,
         extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(x),
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[float]":
         """Calculating arithmetic average of the records
@@ -859,4 +957,5 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         return PartialGearFunction(
             Avg(extractor=extractor, **kwargs),
             input_function=self,
+            requirements=requirements,
         )

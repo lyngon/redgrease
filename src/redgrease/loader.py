@@ -241,11 +241,9 @@ class GearsLoader:
         """
         log.debug(f"Updating dependecies as per '{requirements_file_path}'")
         try:
-            requirements_list = list(
-                requirements.read_requirements(requirements_file_path)
-            )
-            log.debug(f"Requirements to load: {', '.join(requirements_list)}")
-            self.redis.gears.pyexecute("GB().run()", requirements=requirements_list)
+            requirements_set = requirements.read_requirements(requirements_file_path)
+            log.debug(f"Requirements to load: {', '.join(requirements_set)}")
+            self.redis.gears.pyexecute(requirements=requirements_set)
         except Exception as ex:
             log.error(f"Something went wrong: {ex}")
 
