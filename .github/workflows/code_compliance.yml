@@ -28,7 +28,7 @@ jobs:
         python -m pip install .[all]
         
     - name: Check imports with isort
-      run: ishort ./**/*.py --check-only
+      run: isort ./**/*.py --check-only
         
     - name: Lint with flake8
       run: flake8 ./src/ --count --show-source --statistics
