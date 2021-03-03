@@ -12,6 +12,11 @@ config = configparser.ConfigParser()
 config.read(config_file)
 current_version = Version(config.get("metadata", "version", fallback="0.0.0"))
 
+if "--read-version" in sys.argv:
+    print(current_version)
+    exit(0)
+
+
 major = current_version.major
 minor = current_version.minor
 patch = current_version.micro

@@ -1,0 +1,77 @@
+# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+name: Upload Python Package
+
+on:
+  release:
+    types: [created]
+  push:
+    branches:
+    - main
+  paths-ignore:
+  - setup.cfg
+
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudm sudo apt-get install redis-tools netcat
+        python -m pip install --upgrade pip
+        pip install packaging setuptools wheel twine
+    
+    - name: Build and publish
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: python publish.py -y
+
+    - name: Commit updated version in setup.cfg
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git commit -m "$(python publish.py --read-version)" -a
+    
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+
+    - name: Create Docker image
+      run: |
+        docker run --rm --name redisgears -p 127.0.0.1:6379:6379 -d redislabs/redisgears:latest
+        while ! nc -z localhost 6379; do sleep 0.1 ; done
+        redis-cli RG.PYEXECUTE "" REQUIREMENTS redgrease[runtime]==$(python publish.py --read-version)
+        docker commit -a "Lyngon Pte. Ltd. <info@lyngon.com>" -m "Install redgrease $(python publish.py --read-version)" redisgears lyngon/redgrease:$(python publish.py --read-version
+
+    - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    -  name: Push Docker image to DockerHub
+        run: |
+          docker push lyngon/redgrease:$(python publish.py --read-version)
+          docker tag lyngon/redgrease:$(python publish.py --read-version) lyngon/redgrease:latest
+          docker push lyngon/redgrease:latest
+
+
+    
