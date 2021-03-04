@@ -34,7 +34,7 @@ jobs:
       
     - name: Test with pytest
       env:
-        REDGREASE_RUNTIME_PACKAGE: redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@${{ github.head_ref }}
+        REDGREASE_RUNTIME_PACKAGE: redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@${GITHUB_REF#refs/heads/}
         REDISGEARS_IMAGE: ${{ matrix.redisgears-container }}
       run: pytest --cov=redgrease --cov-report=xml
       

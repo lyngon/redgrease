@@ -28,7 +28,9 @@ else:
 
 if "dev" in sys.argv or "test" in sys.argv:
     dev_release = (
-        ".dev1" if not current_version.is_devrelease else f".dev{current_version.dev+1}"
+        ".dev1"
+        if not current_version.is_devrelease
+        else f".dev{current_version.dev+1}"  # type: ignore
     )
     if current_version.pre and not pre_release:
         print(f"current_version: {current_version}")
