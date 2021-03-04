@@ -12,7 +12,7 @@ config = configparser.ConfigParser()
 config.read(config_file)
 current_version = Version(config.get("metadata", "version", fallback="0.0.0"))
 
-if "--read-version" in sys.argv:
+if "--read-version" in sys.argv or "--current-version" in sys.argv:
     print(current_version)
     exit(0)
 

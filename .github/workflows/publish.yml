@@ -3,6 +3,10 @@
 
 name: Publish
 
+
+# TODO: inspect ${{ github.tag_name }} if it is of form 'refs/tags/x.y.z' 
+# in which case x.y.z should be used as the version to publish
+
 on:
   release:
     types: [created]
@@ -44,15 +48,15 @@ jobs:
 
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
-          commit_message: $(python publish.py --read-version)
+          commit_message: $(python publish.py --current-version)
           file_pattern: setup.cfg
           
     - name: Create Docker image
       run: |
         docker run --rm --name redisgears -p 127.0.0.1:6379:6379 -d redislabs/redisgears:latest
         while ! nc -z localhost 6379; do sleep 0.1 ; done
-        redis-cli RG.PYEXECUTE "" REQUIREMENTS redgrease[runtime]==$(python publish.py --read-version)
-        docker commit -a "Lyngon Pte. Ltd. <info@lyngon.com>" -m "Redis Gears with redgrease $(python publish.py --read-version)" redisgears lyngon/redgrease:$(python publish.py --read-version
+        redis-cli RG.PYEXECUTE "" REQUIREMENTS redgrease[runtime]==$(python publish.py --current-version)
+        docker commit -a "Lyngon Pte. Ltd. <info@lyngon.com>" -m "Redis Gears with redgrease $(python publish.py --current-version)" redisgears lyngon/redgrease:$(python publish.py --current-version
 
     - name: Login to DockerHub
       uses: docker/login-action@v1 
@@ -62,6 +66,6 @@ jobs:
 
     - name: Push Docker image to DockerHub
       run: |
-        docker push lyngon/redgrease:$(python publish.py --read-version)
-        docker tag lyngon/redgrease:$(python publish.py --read-version) lyngon/redgrease:latest
+        docker push lyngon/redgrease:$(python publish.py --current-version)
+        docker tag lyngon/redgrease:$(python publish.py --current-version) lyngon/redgrease:latest
         docker push lyngon/redgrease:latest
