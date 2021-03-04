@@ -6,7 +6,7 @@
 [![PyPI PythonVersion](https://img.shields.io/pypi/pyversions/redgrease)](https://www.python.org/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/alerts/)
-[![Build Status](https://img.shields.io/github/workflow/status/lyngon/redgrease/full_tests/main)](https://github.com/lyngon/redgrease/actions)
+[![tests](https://github.com/lyngon/redgrease/actions/workflows/full_tests.yml/badge.svg)](https://github.com/lyngon/redgrease/actions/workflows/full_tests.yml)
 [![codecov](https://codecov.io/gh/lyngon/redgrease/branch/main/graph/badge.svg?token=pQZbBVxxmm)](https://codecov.io/gh/lyngon/redgrease)
 [![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)](https://libraries.io/pypi/redgrease)
 [![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)](https://github.com/lyngon/redgrease/pulls?q=is%3Apr+is%3Aclosed)
