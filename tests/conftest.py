@@ -25,7 +25,7 @@ redgrease_runtime_image_name = f"{redgrease_runtime_repo}:{redgrease_version}"
 redgrease_runtime_package = os.getenv(
     "REDGREASE_RUNTIME_PACKAGE", "redgrease[runtime]=={redgrease_version}"
 )
-print(">>> >>> REDGREASE_RUNTIME_PACKAGE: {redgrease_runtime_package}")
+print(f">>> >>> REDGREASE_RUNTIME_PACKAGE: {redgrease_runtime_package}")
 
 redis_port = "6379/tcp"
 redisgears_repo = os.getenv("REDISGEARS_IMAGE", "redislabs/redisgears:latest")
@@ -65,7 +65,9 @@ def redgrease_runtime_image(docker_client: DockerClient, redisgears_container):
         # TODO: Use this approach inst
         # f"redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@{branch}"
 
-        r.execute_command(f"RG.PYEXECUTE '' REQUIREMENTS '{redgrease_runtime_package}'")
+        r.execute_command(
+            "RG.PYEXECUTE", "", "REQUIREMENTS", f"{redgrease_runtime_package}"
+        )
         redisgears_container = docker_client.containers.get(redisgears_container.id)
 
         redisgears_container.commit(redgrease_runtime_repo, redgrease_version)
