@@ -52,7 +52,7 @@ jobs:
         docker run --rm --name redisgears -p 127.0.0.1:6379:6379 -d redislabs/redisgears:latest
         while ! nc -z localhost 6379; do sleep 0.1 ; done
         redis-cli RG.PYEXECUTE "" REQUIREMENTS redgrease[runtime]==$(python publish.py --current-version)
-        docker commit -a "Lyngon Pte. Ltd. <info@lyngon.com>" -m "Redis Gears with redgrease $(python publish.py --current-version)" redisgears lyngon/redgrease:$(python publish.py --current-version
+        docker commit -a "Lyngon Pte. Ltd. <info@lyngon.com>" -m "Redis Gears with redgrease $(python publish.py --current-version)" redisgears lyngon/redgrease:$(python publish.py --current-version)
 
     - name: Login to DockerHub
       uses: docker/login-action@v1 
