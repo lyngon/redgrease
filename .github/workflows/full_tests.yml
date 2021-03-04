@@ -1,6 +1,6 @@
 # This workflow will install Python develompment dependencies and run tests
 
-name: Run full test suite
+name: tests
 
 on:
   pull_request:
