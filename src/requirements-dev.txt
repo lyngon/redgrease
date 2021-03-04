@@ -6,3 +6,4 @@ wheel
 mypy
 
 -r requirements-test.txt
+-r requirements.txt

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 import pathlib
-import sys
 
 import setuptools
 
@@ -71,5 +70,3 @@ setuptools.setup(
     python_requires=">=3.6",
     keywords="Redis, Gears, development",
 )
-
-sys.exit(0)

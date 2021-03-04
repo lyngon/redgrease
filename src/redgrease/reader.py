@@ -1,19 +1,15 @@
-from typing import Iterable, Union
-
-from packaging.version import Version
-
 import redgrease.runtime
 import redgrease.sugar
+
+# from packaging.version import Version
 
 
 class GearReader(redgrease.runtime.GearsBuilder):
     def __init__(
         self,
-        reader: str,
+        reader: str = redgrease.sugar.ReaderType.KeysReader,
         defaultArg: str = "*",
         desc: str = None,
-        requirements: Iterable[str] = None,
-        require_runtime: Union[Version, str, bool] = True,
     ):
         """Gear function / process factory
         Args:
@@ -47,25 +43,6 @@ class GearReader(redgrease.runtime.GearsBuilder):
                 Defaults to False.
         """
         super().__init__(reader=reader, defaultArg=defaultArg, desc=desc)
-
-        if require_runtime:
-            if isinstance(require_runtime, Version):
-                runtime_package = f"redgrease[runtime]=={require_runtime}"
-            elif isinstance(require_runtime, str):
-                if require_runtime[0] in ["=", ">", "<", "!"]:
-                    runtime_package = f"redgrease[runtime]{require_runtime}"
-                elif require_runtime[0].isnumeric():
-                    runtime_package = f"redgrease[runtime]=={require_runtime}"
-                else:
-                    runtime_package = require_runtime
-            else:
-                runtime_package = "redgrease[runtime]"
-            self.requirements = [runtime_package]
-        else:
-            self.requirements = []
-
-        if requirements:
-            self.requirements += list(requirements)
 
 
 class KeysReader(GearReader):

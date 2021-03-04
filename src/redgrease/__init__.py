@@ -2,7 +2,15 @@ import sys
 
 from .func import trigger
 from .gears import ClosedGearFunction, GearFunction, PartialGearFunction
-from .requirements import read_requirements
+from .reader import (
+    CommandReader,
+    GearReader,
+    KeysOnlyReader,
+    KeysReader,
+    PythonReader,
+    ShardsIDReader,
+    StreamReader,
+)
 from .sugar import FailurePolicy, KeyType, LogLevel, ReaderType, TriggerMode
 
 __all__ = [
@@ -10,14 +18,19 @@ __all__ = [
     "ClosedGearFunction",
     "GearFunction",
     "PartialGearFunction",
-    "read_requirements",
     "FailurePolicy",
     "KeyType",
     "LogLevel",
     "ReaderType",
     "TriggerMode",
     "utils",
-    "typing",
+    "CommandReader",
+    "GearReader",
+    "KeysOnlyReader",
+    "KeysReader",
+    "PythonReader",
+    "ShardsIDReader",
+    "StreamReader",
 ]
 
 # Dynamic / Conditional imports below. (depends on installed packa)
@@ -47,27 +60,20 @@ try:
 except ModuleNotFoundError:
     pass
 
-
 try:
-    # this will fail if either redis or packaging packages are not installed
-    from .reader import (
-        CommandReader,
-        GearReader,
-        KeysOnlyReader,
-        KeysReader,
-        PythonReader,
-        ShardsIDReader,
-        StreamReader,
+    # this will fail if packaging packages is not installed
+    from .requirements import (
+        Requirement,
+        Version,
+        read_requirements,
+        resolve_requirements,
     )
 
     __all__ += [
-        "CommandReader",
-        "GearReader",
-        "KeysOnlyReader",
-        "KeysReader",
-        "PythonReader",
-        "ShardsIDReader",
-        "StreamReader",
+        "Requirement",
+        "Version",
+        "read_requirements",
+        "resolve_requirements",
     ]
 except ModuleNotFoundError:
     pass

@@ -20,6 +20,11 @@ default_requirements_pattern = "*requirements*.txt"
 default_unblocking_pattern = "unblock"
 default_ignore_patterns: List[str] = []
 
+# Regex type changed
+# from re.SRE_Pattern in Python 3.6
+# to re.Pattern in Python3 3.7
+regex_type = type(re.compile(""))
+
 
 def fail(exception, *messages):
     """Convenience function for raising exceptions
@@ -68,7 +73,7 @@ class GearsLoader:
             unblocking_pattern = default_unblocking_pattern
         if isinstance(unblocking_pattern, str):
             unblocking_pattern = re.compile(re.escape(unblocking_pattern))
-        if not isinstance(unblocking_pattern, re.Pattern):
+        if not isinstance(unblocking_pattern, regex_type):
             fail(ValueError, f"Invalid unblocking pattern: {unblocking_pattern}")
         self.unblocking_pattern = unblocking_pattern
 
@@ -241,11 +246,9 @@ class GearsLoader:
         """
         log.debug(f"Updating dependecies as per '{requirements_file_path}'")
         try:
-            requirements_list = list(
-                requirements.read_requirements(requirements_file_path)
-            )
-            log.debug(f"Requirements to load: {', '.join(requirements_list)}")
-            self.redis.gears.pyexecute("GB().run()", requirements=requirements_list)
+            requirements_set = requirements.read_requirements(requirements_file_path)
+            log.debug(f"Requirements to load: {', '.join(requirements_set)}")
+            self.redis.gears.pyexecute(requirements=requirements_set)
         except Exception as ex:
             log.error(f"Something went wrong: {ex}")
 

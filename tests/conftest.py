@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime
 from typing import Callable
@@ -14,22 +15,20 @@ from docker.errors import APIError as DockerError
 import redgrease
 import redgrease.client
 
-redgrease_version = importlib_metadata.version("redgrease")
+redgrease_version = os.getenv(
+    "REDGREASE_VERSION", importlib_metadata.version("redgrease")
+)
+
 redgrease_runtime_repo = "lyngon/redisgears"
 redgrease_runtime_image_name = f"{redgrease_runtime_repo}:{redgrease_version}"
 
+redgrease_runtime_package = os.getenv(
+    "REDGREASE_RUNTIME_PACKAGE", "redgrease[runtime]=={redgrease_version}"
+)
+print(f">>> >>> REDGREASE_RUNTIME_PACKAGE: {redgrease_runtime_package}")
+
 redis_port = "6379/tcp"
-
-# The environment variable 'TOX_ENV_NAME' contains the name of the Tox environment,
-# as specified in tox.ini
-# I.e. something like '1.0.0-py38' or 'latest-pypy'
-# Ideally there should be a parameterized fixture that instantiates the correct
-# RedisGears image repo based on this parsing this variable, and extracting the version
-# Note: current tox env naming has the version of the 'redislabs/redisgears' repo
-# as the first part, without any prefix and delimited by a '-'
-# (followed by other env identifiers such as python version and whatnot)
-redisgears_repo = "redislabs/redisgears:latest"
-
+redisgears_repo = os.getenv("REDISGEARS_IMAGE", "redislabs/redisgears:latest")
 redisgears_image = docker.fetch(repository=redisgears_repo)
 
 # Note: function scope significantly slows down testing
@@ -63,8 +62,11 @@ def redgrease_runtime_image(docker_client: DockerClient, redisgears_container):
         ip, port = redisgears_container.get_addr(redis_port)
         r = instantiate(redis.Redis, host=ip, port=port)
 
+        # TODO: Use this approach inst
+        # f"redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@{branch}"
+
         r.execute_command(
-            f"RG.PYEXECUTE '' REQUIREMENTS redgrease[runtime]=={redgrease_version}"
+            "RG.PYEXECUTE", "", "REQUIREMENTS", f"{redgrease_runtime_package}"
         )
         redisgears_container = docker_client.containers.get(redisgears_container.id)
 

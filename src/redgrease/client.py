@@ -8,6 +8,7 @@ import redgrease.config
 import redgrease.data
 import redgrease.gears
 import redgrease.reader
+import redgrease.requirements
 from redgrease.utils import (
     CaseInsensitiveDict,
     bool_ok,
@@ -152,9 +153,10 @@ class Gears:
 
     def pyexecute(
         self,
-        gear_function: Union[str, redgrease.gears.ClosedGearFunction],
+        gear_function: Union[str, redgrease.gears.ClosedGearFunction] = "",
         unblocking=False,
-        requirements: Iterable[str] = None,
+        requirements: Iterable[Union[str, redgrease.requirements.Requirement]] = None,
+        enforce_redgrease: redgrease.requirements.PackageOption = False,
     ):
         """Execute Python code
 
@@ -183,37 +185,48 @@ class Gears:
             A simple 'OK' string is returned if the function has no output
             (i.e. it doesn't consist of any functions with the run action).
         """
-        requirements = list(requirements) if requirements else []
+        requirements = set(requirements if requirements else [])
 
-        pickled_results = False
         if isinstance(gear_function, redgrease.gears.GearFunction):
-            if isinstance(gear_function, redgrease.reader.GearReader):
-                requirements = gear_function.requirements + requirements
+            # If the input is a GearFunction, we get the requirements from it,
+            # and ensure that redgrease is included
+            requirements = requirements.union(gear_function.requirements)
+            enforce_redgrease = True
 
-            if isinstance(gear_function, redgrease.gears.ClosedGearFunction):
-                function_string = redgrease.data.seralize_gear_function(gear_function)
-                pickled_results = True
-            else:
-                raise ValueError(
-                    "Cannot execute partial Gears function. "
-                    "Gears functions must be terminated with either 'run' (batch mode) "
-                    "or 'register' (event mode) operators."
-                )
+            if isinstance(gear_function, redgrease.gears.PartialGearFunction):
+                # If the function isn't closed with either 'run' or 'register'
+                # we assume it is meant to be closed with a 'run'
+                gear_function = gear_function.run()
+
+            function_string = redgrease.data.seralize_gear_function(gear_function)
+
         elif os.path.exists(gear_function):
-            function_string = "..."
+            # If the gear function is a fle path,
+            # then we load the contents of the file
+            with open(gear_function) as script_file:
+                function_string = script_file.read()
+
         else:
+            # Otherwise we default to the string version of the function
             function_string = str(gear_function)
 
         params = []
         if unblocking:
             params.append("UNBLOCKING")
 
-        if requirements is not None:
+        requirements = redgrease.requirements.resolve_requirements(
+            requirements, enforce_redgrease=enforce_redgrease
+        )
+
+        if requirements:
             params.append("REQUIREMENTS")
-            params += requirements
+            params += list(map(str, requirements))
 
         return self.redis.execute_command(
-            "RG.PYEXECUTE", function_string, *params, pickled_results=pickled_results
+            "RG.PYEXECUTE",
+            function_string,
+            *params,
+            pickled_results=isinstance(gear_function, redgrease.gears.GearFunction)
         )
 
     def pystats(self) -> redgrease.data.PyStats:

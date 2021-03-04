@@ -1,0 +1,53 @@
+
+# This workflow will install Python develompment dependencies and run tests on a limited set of environments
+name: Run minimal / quick test suite
+
+on: 
+  push:
+    paths-ignore:
+    - examples/**
+    - setup.cfg
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+        redisgears-container:
+        - redislabs/redisgears:latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}" 
+      id: extract_branch
+
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r src/requirements-test.txt
+        python -m pip install .[all]
+      
+    - name: Test with pytest
+      env:
+        REDGREASE_RUNTIME_PACKAGE: redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@${{ steps.extract_branch.outputs.branch }}
+        REDISGEARS_IMAGE: ${{ matrix.redisgears-container }}
+      run: pytest --cov=redgrease --cov-report=xml
+      
+    - name: Submit code coverage reports
+      uses: codecov/codecov-action@v1
+      with:
+        verbose: true
+
+    - name: Readme hacks
+      run: echo "Readme hacks go here!"
