@@ -15,7 +15,7 @@
 [![Lines of Code](https://img.shields.io/tokei/lines/github/lyngon/redgrease?label=LOC)](https://github.com/lyngon/redgrease/pulse)
 [![Language Python](https://img.shields.io/github/languages/top/lyngon/redgrease)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Docker Image](https://img.shields.io/docker/v/lyngon/redisgears?label=lyngon%2Fredisgears&logo=docker)](https://hub.docker.com/r/lyngon/redisgears)
+[![Docker Image](https://img.shields.io/docker/v/lyngon/redgrease?label=lyngon%2Fredgrease&logo=docker)](https://hub.docker.com/r/lyngon/redisgears)
 
 [![mushroom, mushroom!](https://img.shields.io/badge/mushroom-mushroom!-green)](https://www.youtube.com/watch?v=hGlyFc79BUE)
 
