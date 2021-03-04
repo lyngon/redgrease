@@ -16,7 +16,7 @@ jobs:
       matrix:
         python-version: [3.7]
         redisgears-container:
-        - redislabs/redisgears:1.0.0
+        - redislabs/redisgears:latest
 
     steps:
     - uses: actions/checkout@v2
