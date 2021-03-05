@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Command line interface of redgrease.
+Allows for loading of gears python scripts into a Redis Gears cluster.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
