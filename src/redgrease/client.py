@@ -21,8 +21,6 @@ Examples:
         g = redgrease.Gears(r)
         g.pyexecute(...)
 
-
-
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"

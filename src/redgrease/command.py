@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Serverside Redis and Redis Gears command
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -37,8 +33,24 @@ import redgrease.client
 import redgrease.runtime
 
 
-def runtime_execute_command(self, command_name, *args, **options):
-    "Execute a command in local Gear runtime and return a parsed response"
+def _runtime_execute_command(self, command_name, *args, **options):
+    """Override replacement method for `redis.Redis.execute_command` in
+    Redis Geear server runtime.
+
+    Args:
+        command_name (str):
+            Name of command to execute
+
+        *args (Any):
+            Command arguments
+
+        **options (Any):
+            Result parsing options (keyword args)
+
+    Returns:
+        bytes:
+            Command response
+    """
     response = redgrease.runtime.execute(command_name, *args)
     if command_name in self.response_callbacks:
         return self.response_callbacks[command_name](response, **options)
@@ -47,11 +59,24 @@ def runtime_execute_command(self, command_name, *args, **options):
 
 @functools.lru_cache()
 def get_runtime_client():
+    """Creates a Redis client for the Redis server runtime environment
+
+    Returns:
+        redis.Redis:
+            Redis client
+    """
+    # By setting the connection pool to Elipsis, the client is 'tricked' to believe it
+    # alraeady has a set of connections.
+    # Swapping out the `execute_command` method for a replacement that uses the global
+    # `execute` internally instead of the connection pool.
+
     runtime_client = redgrease.client.RedisGears(connection_pool=...)
+
     runtime_client.execute_command = types.MethodType(
-        runtime_execute_command, runtime_client
+        _runtime_execute_command, runtime_client
     )
     return runtime_client
 
 
 redis = get_runtime_client()  # noqa: F811 - Used as exported var
+""" Runtime / serverside redis client with gears features"""
