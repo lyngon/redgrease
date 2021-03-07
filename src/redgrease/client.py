@@ -362,7 +362,7 @@ class Gears:
             "RG.PYEXECUTE",
             function_string,
             *params,
-            pickled_results=isinstance(gear_function, redgrease.gears.GearFunction)
+            pickled=isinstance(gear_function, redgrease.gears.GearFunction)
         )
 
     def pystats(self) -> redgrease.data.PyStats:
@@ -458,7 +458,7 @@ class Redis(redis.Redis):
             ),
             "RG.CONFIGSET": lambda res: all(map(bool_ok, res)),
             "RG.DROPEXECUTION": bool_ok,
-            "RG.DUMPEXECUTIONS": list_parser(redgrease.data.Registration.from_redis),
+            "RG.DUMPEXECUTIONS": list_parser(redgrease.data.ExecutionInfo.from_redis),
             "RG.DUMPREGISTRATIONS": list_parser(redgrease.data.Registration.from_redis),
             "RG.GETEXECUTION": redgrease.data.ExecutionPlan.parse,
             "RG.GETRESULTS": redgrease.data.parse_execute_response,
