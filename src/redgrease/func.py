@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Gears function decorators
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -30,8 +26,11 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+from typing import Callable
+
 import redgrease.runtime
 import redgrease.sugar
+from redgrease.gears import ClosedGearFunction
 from redgrease.typing import Callback
 
 
@@ -43,7 +42,45 @@ def trigger(
     mode: str = redgrease.sugar.TriggerMode.Async,
     onRegistered: Callback = None,
     **kargs,
-):
+) -> Callable[[Callable], ClosedGearFunction]:
+    """Decorator for creation of CommandReader + Tigger GearFunctions
+
+    Args:
+        trigger (str):
+            The trigger string
+
+        prefix (str, optional):
+            Register prefix.
+            Same as for the `register` operation.
+            Defaults to "*".
+
+        convertToStr (bool, optional):
+            Convert the results to str.
+            Same as for the `register` operation.
+            Defaults to True.
+
+        collect (bool, optional):
+            Add a `collect' operation to the end of the function.
+            Same as for the `register` operation.
+            Defaults to True.
+
+        mode (str, optional):
+            The execution mode of the triggered function.
+            Same as for the `register` operation.
+            Defaults to redgrease.sugar.TriggerMode.Async.
+
+        onRegistered (Callback, optional):
+            A function callback thats called on each shard upon function registration.
+            It is a good place to initialize non-serializable objects such as
+            network connections.
+            Same as for the `register` operation.
+            Defaults to None.
+
+    Returns:
+        Callable[[Callable], ClosedGearFunction]:
+            A ClosedGearFunction generator.
+    """
+
     def gear(func):
         redgrease.runtime.GearsBuilder("CommandReader").map(
             lambda params: func(params[1:])
