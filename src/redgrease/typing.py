@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Type variables, Type aliases and Protocol Types.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -56,62 +52,163 @@ else:
 T = TypeVar("T")
 
 InputRecord = TypeVar("InputRecord", contravariant=True)
+"""Type variable for the input value of a GearFunction step / operation."""
+
 OutputRecord = TypeVar("OutputRecord", covariant=True)
+"""Type variable for the output value of a GearFunction step / operation."""
 
 Key = TypeVar("Key", contravariant=True)
+"""Type variable for a Keys
+used in extractor functions in GroupBy operations and similar.
+"""
+
 Val = TypeVar("Val")
+"""Type variable for intermediate values inside a step / operation."""
 
 Constructor = Union[Type[T], Callable[[Any], T]]
+"""Joint type for primitive Types and (single argument) object constructors"""
 
 RedisType = Union[bytes, int, float]
+"""Types native to Redis"""
+
 SafeType = Union[bytes, int, float, str]
+"""Types that Redis happily accepts as input without any manipulation."""
+
 SupportedType = Union[bool, str, bytes, int, float]
+"""Types that RedGrease supports"""
 
 RedisKey = Union[str, bytes]
+"""Accepted types for Redis Keys"""
 
 Record = Dict
+"""The type of a record from KeysReader and others."""
 
 
 class Callback(Protocol[InputRecord]):
+    """Protocol Type for general Callbacks
+
+    An function of Callback type can be called with a single argument:
+
+        - A record, of type InputRecord
+
+        The function a value, of any type.
+    """
+
     def __call__(self, record: InputRecord) -> Any:
         ...
 
 
 class Extractor(Protocol[InputRecord, OutputRecord]):
+    """Protocol Type for Extractor functions
+
+    An function of Extractor type can be called with a single argument:
+
+        - A record, of type InputRecord
+
+    The function a value, of type OutputRecord.
+    """
+
     def __call__(self, record: InputRecord) -> OutputRecord:
         ...
 
 
 class Mapper(Protocol[InputRecord, OutputRecord]):
+    """Protocol Type for Mapper functions
+
+    An function of Mapper type can be called with a single argument:
+
+        - A record, of type InputRecord
+
+    The function returns a value, of type OutputRecord.
+    """
+
     def __call__(self, record: InputRecord) -> OutputRecord:
         ...
 
 
 class Expander(Protocol[InputRecord, OutputRecord]):
+    """Protocol Type for Expander functions
+
+    An function of Expander type can be called with a single argument:
+
+        - A record, of type InputRecord
+
+        The function returns an **Iterable** of any type, OutputRecord.
+    """
+
     def __call__(self, record: InputRecord) -> Iterable[OutputRecord]:
         ...
 
 
 class Processor(Protocol[InputRecord]):
+    """Protocol Type for Processor functions
+
+    An function of Processor type can be called with a single argument:
+
+        - A record, of type InputRecord
+
+    The function does not return anything.
+    """
+
     def __call__(self, record: InputRecord) -> None:
         ...
 
 
 class Filterer(Protocol[InputRecord]):
+    """Protocol Type for Filterer functions
+
+    An function of Filterer type can be called with a single argument:
+
+        - A record, of type InputRecord
+
+    The function returns a bool.
+    """
+
     def __call__(self, record: InputRecord) -> bool:
         ...
 
 
 class Accumulator(Protocol[T, InputRecord]):
+    """Protocol Type for Accumulator functions
+
+    An function of Accumulator type can be called with a two arguments:
+
+        - An accumulator value, of type T
+        - A record, of type InputRecord
+
+    The function returns a value of the same type as the accumulator value, T.
+    """
+
     def __call__(self, accumulator: T, record: InputRecord) -> T:
         ...
 
 
 class Reducer(Protocol[Key, T, InputRecord]):
+    """Protocol Type for Reducer functions
+
+    An function of Reducer type can be called with a three arguments:
+
+        - A key value, of type Key
+        - An accumulator value, of type T
+        - A record, of type InputRecord
+
+    The function returns a value of the same type as the accumulator value, T.
+    """
+
     def __call__(self, key: Key, accumulator: T, record: InputRecord) -> T:
         ...
 
 
 class BatchReducer(Protocol[Key, OutputRecord, InputRecord]):
+    """Protocol Type for BatchReducer functions
+
+    An function of BatchReducer type can be called with a three arguments:
+
+        - A key value, of type Key
+        - An Iterable collection of records, of type InputRecord
+
+    The function returns a value of the same type as the accumulator value, T.
+    """
+
     def __call__(self, key: Key, records: Iterable[InputRecord]) -> OutputRecord:
         ...
