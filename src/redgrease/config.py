@@ -71,7 +71,7 @@ class Config:
         """
         self.redis = redis
 
-    def get(self, *config_option: Union[bytes, str]) -> Dict[str, Any]:
+    def get(self, *config_option: Union[bytes, str]) -> Dict[Union[bytes, str], Any]:
         """Get the value of one or more built-in configuration or
         a user-defined options.
 
@@ -80,7 +80,7 @@ class Config:
                 One or more names/key of configurations to get.
 
         Returns:
-            Dict[str, Any]:
+            Dict[Union[bytes, str], Any]:
                 Dict of the requested config options mapped to their corresponding
                 values.
         """
@@ -127,7 +127,7 @@ class Config:
             Any:
                 The value of the config option.
         """
-        return self.get(config_option)[safe_str(config_option)]
+        return self.get(config_option)[config_option]
 
     @property
     def MaxExecutions(self) -> int:
