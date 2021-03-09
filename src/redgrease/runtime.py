@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Redgrease's (overloaded) variants of the symbols loaded per default into the top level
+namespace of Gear functions in the Redis server Python runtime.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -31,15 +28,16 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 """
 
 
-import logging
-
 import redgrease.gears
 import redgrease.sugar as sugar
 
-logger = logging.getLogger(__name__)
-
 
 class GearsBuilder(redgrease.gears.PartialGearFunction):
+    """The GearsBuilder class is imported to the runtime's environment by default.
+
+    It exposes the functionality of the function's context builder.
+    """
+
     def __init__(
         self,
         reader: str = sugar.ReaderType.KeysReader,
@@ -49,26 +47,29 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
         **kwargs,
     ):
         """Gear function / process factory
+
         Args:
-            reader (str, optional): Input records reader
+            reader (str, optional):
+                Input records reader
                 Defining where the input to the gear will come from.
-                One of:
-                - 'KeysReader':
-                - 'KeysOnlyReader':
-                - 'StreamReader':
-                - 'PythonReader':
-                - 'ShardsReader':
-                - 'CommandReader':
+                One of::
+                    - 'KeysReader'
+                    - 'KeysOnlyReader'
+                    - 'StreamReader'
+                    - 'PythonReader'
+                    - 'ShardsReader'
+                    - 'CommandReader'
                 Defaults to 'KeysReader'.
 
             defaultArg (str, optional):
                 Additional arguments to the reader.
-                These are usually a key's name, prefix, glob-like
-                or a regular expression.
+                These are usually a key's name, prefix, glob-like or a regular
+                expression.
                 Its use depends on the function's reader type and action.
                 Defaults to '*'.
 
-            desc (str, optional): An optional description.
+            desc (str, optional):
+                An optional description.
                 Defaults to None.
         """
         reader_op = redgrease.gears.Reader(reader, defaultArg, desc, *args, **kwargs)
@@ -79,12 +80,19 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
 
 GB = GearsBuilder
+"""Convnenience shorthand for GearsBuilder."""
 
 
 # # Suppress warnings for missing redisgears packagae
 # # As this package only lives on the Redis Gears server
 # pyright: reportMissingImports=false
 class atomic:
+    """The atomic() Python context is imported to the runtime's environment by default.
+
+    The context ensures that all operations in it are executed atomically by blocking
+    he main Redis process.
+    """
+
     def __init__(self):
         from redisgears import atomicCtx as redisAtomic
 
@@ -102,10 +110,12 @@ def execute(command: str, *args) -> bytes:
     """Execute an arbitrary Redis command.
 
     Args:
-        command (str): The commant to execute
+        command (str):
+            The commant to execute
 
     Returns:
-        bytes: Raw command response
+        bytes:
+            Raw command response
     """
     from redisgears import executeCommand as redisExecute
 
@@ -118,7 +128,8 @@ def hashtag() -> bytes:
     in a cluster.
 
     Returns:
-        str: [description]
+        str:
+            A hastag that maps to the lowest hash slot served by the local engine.
     """
     from redisgears import getMyHashTag as redisHashtag
 
@@ -129,9 +140,17 @@ def log(message: str, level: str = sugar.LogLevel.Notice):
     """Print a message to Redis' log.
 
     Args:
-        message (str): The message to output
-        level (str, optional): Message loglevel. Either:
-        'debug', 'verbose', 'notice' or 'wartning'
+        message (str):
+            The message to output
+
+        level (str, optional):
+            Message loglevel. Either::
+
+                - 'debug'
+                - 'verbose'
+                - 'notice'
+                - 'wartning'
+
             Defaults to 'notice'.
     """
     from redisgears import log as redisLog
@@ -143,7 +162,8 @@ def configGet(key: str) -> bytes:
     """Fetches the current value of a RedisGears configuration option.
 
     Args:
-        key (str): The configuration option key
+        key (str):
+            The configuration option key
     """
     from __main__ import configGet as redisConfigGet
 
@@ -155,8 +175,11 @@ def gearsConfigGet(key: str, default=None) -> bytes:
     default value if that key does not exist.
 
     Args:
-        key (str): The configuration option key.
-        default ([type], optional): A default value.
+        key (str):
+            The configuration option key.
+
+        default ([type], optional):
+            A default value.
             Defaults to None.
     """
     from __main__ import gearsConfigGet as redisGearsConfigGet
@@ -168,6 +191,22 @@ def run(
     function: redgrease.gears.GearFunction,
     builder: GearsBuilder,
 ):
+    """Transforms a RedGrease GearFunction into a native Gears function.
+
+    Note: This function is specific to RedGrease and is NOT a standard Redis Gears
+    runtime function.
+
+    Args:
+        function (redgrease.gears.GearFunction):
+            A GearsFunction, as created with RedGrease constructs.
+
+        builder (GearsBuilder):
+            The Redis Gears native GearsBuilder class.
+
+    Returns:
+        GearsBuilder:
+            Redis Gears native GearsBuilder object, reconstructed from the input.
+    """
     if function.input_function:
         input_builder = run(function.input_function, builder)
     else:
