@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Module for handling of requirements.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -32,20 +28,26 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 
 import itertools
-from typing import Dict, Iterable, List, Mapping, Optional, Set, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Union
 
 import packaging.requirements
 import packaging.version
 
 default_redgrease = packaging.requirements.Requirement("redgrease[runtime]")
+"""The default redgrease runtime package. Latest from PyPi."""
 
 # Re-exposing for convenience
 Version = packaging.version.Version
-Requirement = packaging.requirements.Requirement
-InvalidRequirement = packaging.requirements.InvalidRequirement
+"""Same as 'packaging.version.Version', for convenience."""
 
+Requirement = packaging.requirements.Requirement
+"""Same as 'packaging.requirements.Requirement', for convenience."""
+
+InvalidRequirement = packaging.requirements.InvalidRequirement
+"""Same as 'packaging.requirements.InvalidRequirement', for convenience."""
 
 PackageOption = Optional[Union[bool, str, Version, Requirement]]
+"""Type alias for valid types of RedGrease package version specification."""
 
 
 def read_requirements(
@@ -54,10 +56,12 @@ def read_requirements(
     """Extract list of individual requirements from a 'requirements.txt' file
 
     Args:
-        requirements_file_paths (Iterable[str]): Requirements file path
+        requirements_file_paths (Iterable[str]):
+            Requirements file path
 
     Returns:
-        [set[str]]: Individual requirements.
+        Set[str]:
+            The individual requirements in the file.
     """
     requirements = set.union(
         *[
@@ -80,6 +84,32 @@ def read_requirements(
 def to_packages_dict(
     requirements: Iterable[Requirement],
 ) -> Dict[str, List[Requirement]]:
+    """Transforms a collection of requirements to a dict mapping packge names to
+    a list of requirements.
+
+    I.e. grouping the different versions of packages in the requiremnts by name.
+
+    E.g.
+        ```
+        reqs = map(Requirement, ["pack_x[xtra]", "pack_y>=1.0", "pack_x!=2.1"])
+        to_packages_dict(reqs)
+        ```
+        results in:
+        ```
+        {
+            "pack_x": [<Requirement("pack_x[xtra]")>, <Requirement("pack_x!=2.1")>],
+            "pack_y": [<Requirement("pack_y>=1.0")>]
+        }
+        ```
+
+    Args:
+        requirements (Iterable[Requirement]):
+            A collection of requirements.
+
+    Returns:
+        Dict[str, List[Requirement]]:
+            A dict that maps packge names to a list of specific requirements.
+    """
     return {
         str(name): list(pkgs)
         for name, pkgs in itertools.groupby(requirements, lambda r: r.name)
@@ -87,8 +117,24 @@ def to_packages_dict(
 
 
 def from_packages_dict(
-    packages: Mapping[str, Iterable[Requirement]]
+    packages: Mapping[Any, Iterable[Requirement]]
 ) -> Set[Requirement]:
+    """Flattens any dict, where the values are collections of Requirements into a
+    set of thoes requirements.
+
+    Args:
+        packages (Mapping[str, Iterable[Requirement]]):
+            Any dict where the values are collections of requirements.
+            For example the results from `to_package_dict`.
+
+    Returns:
+        Set[Requirement]:
+            The set of unique requirments.
+            Note that if the dictionary contains multiple versions
+            (i.e different version constraints and/or extras) of the same requirement,
+            the resulting set will contain them all too, as they are thechically not
+            identical.
+    """
     return set([req for _, req_list in packages.items() for req in req_list])
 
 
@@ -96,44 +142,51 @@ def resolve_requirements(
     requirements: Iterable[Union[str, Requirement]],
     enforce_redgrease: PackageOption = False,
 ) -> Set[Requirement]:
+    """Attempts to resolve the given requirements, and that the desired version of
+    redgrease is, or is NOT, included.
+
+    Args:
+        requirements (Iterable[Union[str, Requirement]]):
+            Any iterable of requirements, encoded as either strings ('numpy',
+            'passlib[bcrypt]==1.7.4') or a packaging.requirements.Requiremnt object.
+
+        enforce_redgrease (PackageOption, optional):
+            Indicates if, and potentially which version of, redgrease should be
+            enforced as a requirement.
+
+            It can take several optional types::
+
+                - None : enforces that 'redgrease' is NOT in thequirements,
+                    any redgrease requirements will be removed.
+
+                - bool :
+                    True, enforces latest 'redgrease' package on PyPi,
+                    False, no enforcing. requirements are passed as-is,
+                        with or without 'redgrease'
+
+                - str :
+                    a. Specific version. E.g. "1.2.3".
+                    b. Version qualifier. E.g. ">=1.0.0"
+                    c. Extras. E.g. "all" or "runtime".
+                        Will enforce the latest version, with this/these extras
+                    d. Custom source. E.g:
+                        "redgrease[all]>=1.2.3"
+                        "redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@branch_xyz"
+
+                - Version : behaves just as string version (a.)
+
+                - Requirment : behaves just as string version (d.)
+
+            Defaults to False.
+
+    Returns:
+        Set[Requirement]:
+            Set of resulting Requirements.
+
+    Raises:
+        InvalidRequirement:
+            If any of the requirements are not well-formed.
     """
-    resolve_requirements attempts to resolve the given requirements,
-    and that the desired version of redgrease is, or is NOT, included.
-
-    :param requirements: Any iterable of requirements,
-        encoded as either strings ('numpy', 'passlib[bcrypt]==1.7.4')
-        or a packaging.requirements.Requiremnt object.
-    :type requirements: Iterable[Union[str, Requirement]]
-
-    :param enforce_redgrease: Indicates if, and potentially which version of,
-        redgrease should be enforced as a requirement.
-        It can take several optional types:
-        - None : enforces that 'redgrease' is NOT in thequirements,
-            any redgrease requirements will be removed.
-        - bool :
-            True, enforces latest 'redgrease' package on PyPi,
-            False, no enforcing. requirements are passed as-is,
-                with or without 'redgrease'
-        - str :
-            a. Specific version. E.g. "1.2.3".
-            b. Version qualifier. E.g. ">=1.0.0"
-            c. Extras. E.g. "all" or "runtime".
-                Will enforce the latest version, with this/these extras
-            d. Custom source. E.g:
-                "redgrease[all]>=1.2.3"
-                "redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@branch_xyz"
-        - Version : behaves just as string version (a.)
-        - Requirment : behaves just as string version (d.)
-        defaults to False
-    :type enforce_redgrease: Union[bool, str, Version, Requirement], optional
-
-    :raises packaging.requirements.InvalidRequirement:
-        If any of the requirements are not well-formed
-
-    :return: Set of requirements
-    :rtype: Set[Requirement]
-    """
-
     requirements_set = set(
         [packaging.requirements.Requirement(str(req)) for req in requirements]
         if requirements
