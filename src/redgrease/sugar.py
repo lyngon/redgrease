@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Basic syntactic sugar.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -30,41 +26,67 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 import logging
-
-# Various "sugar" constructs, such as:
-# - Helper enums, instead of "magic" strings.
-# - Function decorators for boilerplate gears constructs
+from typing import Any
 
 
 class ReaderType:
     """Redis Gears Reader Types"""
 
     KeysReader = "KeysReader"
+    """KeysReader"""
+
     KeysOnlyReader = "KeysOnlyReader"
+    """KeysOnlyReader"""
+
     StreamReader = "StreamReader"
+    """StreamReader"""
+
     PythonReader = "PythonReader"
+    """PythonReader"""
+
     ShardsIDReader = "ShardsIDReader"
+    """ShardsIDReader"""
+
     CommandReader = "CommandReader"
+    """CommandReader"""
 
 
 class TriggerMode:
     """Redis Geears Trigger modes for registered actions"""
 
     Async = "async"
+    """Async"""
+
     AsyncLocal = "async_local"
+    """AsyncLocal"""
+
     Sync = "sync"
+    """Sync"""
 
 
 class KeyType:
     """Redis Key Types"""
 
     String = "string"
+    """String"""
+
     Hash = "hash"
+    """Hash"""
+
     List = "list"
+    """List"""
+
     Set = "set"
+    """Set"""
+
     ZSet = "zset"
+    """ZSet"""
+
     Stream = "stream"
+    """Stream"""
+
     Module = "module"
+    """Module"""
 
     _constructors = {
         "string": str,
@@ -74,7 +96,23 @@ class KeyType:
     }
 
     @staticmethod
-    def of(python_type):
+    def of(python_type: Any) -> str:
+        """Get the correspondig Redis key type string for a given Python type or value,
+        if it exists.
+        The only valid types are 'str', 'dict', 'list' and 'set'.
+
+        Args:
+            python_type (Any):
+                A python type or any value value.
+
+        Raises:
+            ValueError:
+                If there is no valid Redis key type for the Python type.
+
+        Returns:
+            str:
+                The string representing the Redis key type.
+        """
         if python_type is str or isinstance(python_type, str):
             return KeyType.String
         elif python_type is dict or isinstance(python_type, dict):
@@ -90,25 +128,59 @@ class KeyType:
 
     @staticmethod
     def constructor(key_type: str):
+        """Get the corresponting Python type / constructor, for a given Redis key type.
+
+        Args:
+            key_type (str):
+                A Redis key type as str.
+
+        Returns:
+            Type:
+                The Python constructor / type corresponding to the key type.
+        """
         return KeyType._constructors[key_type]
 
 
 class FailurePolicy:
+    """Redis event handler failure policy"""
+
     Continue = "continue"
+    """Continue"""
+
     Abort = "abort"
+    """Abort"""
+
     Retry = "retry"
+    """Retry"""
 
 
 class LogLevel:
     """Redis Gears log levels"""
 
     Debug = "debug"
+    """Debug"""
+
     Verbose = "verbose"
+    """Verbose"""
+
     Notice = "notice"
+    """Notice"""
+
     Warning = "warninig"
+    """Warning"""
 
     @staticmethod
     def to_logging_level(rg_log_level):
+        """Get the 'logging' log level corresponding to a Redis Gears log level.
+
+        Args:
+            rg_log_level ([type]):
+                Reis Gears log level
+
+        Returns:
+            int:
+                The corresponding default 'logging' log level.
+        """
         if rg_log_level == LogLevel.Debug:
             return logging.DEBUG
         elif rg_log_level == LogLevel.Verbose:
