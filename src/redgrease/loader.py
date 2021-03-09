@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Module for loading Gears script files into a Redis Gears cluster, as well as 
+continiously monitor the files or directories for changes, and in that case reload the
+modified/created scripts into the cluster.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -38,7 +36,7 @@ from os.path import isfile
 from pathlib import Path
 from typing import List, Union
 
-from redis.exceptions import ResponseError
+from redis.exceptions import RedisError, ResponseError
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
@@ -47,25 +45,36 @@ from redgrease import client, formatting, hysteresis, requirements
 log = logging.getLogger(__name__)
 
 default_index_prefix = "/redgrease/scripts"
+"""The defaut prefix for the Redis keys that hold the Loader index data"""
+
 default_script_pattern = "*.py"
+"""The default pattern for scripts to monitor and load."""
+
 default_requirements_pattern = "*requirements*.txt"
+"""The default pattern for requirements files to monitor and load."""
+
 default_unblocking_pattern = "unblock"
+"""The default pattern (within script files) that indicate 'unblocking' load"""
+
 default_ignore_patterns: List[str] = []
+"""Default list of file patterns to ignore"""
 
 # Regex type changed
 # from re.SRE_Pattern in Python 3.6
 # to re.Pattern in Python3 3.7
-regex_type = type(re.compile(""))
+_regex_type = type(re.compile(""))
 
 
 def fail(exception, *messages):
     """Convenience function for raising exceptions
 
     Args:
-        exception ([Exception]): Exception to raise
+        exception ([Exception]):
+            Exception to raise.
 
-        *messages (str): Any number of messages.
-        Will be separated by full stop/period (.).
+        *messages (str):
+            Any number of messages.
+            Will be separated by full stop/period (.).
 
     Raises:
         exception: Exception
@@ -77,6 +86,14 @@ def fail(exception, *messages):
 
 
 class GearsLoader:
+    """Monitors and loads one or more script files into Redis Gear cluster.
+
+    Note that the loader will use the Redis cluster to store some indexing data
+    for its own operation.
+    Most notably information about which registration id has bee assigned to any
+    'registered' script files.
+    """
+
     def __init__(
         self,
         script_pattern: str = None,
@@ -89,6 +106,48 @@ class GearsLoader:
         observe: float = None,
         **redis_kwargs,
     ):
+        """Instatiate a Gears Loader
+
+        Args:
+            script_pattern (str, optional):
+                A file pattern the files to monitor. Supports globbing.
+                E.g. `scripts/*.py`.
+                Defaults to None.
+
+            requirements_pattern (str, optional):
+                A file pattern for any requirement files defining the requirements of
+                the scripts monitored. Supports globbing.
+                E.g. `scripts/*requirements*.txt`.
+                Defaults to None.
+
+            unblocking_pattern ([type], optional):
+                Pattern within script files that determine if the files should be
+                loaded as "unblocking".
+                E.g. `unblock`.
+                Defaults to None.
+
+            ignore_patterns (str, optional):
+                Patterns for files to ignore.
+                Defaults to None.
+
+            index_prefix (str, optional):
+                Prefix for the keys in Redis used by the GearLoader index.
+                Defaults to None.
+
+            server (str, optional):
+                Server / host name or IP.
+                Defaults to "localhost".
+
+            port (int, optional):
+                Server / host port number.
+                Defaults to 6379.
+
+            observe (float, optional):
+                If `True`, continously observe the files, and reload if there are any
+                changes.
+                If `False`, the files will only be loaded when added to the Loader.
+                Defaults to None.
+        """
         self.directories: List[Path] = []
 
         self.script_pattern = (
@@ -105,7 +164,7 @@ class GearsLoader:
             unblocking_pattern = default_unblocking_pattern
         if isinstance(unblocking_pattern, str):
             unblocking_pattern = re.compile(re.escape(unblocking_pattern))
-        if not isinstance(unblocking_pattern, regex_type):
+        if not isinstance(unblocking_pattern, _regex_type):
             fail(ValueError, f"Invalid unblocking pattern: {unblocking_pattern}")
         self.unblocking_pattern = unblocking_pattern
 
@@ -141,15 +200,28 @@ class GearsLoader:
     def __del__(self):
         try:
             self.redis.close()
-        except Exception as ex:
+        except RedisError as ex:
             log.warn(f"Error while closing redis: {ex}")
 
         try:
             self.stop()
         except Exception as ex:
             log.warn(f"Error stopping observer: {ex}")
+            raise
 
-    def add_directory(self, directory: Union[Path, str], recursive: bool = False):
+    def add_directory(
+        self, directory: Union[Path, str], recursive: bool = False
+    ) -> None:
+        """Add a directory to the Loader
+
+        Args:
+            directory (Union[Path, str]):
+                Directory of scripts to load.
+
+            recursive (bool, optional):
+                Recursively scan sub-directories.
+                Defaults to False.
+        """
         if not isinstance(directory, Path):
             directory = Path(str(directory))
 
@@ -171,17 +243,18 @@ class GearsLoader:
 
         self.directories.append(directory)
 
-    # Execute / Register script in redis
-    # TODO: Should be integrated into redgrease.RedisGears class
+    # TODO: Should call pyexecute with the file path directly
     # TODO: Handle multiple registrations per script.
     def register_script(self, script_path):
         """Execute / Register a gear script in redis using 'RG.PYEXECUTE'
 
-        Args:
-            script_path (str): Path to the script.
-
             Note: paths that maches the 'unblocking-pattern', will be executed
             with the 'UNBLOCKING' modifier.
+
+        Args:
+            script_path (str):
+                Path to the script.
+
         """
         log.debug(f"Registering script '{script_path}'")
         general_failure_msg = f"Unable to register script file '{script_path}'"
@@ -238,18 +311,19 @@ class GearsLoader:
                     "Is this a shared environment?"
                 )
 
-        except Exception as ex:
+        except RedisError as ex:
             log.error(f"Something went wrong: {ex}")
 
     # Actions
-    # TODO: Should be integrated into redgrease.RedisGears class
+    # TODO: Should call pyexecute with the file path directly
     # TODO: Handle multiple registrations per script.
     def unregister_script(self, script_path):
         """Check if a given script is registered, and if so,
         unregister it using 'RG.UNREGISTER'
 
         Args:
-            script_path (str): Script path
+            script_path (str):
+                Script path
         """
         log.debug(f"Unregistering script: '{script_path}'")
         reg_key = f"{self.index_prefix}{script_path}"
@@ -274,7 +348,8 @@ class GearsLoader:
         """Update (add only) package dependencies on the Redis instance
 
         Args:
-            requirements_file_path (str): File path of 'requirements.txt' file.
+            requirements_file_path (str):
+                File path of 'requirements.txt' file.
         """
         log.debug(f"Updating dependecies as per '{requirements_file_path}'")
         try:
@@ -293,7 +368,8 @@ class GearsLoader:
         Removed requirement files does not remove any installed packages.
 
         Args:
-            event (watchdog.FileDeletedEvent): Event data for deleted file
+            event (watchdog.FileDeletedEvent):
+                Event data for deleted file
         """
         file = event.src_path
         if fnmatch(file, self.script_pattern):
@@ -318,7 +394,8 @@ class GearsLoader:
         script or requirement file has been modified.
 
         Args:
-            event ([type]): [description]
+            event (watchdog.FileModifiedEvent):
+                Event data for modified file
         """
         file = event.src_path
         if fnmatch(file, self.script_pattern):
@@ -344,7 +421,8 @@ class GearsLoader:
         Removed requirement files does not remove any installed packages.
 
         Args:
-            event ([type]): [description]
+            event (watchdog.FileMovedEvent):
+                Event data for moved file.
         """
         old_file = event.src_path
         new_file = event.dest_path
@@ -388,10 +466,12 @@ class GearsLoader:
             )
 
     def start(self):
+        """Start Loader monitoring."""
         log.info("Starting RedGrease directory watcher ")
         if self.observer:
             self.observer.start()
 
     def stop(self):
+        """Stop Loader monitoring."""
         if self.observer:
             self.observer.stop()
