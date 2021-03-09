@@ -45,6 +45,8 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
         reader: str = sugar.ReaderType.KeysReader,
         defaultArg: str = "*",
         desc: str = None,
+        *args,
+        **kwargs,
     ):
         """Gear function / process factory
         Args:
@@ -69,8 +71,11 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
             desc (str, optional): An optional description.
                 Defaults to None.
         """
-        reader_op = redgrease.gears.Reader(reader, defaultArg, desc)
-        super().__init__(operation=reader_op, input_function=None)
+        reader_op = redgrease.gears.Reader(reader, defaultArg, desc, *args, **kwargs)
+        super().__init__(
+            operation=reader_op,
+            input_function=None,
+        )
 
 
 GB = GearsBuilder

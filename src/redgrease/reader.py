@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Sugar classes for the various Gears Reader types.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -31,20 +27,30 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 """
 
 
+from typing import Iterable, Optional
+
 import redgrease.runtime
 import redgrease.sugar
 
 
 class GearReader(redgrease.runtime.GearsBuilder):
+    """Base class for the Reader sugar classes.
+
+    Extends `redgrease.runtime.GearsBuilder' with arguments for collecting
+    requirements.
+    """
+
     def __init__(
         self,
         reader: str = redgrease.sugar.ReaderType.KeysReader,
         defaultArg: str = "*",
         desc: str = None,
+        requirements: Optional[Iterable[str]] = None,
     ):
         """Gear function / process factory
         Args:
-            reader (str, optional): Input records reader
+            reader (str, optional):
+                Input records reader.
                 Defining where the input to the gear will come from.
                 One of:
                 - 'KeysReader':
@@ -62,65 +68,194 @@ class GearReader(redgrease.runtime.GearsBuilder):
                 Its use depends on the function's reader type and action.
                 Defaults to '*'.
 
-            desc (str, optional): An optional description.
+            desc (str, optional):
+                An optional description.
                 Defaults to None.
 
             requirements (Iterable[str], optional):
                 Package lependencies for the gear train.
                 Defaults to None.
-
-            require_runtime (Union[Version, str, bool], optional):
-                Auto-require the redgrease server runtime.
-                Defaults to False.
         """
-        super().__init__(reader=reader, defaultArg=defaultArg, desc=desc)
+        super().__init__(
+            reader=reader,
+            defaultArg=defaultArg,
+            desc=desc,
+            requirements=requirements,
+        )
 
 
 class KeysReader(GearReader):
+    """KeysReader is a convenience class for GearsBuilder("KeysReader", ...)"""
+
     def __init__(
         self,
         default_key_pattern: str = "*",
+        desc: str = None,
+        requirements: Optional[Iterable[str]] = None,
     ):
+        """Instantiate a KeysReader partial Gear function.
+
+        Args:
+            default_key_pattern (str, optional):
+                Default Redis key pattern for the keys (and its values, type) to read.
+                Defaults to "*".
+
+            desc (str, optional):
+                An optional description.
+                Defaults to None.
+
+            requirements (Iterable[str], optional):
+                Package lependencies for the gear train.
+                Defaults to None.
+        """
         super().__init__(
-            reader=redgrease.sugar.ReaderType.KeysReader, defaultArg=default_key_pattern
+            reader=redgrease.sugar.ReaderType.KeysReader,
+            defaultArg=default_key_pattern,
+            desc=desc,
+            requirements=requirements,
         )
         self.default_key_pattern = default_key_pattern
 
 
 class KeysOnlyReader(GearReader):
+    """KeysOnlyReader is a convenience class for GearsBuilder("KeysOnlyReader", ...)"""
+
     def __init__(
         self,
         default_key_pattern: str = "*",
+        desc: str = None,
+        requirements: Optional[Iterable[str]] = None,
     ):
+        """Instantiate a KeysOnlyReader partial Gear function.
+
+        Args:
+            default_key_pattern (str, optional):
+                Default Redis keys pattern for the keys to read.
+                Defaults to "*".
+
+            desc (str, optional):
+                An optional description.
+                Defaults to None.
+
+            requirements (Iterable[str], optional):
+                Package lependencies for the gear train.
+                Defaults to None.
+        """
         super().__init__(
             reader=redgrease.sugar.ReaderType.KeysOnlyReader,
             defaultArg=default_key_pattern,
+            desc=desc,
+            requirements=requirements,
         )
         self.default_key_pattern = default_key_pattern
 
 
 class StreamReader(GearReader):
+    """StreamReader is a convenience class for GearsBuilder("StreamReader", ...)"""
+
     def __init__(
         self,
         default_key_pattern: str = "*",
+        desc: str = None,
+        requirements: Optional[Iterable[str]] = None,
     ):
+        """Instantiate a StreamReader partial Gear function.
+
+        Args:
+            default_key_pattern (str, optional):
+                Default Redis keys pattern for the redis stream(s) to read.
+                Defaults to "*".
+
+            desc (str, optional):
+                An optional description.
+                Defaults to None.
+
+            requirements (Iterable[str], optional):
+                Package lependencies for the gear train.
+                Defaults to None.
+        """
         super().__init__(
             reader=redgrease.sugar.ReaderType.StreamReader,
             defaultArg=default_key_pattern,
+            desc=desc,
+            requirements=requirements,
         )
         self.default_key_pattern = default_key_pattern
 
 
 class PythonReader(GearReader):
-    def __init__(self):
-        super().__init__(reader=redgrease.sugar.ReaderType.PythonReader)
+    """PythonReader is a convenience class for GearsBuilder("PythonReader", ...)"""
+
+    def __init__(
+        self,
+        desc: str = None,
+        requirements: Optional[Iterable[str]] = None,
+    ):
+        """Instantiate a PythonReader partial Gear function.
+
+        Args:
+            desc (str, optional):
+                An optional description.
+                Defaults to None.
+
+            requirements (Iterable[str], optional):
+                Package lependencies for the gear train.
+                Defaults to None.
+        """
+        super().__init__(
+            reader=redgrease.sugar.ReaderType.PythonReader,
+            desc=desc,
+            requirements=requirements,
+        )
 
 
 class ShardsIDReader(GearReader):
-    def __init__(self):
-        super().__init__(reader=redgrease.sugar.ReaderType.ShardsIDReader)
+    """ShardsIDReader is a convenience class for GearsBuilder("ShardsIDReader", ...)"""
+
+    def __init__(
+        self,
+        desc: str = None,
+        requirements: Optional[Iterable[str]] = None,
+    ):
+        """Instantiate a ShardsIDReader partial Gear function.
+
+        Args:
+            desc (str, optional):
+                An optional description.
+                Defaults to None.
+
+            requirements (Iterable[str], optional):
+                Package lependencies for the gear train.
+                Defaults to None.
+        """
+        super().__init__(
+            reader=redgrease.sugar.ReaderType.ShardsIDReader,
+            desc=desc,
+            requirements=requirements,
+        )
 
 
 class CommandReader(GearReader):
-    def __init__(self):
-        super().__init__(reader=redgrease.sugar.ReaderType.CommandReader)
+    """CommandReader is a convenience class for GearsBuilder("CommandReader", ...)"""
+
+    def __init__(
+        self,
+        desc: str = None,
+        requirements: Optional[Iterable[str]] = None,
+    ):
+        """Instantiate a CommandReader partial Gear function.
+
+        Args:
+            desc (str, optional):
+                An optional description.
+                Defaults to None.
+
+            requirements (Iterable[str], optional):
+                Package lependencies for the gear train.
+                Defaults to None.
+        """
+        super().__init__(
+            reader=redgrease.sugar.ReaderType.CommandReader,
+            desc=desc,
+            requirements=requirements,
+        )
