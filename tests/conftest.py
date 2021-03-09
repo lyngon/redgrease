@@ -19,13 +19,12 @@ redgrease_version = os.getenv(
     "REDGREASE_VERSION", importlib_metadata.version("redgrease")
 )
 
-redgrease_runtime_repo = "lyngon/redisgears"
+redgrease_runtime_repo = "lyngon/redgrease"
 redgrease_runtime_image_name = f"{redgrease_runtime_repo}:{redgrease_version}"
 
 redgrease_runtime_package = os.getenv(
-    "REDGREASE_RUNTIME_PACKAGE", "redgrease[runtime]=={redgrease_version}"
+    "REDGREASE_RUNTIME_PACKAGE", f"redgrease[runtime]=={redgrease_version}"
 )
-print(f">>> >>> REDGREASE_RUNTIME_PACKAGE: {redgrease_runtime_package}")
 
 redis_port = "6379/tcp"
 redisgears_repo = os.getenv("REDISGEARS_IMAGE", "redislabs/redisgears:latest")
