@@ -83,19 +83,19 @@ class CaseInsensitiveDict(dict):
             self[safe_str_upper(k)] = v
 
     def __contains__(self, k):
-        return super(CaseInsensitiveDict, self).__contains__(k.upper())
+        return super(CaseInsensitiveDict, self).__contains__(safe_str_upper(k))
 
     def __delitem__(self, k):
-        super(CaseInsensitiveDict, self).__delitem__(k.upper())
+        super(CaseInsensitiveDict, self).__delitem__(safe_str_upper(k))
 
     def __getitem__(self, k):
-        return super(CaseInsensitiveDict, self).__getitem__(k.upper())
+        return super(CaseInsensitiveDict, self).__getitem__(safe_str_upper(k))
 
     def get(self, k, default=None):
-        return super(CaseInsensitiveDict, self).get(k.upper(), default)
+        return super(CaseInsensitiveDict, self).get(safe_str_upper(k), default)
 
     def __setitem__(self, k, v):
-        super(CaseInsensitiveDict, self).__setitem__(k.upper(), v)
+        super(CaseInsensitiveDict, self).__setitem__(safe_str_upper(k), v)
 
     def update(self, data):
         data = CaseInsensitiveDict(data)
@@ -109,7 +109,6 @@ def as_is(value: T) -> T:
         value (T): Input value
 
     Returns:
-        [T]: The input value, unchanged
     """
     return value
 
@@ -326,7 +325,7 @@ def transform(
                 return value
         else:
             return constuctor(value)  # type: ignore
-    except Exception:
+    except (TypeError, ValueError):
         # if for some reason the value can't be coerced, just use
         # the raw value
         return value
