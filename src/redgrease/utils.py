@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+"""
+Utility and boilerplate functions, such as parsers, value transformers etc.
+"""
+__author__ = "Anders Åström"
+__contact__ = "anders@lyngon.com"
+__copyright__ = "2021, Lyngon Pte. Ltd."
+__licence__ = """The MIT License
+Copyright © 2021 Lyngon Pte. Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+ software and associated documentation files (the “Software”), to deal in the Software
+ without restriction, including without limitation the rights to use, copy, modify,
+ merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to the following
+ conditions:
+
+The above copyright notice and this permission notice shall be included in all copies
+ or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+
 import ast
 import functools
 from enum import Enum
@@ -32,18 +60,21 @@ def iteritems(d: Dict[Key, Val]) -> Iterable[Tuple[Key, Val]]:
     Just to le able to use CaseInsensitiveDict without modifications
 
     Args:
-        d (Dict[Key, Val]): Dict to iterate
+        d (Dict[Key, Val]):
+            Dict to iterate
 
     Returns:
-        Iterable[Tuple[Key, Val]]: Iterable of key-value tuples
+        Iterable[Tuple[Key, Val]]:
+            Iterable of key-value tuples
     """
     return iter(d.items())
 
 
 # Not a parser
 class CaseInsensitiveDict(dict):
-    """Case insensitive dict implementation. Assumes string keys only.
-    Heavily influenced from redis.client, as it is not exported
+    """Case insensitive dict implementation.
+    Assumes string keys only.
+    Heavily influenced from redis.client.
     """
 
     def __init__(self, data):
@@ -74,9 +105,12 @@ def as_is(value: T) -> T:
     """Passthrough parser / identity function
 
     Args:
-        value (T): Input value
+        value (T):
+            Input value
 
     Returns:
+        T:
+            The value, unmodified.
     """
     return value
 
@@ -86,10 +120,12 @@ def str_if_bytes(value: T) -> Union[T, str]:
     Slightly modified from redis.utils, as it is not exported
 
     Args:
-        value (T): Any serialized Redis value
+        value (T):
+            Any serialized Redis value
 
     Returns:
-        Union[T, str]: Either a string or the input unchanged
+        Union[T, str]:
+            Either a string or the input unchanged
     """
     if isinstance(value, bytes):
         return value.decode("utf-8", errors="replace")
@@ -101,10 +137,12 @@ def safe_str(value: Any) -> str:
     """Parse anything to a string
 
     Args:
-        value (Any): Input value
+        value (Any):
+            Input value
 
     Returns:
-        str: String
+        str:
+            String
     """
     if value is None:
         return ""
@@ -115,10 +153,12 @@ def safe_str_upper(value: Any) -> str:
     """Parse anything to an uppercase string
 
     Args:
-        value (Any): Input value
+        value (Any):
+            Input value
 
     Returns:
-        str: parsed uppercase string
+        str:
+            Parsed uppercase string
     """
     return safe_str(value).upper()
 
@@ -131,10 +171,12 @@ def bool_ok(value: Any) -> bool:
     Should be better for long non-Ok replies, e.g. images, erroneously passed to it
 
     Args:
-        value (Any): Input value
+        value (Any):
+            Input value
 
     Returns:
-        bool: Parsed boolean
+        bool:
+            Parsed boolean
     """
     if isinstance(value, (bytes, str)):
         return safe_str_upper(value[:2]) == "OK"
@@ -148,10 +190,12 @@ def safe_bool(input: Any) -> bool:
     as well as "Ok" and "yes"/"no" values
 
     Args:
-        input (Any): Input value
+        input (Any):
+            Input value
 
     Returns:
-        bool: Parsed boolean
+        bool:
+            Parsed boolean
     """
     if isinstance(input, (bool, int)):
         return bool(input)
@@ -173,10 +217,12 @@ def to_int_if_bool(value: Any) -> Union[int, Any]:
     False => 0
 
     Args:
-        value (Union[bool,Any]): A boolean value
+        value (Union[bool,Any]):
+            A boolean value
 
     Returns:
-        Union[int, Any]: Integer reprepresentataion of the bool
+        Union[int, Any]:
+            Integer reprepresentataion of the bool
     """
     return int(value) if isinstance(value, bool) else value
 
@@ -189,10 +235,12 @@ def to_redis_type(value: Any) -> RedisType:
     as well as any complex type that implemens __bytes__ method
 
     Args:
-        value (Any): Value to serialize for Redis
+        value (Any):
+            Value to serialize for Redis
 
     Returns:
-        RedisType: A serialized version
+        RedisType:
+            A serialized version
     """
     if value is None:
         return bytes()
@@ -242,7 +290,8 @@ def to_list(
             Defaults to 'to_redis_type'.
 
     Returns:
-        List: Flattened list of the transformed keys and values
+        List:
+            Flattened list of the transformed keys and values
     """
     if mapping is None:
         return []
@@ -260,13 +309,15 @@ def transform(
     constuctor: Union[Constructor[T], Dict[Key, Constructor[T]]],
     key: Key = None,
 ) -> T:
-    """Applies a transformation to a value. The tranformation fuction could either be
-    passed directly or in a dictionary along with a key to look it up.
-    This is mostly only useful as a helper functoin for constructors of composite types,
+    """Applies a transformation to a value.
+    The tranformation fuction could either be passed directly or in a dictionary along
+    with a key to look it up.
+    This is mostly only useful as a helper function for constructors of composite types,
     where the value may need to be transformed differently depending on the field/key.
 
     Args:
-        value (Any): value to transform
+        value (Any):
+            Value to transform
 
         constuctor (Union[Constructor[T], Dict[Any, Constructor[T]]]):
             Transformation function or a dict of transformation functions.
@@ -275,7 +326,8 @@ def transform(
             to a functsion, this function will be used as a default.
             Otherwise, the value will be returned untransformed.
 
-        key (Key): key to use to look up the appropriate transforpation
+        key (Key):
+            key to use to look up the appropriate transforpation
 
     Returns:
         T: Transformed value
@@ -325,7 +377,8 @@ def to_dict(
 
 
     Args:
-        items (Iterable): Iterable to "fold" into a dict
+        items (Iterable):
+            Iterable to "fold" into a dict
 
         key_transform (Union[Constructor[Key], Dict[Any, Constructor[Key]]], optional):
             Transformation function / type / constructor to apply to keys.
@@ -342,7 +395,8 @@ def to_dict(
             Defaults to None (No value transformation).
 
     Returns:
-        Dict[Key, Val]: Folded dictionary
+        Dict[Key, Val]:
+            Folded dictionary
     """
 
     if items is None:
@@ -371,10 +425,9 @@ def to_dict(
 
 def to_kwargs(items: Iterable) -> Dict[str, Any]:
     """Folds an iterable of values into a 'kwargs-compatible' dict.
-    This is useful for cunstucting objects from  Redis' list responseses,
-    by means of an intermediate kwargs dict that can be passed to for example
-    a constructor
-    It behaves exactly as 'to_dict' but enforces keys to be parsed to strings
+    This is useful for cunstucting objects from  Redis' list responseses, by means
+    of an intermediate kwargs dict that can be passed to for example a constructor.
+    It behaves exactly as 'to_dict' but enforces keys to be parsed to strings.
 
     - Alternating unnamed Key and values, i.e:
     [key_1, value_1, key_2, value_2, ... ]
@@ -383,10 +436,12 @@ def to_kwargs(items: Iterable) -> Dict[str, Any]:
             output: {"foo": 42, "13": 37}
 
     Args:
-        items (Iterable): Iterable to "fold" into a dict
+        items (Iterable):
+            Iterable to "fold" into a dict
 
     Returns:
-        Dict[str, Any]: Folded dictionary
+        Dict[str, Any]:
+            Folded dictionary
     """
     return to_dict(items, key_transform=safe_str)
 
@@ -402,11 +457,13 @@ def list_parser(item_parser: Constructor[T]) -> Callable[[Iterable], List[T]]:
     => [False, True, False]
 
     Args:
-        item_parser (Constructor[T]): The constructor to apply to each element
+        item_parser (Constructor[T]):
+            The constructor to apply to each element.
 
     Returns:
-        Callable[[Iterable[Any]], List[T]]: Function that takes maps the constructor
-        on to the iterable and returns the result as a list
+        Callable[[Iterable[Any]], List[T]]:
+            Function that takes maps the constructor on to the iterable and returns
+            the result as a list.
     """
 
     def parser(input_list):
@@ -445,10 +502,12 @@ def dict_of(
     => {"b":False, "f":1.0, "i":1, "s":"0"}
 
     Args:
-        constructors (Dict[str, Constructor[Any]]): Dict of named constructors
+        constructors (Dict[str, Constructor[Any]]):
+            Dict of named constructors
 
     Returns:
-        Callable[..., Dict[str, Any]]: Dict parser
+        Callable[..., Dict[str, Any]]:
+            Dict parser
     """
 
     def parser(values: Iterable, keys: Iterable[Key]):
@@ -461,6 +520,24 @@ def dict_of(
 
 
 class Record:
+    """Class repredenting a Redis Record, as generated by KeysReader.
+
+    Attributes:
+        key (str):
+            The name of the Redis key.
+
+        value (Any):
+            The value corresponting to the key. `None` if deleted.
+
+        type (str):
+            The core Redis type. Either 'string', 'hash', 'list', 'set', 'zset' or
+            'stream'.
+
+        event (str):
+            The event that triggered the execution.
+            (`None` if the execution was created via the run function.)
+    """
+
     def __init__(
         self,
         key: str,
@@ -476,6 +553,18 @@ class Record:
 
 
 def record(rec: Union[str, dict]) -> Record:
+    """Create a Record
+
+    Args:
+        rec (Union[str, dict]):
+            the value to parse. Either a string (key only) or a dict with at minimum
+            the key `key` present and optionally any of the keys `value`, `type`
+            and/or `event`.
+
+    Returns:
+        Record:
+            Parsed Record object.
+    """
     if isinstance(rec, Record):
         return rec
 
@@ -486,5 +575,22 @@ def record(rec: Union[str, dict]) -> Record:
         return Record(rec)
 
 
-def compose(*functions):
-    return functools.reduce(lambda f, g: lambda x: f(g(x)), functions, lambda x: x)
+def compose(*function: Callable) -> Callable:
+    """Compose functions.
+    I.e::
+
+        ``lambda x: f(g(x))``
+        can be written:
+        ``compose(f, g)``
+
+    Args:
+        *function (Callable):
+            Any number of functions to compose together.
+            Output type of function N must be the input type of function N+1.
+
+    Returns:
+        Callable:
+            A composed function with input type same as the firs function, and output
+            type same as the last function.
+    """
+    return functools.reduce(lambda f, g: lambda x: f(g(x)), function, lambda x: x)
