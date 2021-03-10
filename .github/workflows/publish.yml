@@ -41,15 +41,15 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        echo "##[set-output name=old_version;]$(python publish.py --current-version)" 
+        echo "::set-output name=old_version::$(python publish.py --current-version)"
         python publish.py -y
-        echo "##[set-output name=new_version;]$(python publish.py --current-version)" 
+        echo "::set-output name=new_version::$(python publish.py --current-version)"
       id: publish
 
 
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        commit_message: ${{ steps.publish.new_version }}
+        commit_message: version ${{ steps.publish.new_version }}
         file_pattern: setup.cfg
           
     - name: Create Docker image
