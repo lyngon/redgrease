@@ -41,23 +41,23 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        echo "::set-output name=old_version::$(python publish.py --current-version)"
+        echo "OLD_VER=$(python publish.py --current-version)" >> $GITHUB_ENV
         python publish.py -y
-        echo "::set-output name=new_version::$(python publish.py --current-version)"
+        echo "NEW_VER=$(python publish.py --current-version)" >> $GITHUB_ENV
       id: publish
 
 
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        commit_message: version ${{ steps.publish.new_version }}
+        commit_message: version ${NEW_VER}
         file_pattern: setup.cfg
           
     - name: Create Docker image
       run: |
         docker run --rm --name redisgears -p 127.0.0.1:6379:6379 -d redislabs/redisgears:latest
         while ! nc -z localhost 6379; do sleep 0.1 ; done
-        redis-cli RG.PYEXECUTE "" REQUIREMENTS redgrease[runtime]==${{ steps.publish.new_version }}
-        docker commit -a "Lyngon Pte. Ltd. <info@lyngon.com>" -m "Redis Gears with redgrease ${{ steps.publish.new_version }}" redisgears lyngon/redgrease:${{ steps.publish.new_version }}
+        redis-cli RG.PYEXECUTE "" REQUIREMENTS redgrease[runtime]==${NEW_VER}
+        docker commit -a "Lyngon Pte. Ltd. <info@lyngon.com>" -m "Redis Gears with redgrease ${NEW_VER}" redisgears lyngon/redgrease:${NEW_VER}
 
     - name: Login to DockerHub
       uses: docker/login-action@v1 
@@ -67,6 +67,6 @@ jobs:
 
     - name: Push Docker image to DockerHub
       run: |
-        docker push lyngon/redgrease:${{ steps.publish.new_version }}
-        docker tag lyngon/redgrease:${{ steps.publish.new_version }} lyngon/redgrease:latest
+        docker push lyngon/redgrease:${NEW_VER}
+        docker tag lyngon/redgrease:${NEW_VER} lyngon/redgrease:latest
         docker push lyngon/redgrease:latest
