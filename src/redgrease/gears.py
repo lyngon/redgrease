@@ -339,8 +339,8 @@ class Register(Operation):
             self.prefix,
             self.convertToStr,
             self.collect,
-            self.mode,
-            self.onRegistered,
+            mode=self.mode,
+            onRegistered=self.onRegistered,
             **self.kwargs,
         )
 

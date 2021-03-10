@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Module for loading Gears script files into a Redis Gears cluster, as well as 
+Module for loading Gears script files into a Redis Gears cluster, as well as
 continiously monitor the files or directories for changes, and in that case reload the
 modified/created scripts into the cluster.
 """
