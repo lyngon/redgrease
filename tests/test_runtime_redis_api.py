@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Tests for the serverside redis commands.s
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"

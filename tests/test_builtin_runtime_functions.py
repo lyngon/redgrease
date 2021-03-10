@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Tests for Redgrease overloads of the vanilla runtime functions that are loaded per
+default at top level in ter Redis Gears Python runtime environment.
+Such as `GearsBuilder`, `execute`, `log`, `atomic` etc.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"

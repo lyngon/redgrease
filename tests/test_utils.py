@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
-
-Todo:
-    * Use config as much as possible
-
+Test utils functions.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
