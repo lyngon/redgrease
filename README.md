@@ -7,6 +7,7 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/alerts/)
 [![tests](https://github.com/lyngon/redgrease/actions/workflows/full_tests.yml/badge.svg)](https://github.com/lyngon/redgrease/actions/workflows/full_tests.yml)
+[![Documentation Status](https://readthedocs.org/projects/redgrease/badge/?version=latest)](https://redgrease.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/lyngon/redgrease/branch/main/graph/badge.svg?token=pQZbBVxxmm)](https://codecov.io/gh/lyngon/redgrease)
 [![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)](https://libraries.io/pypi/redgrease)
 [![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)](https://github.com/lyngon/redgrease/pulls?q=is%3Apr+is%3Aclosed)
