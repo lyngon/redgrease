@@ -1,4 +1,4 @@
-redgrease
+API Reference
 =========
 
 .. toctree::
