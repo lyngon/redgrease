@@ -1387,6 +1387,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
                     - A glob-like pattern for the KeysReader and KeysOnlyReader readers.
                     - A key name for the StreamReader reader.
                     - A Python generator for the PythonReader reader.
+
                 Defaults to None.
 
             convertToStr (bool, optional):
