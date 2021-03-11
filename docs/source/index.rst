@@ -13,7 +13,7 @@ Welcome to redgrease's documentation!
    :caption: Contents:
 
    blah
-   redgrease
+   modules
 
 
 Indices and tables

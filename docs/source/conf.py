@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.abspath("../../src/redgrease/"))
 project = "redgrease"
 copyright = "2021, Lyngon Pte. Ltd."
 author = "Anders Åström"
+version = "0.1"  # can this be dynamic somehow?
 
 
 # -- General configuration ---------------------------------------------------
@@ -46,10 +47,23 @@ exclude_patterns: List[str] = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"  # "alabaster"
+html_theme = "sphinx_rtd_theme"
+html_theme_options = {
+    # 'analytics_id': 'UA-XXXXXXX-1',  #  Provided by Google in your dashboard
+    # "analytics_anonymize_ip": True,
+    "display_version": True,
+    "prev_next_buttons_location": "both",
+    "style_external_links": True,
+    # "style_nav_header_background": "#7a0c00",
+}
+
+html_logo = "../images/redgrease_icon_02.png"
+html_favicon = "../images/LyngonLogo-favicon.ico"
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+# custom.css is inside one of the html_static_path folders (e.g. _static)
+html_css_files = ["custom.css"]
