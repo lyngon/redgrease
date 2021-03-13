@@ -132,7 +132,7 @@ def initialize_logger(  # noqa: C901
     if not conf_file.is_file():
         raise FileNotFoundError(conf_file)
 
-    parse_error_string = "Unable to parse config file as %: '%'"
+    parse_error_string = "Unable to parse config file as {}: '{}'"
 
     # assume yaml, unelss explicitly otherwise
     if suffix not in [".ini", ".json"]:
@@ -144,7 +144,7 @@ def initialize_logger(  # noqa: C901
                 config_dict = yaml.safe_load(f.read())
                 logging.getLogger(__name__).info(f"Successfully read '{conf_file}''")
         except yaml.error.YAMLError as e:
-            msg = parse_error_string % ("YAML", conf_file)
+            msg = parse_error_string.format("YAML", conf_file)
             if suffix in [".yaml", ".yml"]:
                 raise ValueError(msg) from e
             else:
@@ -161,7 +161,7 @@ def initialize_logger(  # noqa: C901
                 logging.getLogger(__name__).info(f"Successfully read '{conf_file}'")
 
         except json.JSONDecodeError as e:
-            msg = parse_error_string % ("JSON", conf_file)
+            msg = parse_error_string.format("JSON", conf_file)
             if suffix == ".json":
                 raise ValueError(msg) from e
             else:
@@ -177,14 +177,14 @@ def initialize_logger(  # noqa: C901
             logging.getLogger(__name__).info(f"Successfully loaded '{conf_file}'")
             return
         except configparser.Error as e:
-            msg = parse_error_string % ("INI", conf_file)
+            msg = parse_error_string.format("INI", conf_file)
             if suffix == ".ini":
                 raise ValueError(msg) from e
             else:
                 logging.getLogger(__name__).warning(msg)
 
     if not config_dict:
-        msg = parse_error_string % ("anything", conf_file)
+        msg = parse_error_string.format("anything", conf_file)
         raise ValueError(msg)
 
     logging.config.dictConfig(config_dict)
