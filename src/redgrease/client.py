@@ -196,7 +196,6 @@ class Gears:
             redis.exceptions.ResponseError:
                 If the the execution does not exist or is still running
         """
-        pass
 
         if isinstance(id, redgrease.data.ExecutionInfo):
             id = id.executionId

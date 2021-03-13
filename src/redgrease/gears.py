@@ -39,7 +39,6 @@ from typing import (
 )
 
 import redgrease.sugar as sugar
-from redgrease.typing import Callback
 
 if TYPE_CHECKING:
     import redgrease.typing as optype
@@ -275,7 +274,7 @@ class Register(Operation):
         convertToStr: bool = True,
         collect: bool = True,
         mode: str = sugar.TriggerMode.Async,
-        onRegistered: Callback = None,
+        onRegistered: "optype.Callback" = None,
         **kwargs,
     ) -> None:
         """Instantiate a Register action
