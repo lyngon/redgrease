@@ -78,5 +78,7 @@ def get_runtime_client():
     return runtime_client
 
 
-redis = get_runtime_client()  # noqa: F811 - Used as exported var
+cmd = get_runtime_client()  # noqa: F811 - Used as exported var
 """ Runtime / serverside redis client with gears features"""
+
+__all__ = ["cmd"]

@@ -51,7 +51,6 @@ import os.path
 from typing import Any, Iterable, List, Mapping, Optional, Union
 
 import redis
-import rediscluster
 
 import redgrease.config
 import redgrease.data
@@ -502,28 +501,3 @@ class Redis(redis.Redis):
     def __init__(self, *args, **kwargs):
         """Instantiate a redis client, with gears features"""
         super().__init__(*args, **kwargs)
-
-
-@geared
-class RedisCluster(rediscluster.RedisCluster):
-    """RedisCluster client class, with support for gears features
-
-    Behaves exactly like the rediscluster.RedisCluster client, but is extended with
-    a 'gears' property fo executiong Gears commands.
-
-    Attributes:
-        gears (redgrease.client.Gears):
-            Gears command client.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """Instantiate a redis cluster client, with gears features"""
-
-        super().__init__(*args, **kwargs)
-
-
-def RedisGears(*args, **kwargs):
-    try:
-        return RedisCluster(*args, **kwargs)
-    except rediscluster.exceptions.RedisClusterException:
-        return Redis(*args, **kwargs)
