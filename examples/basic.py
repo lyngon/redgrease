@@ -23,7 +23,7 @@ active_user_count = active_users.count()
 all_issued_permissions = active_users.flatmap(lambda usr: usr["permissions"]).distinct()
 
 # Redis Client w. Gears
-r = redgrease.client.RedisGears()
+r = redgrease.RedisGears()
 
 # Two ways of running:
 count = r.gears.pyexecute(active_user_count.run())

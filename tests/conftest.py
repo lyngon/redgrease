@@ -41,7 +41,6 @@ from docker import DockerClient
 from docker.errors import APIError as DockerError
 
 import redgrease
-import redgrease.client
 
 redgrease_version = os.getenv(
     "REDGREASE_VERSION", importlib_metadata.version("redgrease")
@@ -121,13 +120,13 @@ def server_connection_params(redgrease_runtime_container):
 
 @pytest.fixture()
 def clean_redisgears_instance(server_connection_params):
-    """redgrease.client.RedisGears client instance from the redgrease package,
+    """redgrease.RedisGears client instance from the redgrease package,
     connected to the test server.
 
     This client instance is the SOT for most of the tests.
     """
     return instantiate(
-        redgrease.client.RedisGears,
+        redgrease.RedisGears,
         **server_connection_params,
     )
 

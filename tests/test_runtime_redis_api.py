@@ -31,7 +31,8 @@ from pathlib import Path
 
 import pytest
 
-from redgrease.client import RedisGears, safe_str
+from redgrease import RedisGears
+from redgrease.utils import safe_str
 
 scripts_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "gear_scripts")
 
