@@ -31,7 +31,7 @@ import sys
 import pytest
 import redis.exceptions
 
-from redgrease import GearsBuilder, execute, hashtag, RedisGears
+from redgrease import GearsBuilder, RedisGears, execute, hashtag
 
 counter = 0
 
