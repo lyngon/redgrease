@@ -54,7 +54,7 @@ common_extras = [
 runtime_extras = common_extras + []
 client_extras = common_extras + [
     "typing-extensions",
-    
+    "redis-py-cluster",
 ]
 cli_extras = client_extras + [
     "watchdog",
