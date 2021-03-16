@@ -25,5 +25,6 @@ class RedisCluster(rediscluster.RedisCluster):
 def RedisGears(*args, **kwargs):
     try:
         return RedisCluster(*args, **kwargs)
-    except rediscluster.exceptions.RedisClusterException:
+
+    except (AttributeError, rediscluster.exceptions.RedisClusterException):
         return redgrease.client.Redis(*args, **kwargs)

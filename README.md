@@ -161,7 +161,7 @@ def process(x):
 gear = CommandReader().flatmap(as_is).map(process).register(trigger="launch")
 
 # Redis client with Gears
-rg = RedisGears()
+rg = redgrease.RedisGears()
 
 # Register the gear function on a cluster
 gear.on(rg) 
@@ -204,9 +204,9 @@ It is recomendede to use the `redgreese[runtime]` package as a serverside depend
 This installs dependencies for the all the serverside features such as serverside Redis commands and the runtime for gears constructed with the 'Remote Gears Builder'
 
 ```python
-from redgrease.client import RedisGears
+import redgrease
 
-rg = RedisGears()
+rg = redgrease.RedisGears()
 rg.gears.pyexecute("", requirements=["redgrease[runtime]"])
 ```
 

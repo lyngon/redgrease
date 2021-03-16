@@ -77,9 +77,11 @@ try:
         # This will fail if redis-py-cluster package is not installed
         from .cluster import RedisCluster, RedisGears
 
-        __all__ += ["RedisGears", "RedisCluster"]
+        __all__ += ["RedisCluster"]
     except ModuleNotFoundError:
         from .client import Redis as RedisGears
+
+    __all__ += ["RedisGears"]
 
 except ModuleNotFoundError:
     pass

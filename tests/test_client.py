@@ -35,7 +35,6 @@ import pytest
 import redgrease
 import redgrease.client
 import redgrease.data
-from redgrease.client import RedisGears
 from redgrease.utils import safe_str, str_if_bytes
 
 # Other things to test:
@@ -44,7 +43,7 @@ from redgrease.utils import safe_str, str_if_bytes
 
 
 @pytest.mark.parametrize("package", ["numpy"])
-def test_pydumpreqs(rg: RedisGears, package):
+def test_pydumpreqs(rg: redgrease.RedisGears, package):
     orig_reqs = rg.gears.pydumpreqs()
     assert isinstance(orig_reqs, list)
 
@@ -79,7 +78,7 @@ def test_pydumpreqs(rg: RedisGears, package):
     ids=lambda x: f"{len(x)}arg",
 )
 @pytest.mark.parametrize("mode", ["blocking", "unblocking"])
-def test_trigger(rg: RedisGears, arg_list: List, mode: str):
+def test_trigger(rg: redgrease.RedisGears, arg_list: List, mode: str):
     triggger_name = "Bang"
     unblocking: bool = mode == "unblocking"
     fun_str = (
@@ -99,7 +98,7 @@ def test_trigger(rg: RedisGears, arg_list: List, mode: str):
 
 
 @pytest.mark.parametrize("mode", ["blocking", "unblocking"])
-def test_dumpregistrations(rg: RedisGears, mode: str):
+def test_dumpregistrations(rg: redgrease.RedisGears, mode: str):
     triggger_name = "Bang"
     unblocking: bool = mode == "unblocking"
     fun_str = (
@@ -165,7 +164,7 @@ def test_dumpregistrations(rg: RedisGears, mode: str):
     assert reg2.RegistrationData.numSuccess == reg.RegistrationData.numSuccess + 1
 
 
-def test_unregister(rg: RedisGears):
+def test_unregister(rg: redgrease.RedisGears):
     triggger_name = "Bang"
     fun_str = (
         """GB('CommandReader')"""
@@ -189,7 +188,7 @@ def test_unregister(rg: RedisGears):
 
 
 @pytest.mark.parametrize("fun_str", ["GB().run()"])
-def test_getexecution(rg: RedisGears, fun_str: str):
+def test_getexecution(rg: redgrease.RedisGears, fun_str: str):
     # TODO: Test cluster Mode more properly
 
     exec = rg.gears.pyexecute(fun_str, unblocking=True)
@@ -231,7 +230,7 @@ def test_getexecution(rg: RedisGears, fun_str: str):
         assert isinstance(exe_step.arg, str)
 
 
-def test_getresults(rg: RedisGears):
+def test_getresults(rg: redgrease.RedisGears):
     rg.set("AKEY", 42)
     rg.set("ANOTHERKEY", 1)
 
@@ -254,26 +253,26 @@ def test_getresults(rg: RedisGears):
 
 
 @pytest.mark.xfail(reason="Testcase not implemented")
-def test_getresultsblocking(rg: RedisGears):
+def test_getresultsblocking(rg: redgrease.RedisGears):
     assert False
 
 
 @pytest.mark.xfail(reason="Testcase not implemented")
-def test_dumpexecutions(rg: RedisGears):
+def test_dumpexecutions(rg: redgrease.RedisGears):
     assert False
 
 
 @pytest.mark.xfail(reason="Testcase not implemented")
-def test_dropexecution(rg: RedisGears):
+def test_dropexecution(rg: redgrease.RedisGears):
     assert False
 
 
 @pytest.mark.xfail(reason="Testcase not implemented")
-def test_abortexecution(rg: RedisGears):
+def test_abortexecution(rg: redgrease.RedisGears):
     assert False
 
 
-def test_pystats(rg: RedisGears):
+def test_pystats(rg: redgrease.RedisGears):
     stats = rg.gears.pystats()
     assert stats
     assert isinstance(stats, redgrease.data.PyStats)
@@ -293,7 +292,7 @@ def test_pystats(rg: RedisGears):
 
 # TODO: Actually test on a cluster setup
 @pytest.mark.parametrize("cluster_mode", [False])
-def test_infocluster(rg: RedisGears, cluster_mode):
+def test_infocluster(rg: redgrease.RedisGears, cluster_mode):
     info = rg.gears.infocluster()
     # Non-c
     if not cluster_mode:
@@ -304,7 +303,7 @@ def test_infocluster(rg: RedisGears, cluster_mode):
 
 
 # TODO: Actually test on a cluster setup
-def test_refreshcluster(rg: RedisGears):
+def test_refreshcluster(rg: redgrease.RedisGears):
     # Pretty pointless test, but anyway
     # TODO: Somehow validate that it is run... Unsure of how though
     # TODO: See issue #11

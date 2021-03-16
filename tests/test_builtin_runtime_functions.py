@@ -37,9 +37,8 @@ import importlib_metadata
 import pytest
 import redis.exceptions
 
-import redgrease.client
 import redgrease.data
-from redgrease.client import RedisGears
+from redgrease import RedisGears
 
 redgrease_version = importlib_metadata.version("redgrease")
 
