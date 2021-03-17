@@ -70,7 +70,7 @@ def get_runtime_client():
     # Swapping out the `execute_command` method for a replacement that uses the global
     # `execute` internally instead of the connection pool.
 
-    runtime_client = redgrease.client.RedisGears(connection_pool=...)
+    runtime_client = redgrease.client.Redis(connection_pool=...)
 
     runtime_client.execute_command = types.MethodType(
         _runtime_execute_command, runtime_client
@@ -78,5 +78,7 @@ def get_runtime_client():
     return runtime_client
 
 
-redis = get_runtime_client()  # noqa: F811 - Used as exported var
+cmd = get_runtime_client()  # noqa: F811 - Used as exported var
 """ Runtime / serverside redis client with gears features"""
+
+__all__ = ["cmd"]

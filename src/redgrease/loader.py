@@ -40,7 +40,7 @@ from redis.exceptions import RedisError, ResponseError
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from redgrease import client, formatting, hysteresis, requirements
+from redgrease import RedisGears, formatting, hysteresis, requirements
 
 log = logging.getLogger(__name__)
 
@@ -174,7 +174,7 @@ class GearsLoader:
 
         self.index_prefix = index_prefix if index_prefix else default_index_prefix
 
-        self.redis = client.RedisGears(host=server, port=port, **redis_kwargs)
+        self.redis = RedisGears(host=server, port=port, **redis_kwargs)
 
         self.observer = Observer() if observe else None
 
