@@ -468,6 +468,7 @@ def geared(cls):
 
         def __init__(self, *args, **kwargs):
             self._gears = None
+            self.connection = None
             super().__init__(*args, **kwargs)
 
         @property
