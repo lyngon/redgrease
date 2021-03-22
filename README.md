@@ -47,7 +47,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-<script type="text/javascript" src="https://sessionize.com/api/speaker/sessions/b9aa6b1d-b7c1-48a1-8d48-e4fc85059a83/1x0xa41e11x"></script>
+<script type="text/javascript" src="https://sessionize.com/api/speaker/sessions/b9aa6b1d-b7c1-48a1-8d48-e4fc85059a83/0x0xa41e11x1"></script>
 
 Example usage:
 ```python
