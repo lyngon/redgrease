@@ -111,21 +111,23 @@ def test_command_reader(rg: RedisGears):
     assert res == [b"test", b"this", b"is", b"a", b"test"]
 
 
-# @pytest.mark.xfail(
-#     sys.version_info[:2] != redis_py_ver[:2],
-#     reason="Incompatible Python versions",
-#     raises=redis.exceptions.ResponseError,
-# )
-# def test_pythonreader():
-#     gearfun = PythonReader()
-#     raise NotImplementedError(str(gearfun))
+@pytest.mark.xfail(
+    sys.version_info[:2] != redis_py_ver[:2],
+    reason="Incompatible Python versions",
+    raises=redis.exceptions.ResponseError,
+)
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_pythonreader():
+    gearfun = PythonReader()
+    raise NotImplementedError(str(gearfun))
 
 
-# @pytest.mark.xfail(
-#     sys.version_info[:2] != redis_py_ver[:2],
-#     reason="Incompatible Python versions",
-#     raises=redis.exceptions.ResponseError,
-# )
-# def test_streamreader():
-#     gearfun = StreamReader()
-#     raise NotImplementedError(str(gearfun))
+@pytest.mark.xfail(
+    sys.version_info[:2] != redis_py_ver[:2],
+    reason="Incompatible Python versions",
+    raises=redis.exceptions.ResponseError,
+)
+@pytest.mark.xfail(reason="Testcase not implemented")
+def test_streamreader():
+    gearfun = StreamReader()
+    raise NotImplementedError(str(gearfun))
