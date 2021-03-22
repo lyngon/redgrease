@@ -543,7 +543,7 @@ class ClusterInfo(RedisObject):
     my_run_id: str
 
     shards: List[ShardInfo] = attr.ib(
-        converter=list_parser(ShardInfo.from_redis)  # type: ignore e#7912
+        converter=list_parser(ShardInfo.from_redis)  # type: ignore
     )
     """List of the all the shards in the cluster."""
 
