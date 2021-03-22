@@ -255,7 +255,7 @@ class Gears:
 
         Returns:
             redgredase.data.ClusterInfo:
-                Cluster information or None if not ion cluster mode.
+                Cluster information or None if not in cluster mode.
         """
         return self.redis.execute_command("RG.INFOCLUSTER")
 

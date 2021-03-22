@@ -526,6 +526,9 @@ class ShardInfo(RedisObject):
     maxHslot: int
     """Highest hash slot served by the shard."""
 
+    pendingMessages: int
+    """Number of pending messages"""
+
 
 @attr.s(auto_attribs=True, frozen=True)
 class ClusterInfo(RedisObject):
@@ -537,8 +540,10 @@ class ClusterInfo(RedisObject):
     my_id: str
     """The identifier of the shard the client is connected to."""
 
+    my_run_id: str
+
     shards: List[ShardInfo] = attr.ib(
-        converter=list_parser(ShardInfo.from_redis)  # type: ignore #7912
+        converter=list_parser(ShardInfo.from_redis)  # type: ignore
     )
     """List of the all the shards in the cluster."""
 
@@ -559,7 +564,8 @@ class ClusterInfo(RedisObject):
 
         cluster_info = ClusterInfo(
             my_id=safe_str(res[1]),
-            shards=res[2],
+            my_run_id=safe_str(res[3]),
+            shards=res[4],
         )
 
         return cluster_info
