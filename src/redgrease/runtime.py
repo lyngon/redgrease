@@ -72,10 +72,10 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
                 An optional description.
                 Defaults to None.
         """
+        requirements = kwargs.pop("requirements", None)
         reader_op = redgrease.gears.Reader(reader, defaultArg, desc, *args, **kwargs)
         super().__init__(
-            operation=reader_op,
-            input_function=None,
+            operation=reader_op, input_function=None, requirements=requirements
         )
 
 
