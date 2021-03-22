@@ -14,8 +14,9 @@ import os
 import sys
 from typing import List
 
-sys.path.insert(0, os.path.abspath("../../src/redgrease/"))
+sys.path.insert(0, os.path.abspath("../../src/"))
 
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 # -- Project information -----------------------------------------------------
 
@@ -30,7 +31,7 @@ version = "0.1"  # can this be dynamic somehow?
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions: List[str] = ["sphinx.ext.autodoc"]
+extensions: List[str] = ["sphinx.ext.napoleon", "sphinx.ext.autodoc"]
 # ["recommonmark"]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -7,17 +7,17 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/lyngon/redgrease.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lyngon/redgrease/alerts/)
 [![tests](https://github.com/lyngon/redgrease/actions/workflows/full_tests.yml/badge.svg)](https://github.com/lyngon/redgrease/actions/workflows/full_tests.yml)
+[![Documentation Status](https://readthedocs.org/projects/redgrease/badge/?version=latest)](https://redgrease.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/lyngon/redgrease/branch/main/graph/badge.svg?token=pQZbBVxxmm)](https://codecov.io/gh/lyngon/redgrease)
 [![Dependencies status](https://img.shields.io/librariesio/github/lyngon/redgrease)](https://libraries.io/pypi/redgrease)
 [![GitHub last commit](https://img.shields.io/github/last-commit/lyngon/redgrease)](https://github.com/lyngon/redgrease/pulls?q=is%3Apr+is%3Aclosed)
 [![GitHub Open bugs](https://img.shields.io/github/issues-raw/lyngon/redgrease/bug?label=open%20bugs)](https://github.com/lyngon/redgrease/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
 [![GitHub Closed issues](https://img.shields.io/github/issues-closed-raw/lyngon/redgrease?color=informational)]()
 [![Lines of Code](https://img.shields.io/tokei/lines/github/lyngon/redgrease?label=LOC)](https://github.com/lyngon/redgrease/pulse)
-[![Language Python](https://img.shields.io/github/languages/top/lyngon/redgrease)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Docker Image](https://img.shields.io/docker/v/lyngon/redgrease?label=lyngon%2Fredgrease&logo=docker)](https://hub.docker.com/r/lyngon/redgrease)
-
 [![mushroom, mushroom!](https://img.shields.io/badge/mushroom-mushroom!-green)](https://www.youtube.com/watch?v=hGlyFc79BUE)
+[![Language Python](https://img.shields.io/github/languages/top/lyngon/redgrease)](https://www.python.org/)
 
 <!--
 Author: Anders Åström
@@ -46,6 +46,8 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
+
+<script type="text/javascript" src="https://sessionize.com/api/speaker/sessions/b9aa6b1d-b7c1-48a1-8d48-e4fc85059a83/0x0xa41e11x1"></script>
 
 Example usage:
 ```python
