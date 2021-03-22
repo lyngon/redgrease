@@ -6,11 +6,6 @@ import redgrease.data
 import redgrease.utils
 
 
-def nop(*args):
-    return args
-
-
-@redgrease.client.geared
 class RedisCluster(rediscluster.RedisCluster):
     """RedisCluster client class, with support for gears features
 
@@ -53,10 +48,29 @@ class RedisCluster(rediscluster.RedisCluster):
         },
     }
 
+    RESPONSE_CALLBACKS = {
+        **rediscluster.RedisCluster.RESPONSE_CALLBACKS,
+        **redgrease.client.Gears.RESPONSE_CALLBACKS,
+    }
+
     def __init__(self, *args, **kwargs):
         """Instantiate a redis cluster client, with gears features"""
-
+        self._gears = None
+        self.connection = None
         super().__init__(*args, **kwargs)
+
+    @property
+    def gears(self) -> redgrease.client.Gears:
+        """Gears client, exposing gears commands
+
+        Returns:
+            Gears:
+                Gears client
+        """
+        if not self._gears:
+            self._gears = redgrease.client.Gears(self)
+
+        return self._gears
 
 
 def RedisGears(*args, **kwargs):

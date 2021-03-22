@@ -458,35 +458,6 @@ class Gears:
         return self.redis.execute_command("RG.UNREGISTER", id)
 
 
-def geared(cls):
-    class GearsClient(cls):
-
-        RESPONSE_CALLBACKS = {
-            **redis.Redis.RESPONSE_CALLBACKS,
-            **Gears.RESPONSE_CALLBACKS,
-        }
-
-        def __init__(self, *args, **kwargs):
-            self._gears = None
-            super().__init__(*args, **kwargs)
-
-        @property
-        def gears(self) -> Gears:
-            """Gears client, exposing gears commands
-
-            Returns:
-                Gears:
-                    Gears client
-            """
-            if not self._gears:
-                self._gears = Gears(self)
-
-            return self._gears
-
-    return GearsClient
-
-
-@geared
 class Redis(redis.Redis):
     """Redis client class, with support for gears features.
 
@@ -498,6 +469,25 @@ class Redis(redis.Redis):
             Gears command client.
     """
 
+    RESPONSE_CALLBACKS = {
+        **redis.Redis.RESPONSE_CALLBACKS,
+        **Gears.RESPONSE_CALLBACKS,
+    }
+
     def __init__(self, *args, **kwargs):
         """Instantiate a redis client, with gears features"""
+        self._gears = None
         super().__init__(*args, **kwargs)
+
+    @property
+    def gears(self) -> Gears:
+        """Gears client, exposing gears commands
+
+        Returns:
+            Gears:
+                Gears client
+        """
+        if not self._gears:
+            self._gears = Gears(self)
+
+        return self._gears
