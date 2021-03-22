@@ -102,7 +102,7 @@ def test_shardsidreader(rg: RedisGears):
     raises=redis.exceptions.ResponseError,
 )
 def test_command_reader(rg: RedisGears):
-    gear_fun = CommandReader().register(trigger="test")
+    gear_fun = CommandReader().register(trigger="test", convertToStr=False)
     res = rg.gears.pyexecute(gear_fun)
     assert res
     res = rg.gears.trigger("test", "this", "is", "a", "test")

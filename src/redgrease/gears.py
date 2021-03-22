@@ -1365,8 +1365,8 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
     def run(
         self,
         arg: str = None,  # TODO: This can also be a Python generator
-        convertToStr: bool = False,
-        collect: bool = False,
+        convertToStr: bool = True,
+        collect: bool = True,
         # Helpers, all must be None
         # Other Redgrease args
         requirements: Iterable[str] = None,
@@ -1434,8 +1434,8 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
     def register(  # noqa: C901
         self,
         prefix: str = "*",
-        convertToStr: bool = False,
-        collect: bool = False,
+        convertToStr: bool = True,
+        collect: bool = True,
         # Helpers, all must be None
         mode: str = None,
         onRegistered: "optype.Callback" = None,
