@@ -69,9 +69,9 @@ __all__ = [
 
 try:
     # This will fail if redis package is not installed
-    from .client import Gears, Redis, geared
+    from .client import Gears, Redis
 
-    __all__ += ["Gears", "Redis", "geared"]
+    __all__ += ["Gears", "Redis"]
 
     try:
         # This will fail if redis-py-cluster package is not installed
