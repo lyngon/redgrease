@@ -184,6 +184,21 @@ def bool_ok(value: Any) -> bool:
         return False
 
 
+def optional(constructor: Constructor[T]) -> Constructor[Optional[T]]:
+    """Create parser that accepts `None` values, but otherwise behaves like the
+    provided parser.
+
+    Args:
+        constructor (Constructor[T]):
+            constructor to apply, unless the value is None.
+    """
+
+    def parser(value):
+        return None if value is None else constructor(value)
+
+    return parser
+
+
 def safe_bool(input: Any) -> bool:
     """Parse a bool, slightly more accepting
     allowing for literal "True"/"False", integer 0/1,

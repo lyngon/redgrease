@@ -45,6 +45,7 @@ from redgrease.utils import (
     REnum,
     bool_ok,
     list_parser,
+    optional,
     safe_bool,
     safe_str,
     str_if_bytes,
@@ -403,6 +404,12 @@ class RegData(RedisObject):
 
     args: Dict[str, Any] = attr.ib(converter=to_kwargs)
     """Reader-specific arguments"""
+
+    status: Optional[bool] = attr.ib(
+        converter=optional(bool_ok),  # type: ignore #7912
+        default=None,
+    )
+    """Undocumented status field"""
 
 
 # @dataclass
