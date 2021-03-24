@@ -409,6 +409,7 @@ class RegData(RedisObject):
         converter=optional(bool_ok),  # type: ignore #7912
         default=None,
     )
+    """Undocumented status field"""
 
 
 # @dataclass

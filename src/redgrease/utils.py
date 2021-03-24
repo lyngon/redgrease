@@ -184,8 +184,16 @@ def bool_ok(value: Any) -> bool:
         return False
 
 
-def optional(constructor):
-    def parser(value: Any):
+def optional(constructor: Constructor[T]) -> Constructor[Optional[T]]:
+    """Create parser that accepts `None` values, but otherwise behaves like the
+    provided parser.
+
+    Args:
+        constructor (Constructor[T]):
+            constructor to apply, unless the value is None.
+    """
+
+    def parser(value):
         return None if value is None else constructor(value)
 
     return parser
