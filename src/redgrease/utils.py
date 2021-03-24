@@ -184,6 +184,13 @@ def bool_ok(value: Any) -> bool:
         return False
 
 
+def optional(constructor):
+    def parser(value: Any):
+        return None if value is None else constructor(value)
+
+    return parser
+
+
 def safe_bool(input: Any) -> bool:
     """Parse a bool, slightly more accepting
     allowing for literal "True"/"False", integer 0/1,
