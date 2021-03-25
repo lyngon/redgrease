@@ -342,6 +342,7 @@ class Gears:
         """  # noqa
 
         requirements = set(requirements if requirements else [])
+        result_function = None
 
         if isinstance(gear_function, redgrease.gears.GearFunction):
             # If the input is a GearFunction, we get the requirements from it,
@@ -355,6 +356,13 @@ class Gears:
                 gear_function = gear_function.run()
 
             function_string = redgrease.data.seralize_gear_function(gear_function)
+
+            if gear_function.reader == "CommandReader":
+
+                def result_function(*args):
+                    return self.trigger(
+                        gear_function.operation.kwargs["trigger"], *args
+                    )
 
         elif os.path.exists(gear_function):
             # If the gear function is a fle path,
@@ -378,12 +386,16 @@ class Gears:
             params.append("REQUIREMENTS")
             params += list(map(str, requirements))
 
-        return self.redis.execute_command(
+        command_response = self.redis.execute_command(
             "RG.PYEXECUTE",
             function_string,
             *params,
             pickled=isinstance(gear_function, redgrease.gears.GearFunction),
         )
+        if result_function and command_response:
+            return redgrease.data.ExecutionResult(result_function)
+
+        return command_response
 
     def pystats(self) -> redgrease.data.PyStats:
         """Gets memory usage statisticy from the Python interpreter

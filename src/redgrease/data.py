@@ -204,6 +204,9 @@ class ExecutionResult(wrapt.ObjectProxy, Generic[T]):
     def __bytes__(self) -> bytes:
         return to_bytes(self.value)
 
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        return self.value(*args, **kwds)
+
 
 def parse_execute_response(response, pickled=False) -> ExecutionResult:
     """Parses raw responses from `pyexecute`, `getresults` and `getresultsblocking`
