@@ -45,6 +45,7 @@ from redgrease.utils import (
     REnum,
     bool_ok,
     list_parser,
+    optional,
     safe_bool,
     safe_str,
     str_if_bytes,
@@ -202,6 +203,9 @@ class ExecutionResult(wrapt.ObjectProxy, Generic[T]):
 
     def __bytes__(self) -> bytes:
         return to_bytes(self.value)
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        return self.value(*args, **kwds)
 
 
 def parse_execute_response(response, pickled=False) -> ExecutionResult:
@@ -403,6 +407,12 @@ class RegData(RedisObject):
 
     args: Dict[str, Any] = attr.ib(converter=to_kwargs)
     """Reader-specific arguments"""
+
+    status: Optional[bool] = attr.ib(
+        converter=optional(bool_ok),  # type: ignore #7912
+        default=None,
+    )
+    """Undocumented status field"""
 
 
 # @dataclass

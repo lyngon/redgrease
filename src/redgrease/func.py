@@ -25,17 +25,17 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
+import uuid
 from typing import Callable
 
-import redgrease.runtime
+import redgrease.reader
 import redgrease.sugar
 from redgrease.gears import ClosedGearFunction
 from redgrease.typing import Callback
 
 
 def trigger(
-    trigger: str,
+    trigger: str = None,
     prefix: str = "*",
     convertToStr: bool = True,
     collect: bool = True,
@@ -46,8 +46,9 @@ def trigger(
     """Decorator for creation of CommandReader + Tigger GearFunctions
 
     Args:
-        trigger (str):
+        trigger (str, optional):
             The trigger string
+            Will be a unique id if not specified.
 
         prefix (str, optional):
             Register prefix.
@@ -81,17 +82,19 @@ def trigger(
             A ClosedGearFunction generator.
     """
 
-    def gear(func):
-        redgrease.runtime.GearsBuilder("CommandReader").map(
-            lambda params: func(params[1:])
-        ).register(
-            prefix=prefix,
-            convertToStr=convertToStr,
-            collect=collect,
-            mode=mode,
-            onRegistered=onRegistered,
-            trigger=trigger,
-            **kargs,
+    def command_gear(function):
+        return (
+            redgrease.reader.CommandReader()
+            .map(lambda commmand_params: function(*commmand_params[1:]))
+            .register(
+                prefix=prefix,
+                convertToStr=convertToStr,
+                collect=collect,
+                mode=mode,
+                onRegistered=onRegistered,
+                trigger=trigger if trigger else str(uuid.uuid4),
+                **kargs,
+            )
         )
 
-    return gear
+    return command_gear
