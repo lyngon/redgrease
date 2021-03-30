@@ -3,17 +3,30 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to redgrease's documentation!
-=====================================
+RedGrease Documentation
+=======================
 
+
+.. include :: banner.rst
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   blah
-   modules
+   intro
+   quickstart
+   client 
+   executing
+   runtime
+   readers
+   operations
+   serverside_commands
+   sugar
+   cli
+   advanced
+   redgrease
+   help
 
 
 Indices and tables

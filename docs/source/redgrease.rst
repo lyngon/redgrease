@@ -1,4 +1,4 @@
-RedGrease Package
+API Reference
 =================
 
 redgrease package
