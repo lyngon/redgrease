@@ -1,4 +1,6 @@
-RedGrease Package
+.. _api_reference:
+
+API Reference
 =================
 
 redgrease package
