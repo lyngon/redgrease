@@ -45,7 +45,7 @@ exclude_patterns: List[str] = []
 
 # -- Options for HTML output -------------------------------------------------
 
-pygments_style = "sphinx"
+# pygments_style = "sphinx"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.

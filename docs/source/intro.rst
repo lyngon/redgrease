@@ -72,7 +72,7 @@ The first step / operation of any Gear Function is always one of six "Reader", t
 
 - :ref:`KeysReader <reader_keysreader>` : Redis keys and values.
 - :ref:`KeysOnlyReader <reader_keysonlyreader>` : Redis keys.
-- :ref:`StreamReader <reader_stresmReader>` : Redis Stream messages.
+- :ref:`StreamReader <reader_streamreader>` : Redis Stream messages.
 - :ref:`ShardsIDReader <reader_shardsidreader>` : Shard ID.
 - :ref:`PythonReader <reader_pythonreader>` : Arbitrary Python generator.
 - :ref:`CommandReader <reader_commandreader>` : Command aguments from application client.
