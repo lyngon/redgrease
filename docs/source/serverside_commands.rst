@@ -1,7 +1,9 @@
 .. include :: banner.rst
 
-
+.. _red_commands:
 Serverside Redis Commands
 =========================
-Documentation is Work-in-Progress.
-Comming soon, hopefully. 
+
+.. include :: wip.rst
+
+.. include :: footer.rst

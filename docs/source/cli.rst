@@ -1,7 +1,11 @@
 .. include :: banner.rst
 
+.. _cli:
 Command Line Tool
 =================
+
+.. include :: wip.rst
+
 `redgrease` can be invoked from the CLI::
 
    redgrease --help
@@ -37,3 +41,6 @@ Command Line Tool
       -p PORT, --port PORT  Redis Gears host port number [env var: PORT]
       -l LOG_CONFIG, --log-config LOG_CONFIG
                            [env var: LOG_CONFIG]
+
+
+.. include :: footer.rst

@@ -1,12 +1,17 @@
 .. include :: banner.rst
 
+.. _client:
 Redgrease Client
 ================
-Documentation is Work-in-Progress.
-Comming soon, hopefully. 
 
+.. include :: wip.rst
+
+.. _client_gears_commands:
 Gears Commands
 --------------
 
+.. _client_gears_config:
 Gears Configuration
 -------------------
+
+.. include :: footer.rst

@@ -1,8 +1,12 @@
 
 .. include :: banner.rst
 
+.. _runtime:
 Builtin Runtime Functions
 =========================
+
+.. include :: wip.rst
+
 You can load the default redisgears symbols (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc) from the `redgrease.runtime` package. 
 
 During development this will give you auto-completion and type hints
@@ -19,9 +23,12 @@ If it is loaded outside a Redis Gears Python runtime environment, i.e. a develop
 
 It is possible to load all symbols, using `*`, but it's generally not a recomended practice.
 
+
+.. _runtime_gearsbuilder:
 GearsBuilder
 ------------
 
+.. _runtime_execute:
 execute
 -------
 
@@ -49,20 +56,28 @@ Below is an example::
    gb.foreach(cas)
    gb.register('person:*')
 
+.. _runtime_atomic:
 atomic
 ------
 
+.. _runtime_configGet:
 configGet
 ---------
 
+.. _runtime_gearsConfigGet:
 gearsConfigGet
 --------------
 
+.. _runtime_hashtag:
 hashtag
 -------
 
+.. _runtime_log:
 log
 ---
 
+.. _runtime_gearsFuture:
 gearsFuture
 -----------
+
+.. include :: footer.rst

@@ -16,7 +16,7 @@ from typing import List
 
 sys.path.insert(0, os.path.abspath("../../src/"))
 
-on_rtd = os.environ.get('READTHEDOCS') == 'True'
+on_rtd = os.environ.get("READTHEDOCS") == "True"
 
 # -- Project information -----------------------------------------------------
 
@@ -45,6 +45,8 @@ exclude_patterns: List[str] = []
 
 # -- Options for HTML output -------------------------------------------------
 
+pygments_style = "sphinx"
+
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
@@ -59,7 +61,7 @@ html_theme_options = {
 }
 
 html_logo = "../images/redgrease_icon_02.png"
-html_favicon = "../images/LyngonLogo-favicon.ico"
+html_favicon = "../images/LyngonIcon_v3.ico"
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
