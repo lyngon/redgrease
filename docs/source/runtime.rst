@@ -2,6 +2,7 @@
 .. include :: banner.rst
 
 .. _runtime:
+
 Builtin Runtime Functions
 =========================
 
@@ -25,10 +26,12 @@ It is possible to load all symbols, using `*`, but it's generally not a recomend
 
 
 .. _runtime_gearsbuilder:
+
 GearsBuilder
 ------------
 
 .. _runtime_execute:
+
 execute
 -------
 
@@ -57,26 +60,32 @@ Below is an example::
    gb.register('person:*')
 
 .. _runtime_atomic:
+
 atomic
 ------
 
 .. _runtime_configGet:
+
 configGet
 ---------
 
 .. _runtime_gearsConfigGet:
+
 gearsConfigGet
 --------------
 
 .. _runtime_hashtag:
+
 hashtag
 -------
 
 .. _runtime_log:
+
 log
 ---
 
 .. _runtime_gearsFuture:
+
 gearsFuture
 -----------
 

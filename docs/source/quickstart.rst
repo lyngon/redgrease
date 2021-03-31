@@ -1,32 +1,39 @@
 .. include :: banner.rst
 
 .. _quickstart:
+
 Qickstart Guide
 ===============
 
 .. include :: wip.rst
 
 .. _quick_running_gears_server:
+
 Running Redis Gears
 -------------------
 
 .. _quick_installation:
+
 RedGrease Installation
 ----------------------
 
 .. _quick_basics:
+
 Basics
 ------
 
 .. _quick_example_query:
+
 Keyspace Batch Query
 --------------------
 
 .. _quick_example_event_proc:
+
 Event Processing
 ----------------
 
 .. _quick_example_command:
+
 Custom Commands
 ---------------
 

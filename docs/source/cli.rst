@@ -1,6 +1,7 @@
 .. include :: banner.rst
 
 .. _cli:
+
 Command Line Tool
 =================
 

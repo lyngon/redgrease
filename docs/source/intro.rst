@@ -1,6 +1,7 @@
 .. include :: banner.rst
 
 .. _intro:
+
 Introduction
 ============
 
@@ -26,6 +27,7 @@ The Gears functions may include and use third party dependecies like for example
 
 
 .. _intro_redis:
+
 Redis
 -----
 
@@ -35,6 +37,7 @@ It is `open-source <https://github.com/redis/redis>`_ software released under a 
 
 
 .. _intro_redis_gears:
+
 Redis Gears
 -----------
 
@@ -55,6 +58,7 @@ Client applications can define and submit such Python Gear Functions, either to 
 
 
 .. _intro_gear_functions:
+
 Gear Functions
 ~~~~~~~~~~~~~~~
 
@@ -66,11 +70,12 @@ The the steps / operations are 'piped' togetrer by the Redis Gears runtime such 
 
 The first step / operation of any Gear Function is always one of six "Reader", that defines what the initial input:
 
-- KeysReader : Redis keys and values.
-- KeysOnlyReader : Redis keys.
-- StreamReader : Redis Stream messages.
-- PythonReader : Arbitrary Python generator.
-- CommandReader : Command aguments from application client.
+- :ref:`KeysReader <reader_keysreader>` : Redis keys and values.
+- :ref:`KeysOnlyReader <reader_keysonlyreader>` : Redis keys.
+- :ref:`StreamReader <reader_stresmReader>` : Redis Stream messages.
+- :ref:`ShardsIDReader <reader_shardsidreader>` : Shard ID.
+- :ref:`PythonReader <reader_pythonreader>` : Arbitrary Python generator.
+- :ref:`CommandReader <reader_commandreader>` : Command aguments from application client.
 
 Readers can be parameterized to define which subset of data it should operate on, for example by specifying a pattern, for the keys or streams it should read. 
 
@@ -82,6 +87,7 @@ You can find more details about the interals of Gear Functions in the `official 
 
 
 .. _intro_redgrease:
+
 RedGrease
 ---------
 
@@ -92,6 +98,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
     Extended versions of the `redis <https://pypi.org/project/redis/>`_ and `redis-py_cluster <https://github.com/Grokzen/redis-py-cluster>`_ clients, but with additional pythonic functions, mapping closely (1-to-1) to the :ref:`Redis Gears command set <client_gears_commands>` (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc), outlined in the `official Gears documentation <https://oss.redislabs.com/redisgears/commands.html>`_.
 
     .. code-block:: python
+        :emphasize-lines: 6
 
         import redgrease
 
@@ -112,6 +119,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
     It is basically the `redis <https://pypi.org/project/redis/>`_ client, but with ``execute_command()`` rewired to use the Gears-native ``execute()`` instead under the hood. 
 
     .. code-block:: python
+        :emphasize-lines: 8, 11, 13
 
         import redgrease
         import redgrease.utils
@@ -120,13 +128,16 @@ The RedGrease package provides a number of functionalities that facilitates writ
         # This function runs **on** the Redis server.
         def download_image(record):
             image_key = record.value["image"]
-            if redgrese.cmd.hget(image_key, "image_data"): # <- hget
+            if redgrese.cmd.hexists(image_key, "image_data"): # <- hexists
                 # image already downloaded
                 return image_key
-            image_url = redgrease.cmd.hget(image_key,"url") # <- hget
-            image_data = requests.get(image_url)
-            redgrease.cmd.hset(image_key, "image_data", # <- hset
-            images_data)
+            image_url = redgrease.cmd.hget(image_key, "url") # <- hget
+            response = requests.get(image_url)
+            redgrease.cmd.hset(  # <- hset
+                image_key, 
+                "image_data", 
+                byte(response.content)
+            )
             return image_key
 
         redgrease.GB(redgrease.ReaderType.KeysReader, "annotation:*").map(redgrease.utils.record).foreach(download_image).run()
@@ -204,6 +215,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
 
 .. _intro_example_use_cases:
+
 Example Use-Cases
 -----------------
 
@@ -230,6 +242,7 @@ The possible use-cases for Redis Gears, and subsequently RedGrease, is virtually
 
 
 .. _glossary:
+
 Glossary
 -----------
 
