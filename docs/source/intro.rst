@@ -12,7 +12,7 @@ RedGrease is a Python client and runtime package attempting to make it as easy a
 
     Overview
 
-:ref:`Redgrease` makes it easy  to write concise but expressive Python functions to query and/or react to data in Redis in realtime. The functions are automatically distributed and run across the shards of the Redis cluster, providing an excellent balance of performance of distributed computations and expressiveness and power of Python.
+:ref:`Redgrease <intro_redgrease>` makes it easy  to write concise but expressive Python functions to query and/or react to data in Redis in realtime. The functions are automatically distributed and run across the shards of the Redis cluster, providing an excellent balance of performance of distributed computations and expressiveness and power of Python.
 
 It may help you create:
 
@@ -95,6 +95,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
 
 #. :ref:`Redis / Redis Gears client(s) <client>`.
+
     Extended versions of the `redis <https://pypi.org/project/redis/>`_ and `redis-py_cluster <https://github.com/Grokzen/redis-py-cluster>`_ clients, but with additional pythonic functions, mapping closely (1-to-1) to the :ref:`Redis Gears command set <client_gears_commands>` (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc), outlined in the `official Gears documentation <https://oss.redislabs.com/redisgears/commands.html>`_.
 
     .. code-block:: python
@@ -108,6 +109,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
         rg.gears.pyexecute(gear_script)  # <-- RG.PYEXECUTE
 
 #. :ref:`Runtime functions <runtime>` wrappers. 
+
     The Redis Gears server `runtime environment <https://oss.redislabs.com/redisgears/runtime.html>`_ automatically loads a number of special functions into the top leve scope (e.g. ``GearsBuilder``, ``GB``, ``atomic``, ``execute``, ``log`` etc). 
     RedGrease provides placeholder versions that provide **&docstrings**, **auto completion** and **type hints** during development, and does not clash with the actual runtime.
 
@@ -115,6 +117,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
 
 #. :ref:`Server-side Redis commands <red_commands>`.
+
     Allowing for **all** Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of *manually* invoking the corresponding commmand string using ``execute()``. 
     It is basically the `redis <https://pypi.org/project/redis/>`_ client, but with ``execute_command()`` rewired to use the Gears-native ``execute()`` instead under the hood. 
 
@@ -143,6 +146,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
         redgrease.GB(redgrease.ReaderType.KeysReader, "annotation:*").map(redgrease.utils.record).foreach(download_image).run()
 
 #. First class :ref:`GearFunction objects <readers>`.
+
     Inspired by the "remote builders" of the official `redisgears-py <https://github.com/RedisGears/redisgears-py>`_ client, but with some differences, eg:
 
     * Can be created without a Redis connection.
@@ -181,6 +185,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
 
 #. :ref:`A Command Line Tool <cli>`.
+
     Helps running and or loading of Gears scripts onto a Redis Gears server. 
     Particularly useful for "trigger-based" CommandReader Gears.
 
@@ -188,12 +193,13 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     The purpose is mainly to streamline development of 'trigger-style' Gear scripts by providing a form of hot-reloading functionality.
 
-    .. code-block:: shell
+    .. code-block:: console
         
         redgrease --server 10.0.2.21 --watch scripts/
 
 
 #. :ref:`A utils module <api_reference>`.
+
     Full of useful functions. For example:
 
     * A record ``record`` function  that can be used to transform the default `KeysReader` dict to an `Records` object with the appropriate attributes.
@@ -206,6 +212,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
         
 #. :ref:`Syntactic sugar <sugar>`.
+
     For example:
 
     * A ``trigger`` :ref:`Function decorator <trigger_decorator>`, that makes creation and execution of ``CommandReader`` GearFunctions trivial, and providing a straight forward way of adding bespoke serverside Redis commands.
@@ -222,9 +229,11 @@ Example Use-Cases
 The possible use-cases for Redis Gears, and subsequently RedGrease, is virtually endless, but some commomn, or otherwise interesting use-cases include:
 
 * Automatic Cache-miss handling.
+
     Make Redis automatically fetch and cache the requested resource if it isn't found, so that clients do not have to handle it.
 
 * Automatic batched Write-Through / Write-Behind.
+    
     Make Redis automatically write back updates to slower, high latency datastore, efficently using batch writes. Allowing clients to write high velocity updates uninterupted to Redis only 
 
     .. figure:: ../images/Gears_Example_2_white.png
@@ -232,12 +241,15 @@ The possible use-cases for Redis Gears, and subsequently RedGrease, is virtually
         Write-Through / Write-Behind example
 
 * Advanced Data Queries and Transforms.
+    
     Perform "Map-Reduce"-like queries on Redis datasets.
     
 * Stream event processing.
+    
     Trigger processes automatically when data enters Redis.
 
 * Custom commands.
+    
     Create custom Redis commands with arbitrarily sophisticated logic, enabling featuers to virtually any platform with a Redis client implementation. 
 
 

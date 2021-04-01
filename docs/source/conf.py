@@ -31,7 +31,11 @@ version = "0.1"  # can this be dynamic somehow?
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions: List[str] = ["sphinx.ext.napoleon", "sphinx.ext.autodoc"]
+extensions: List[str] = [
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+]
 # ["recommonmark"]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -45,7 +49,7 @@ exclude_patterns: List[str] = []
 
 # -- Options for HTML output -------------------------------------------------
 
-# pygments_style = "sphinx"
+pygments_style = "fruity"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
