@@ -98,7 +98,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     Extended versions of the `redis <https://pypi.org/project/redis/>`_ and `redis-py_cluster <https://github.com/Grokzen/redis-py-cluster>`_ clients, but with additional pythonic functions, mapping closely (1-to-1) to the :ref:`Redis Gears command set <client_gears_commands>` (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc), outlined in the `official Gears documentation <https://oss.redislabs.com/redisgears/commands.html>`_.
 
-    .. code-block:: python3
+    .. code-block:: python
         :emphasize-lines: 6
 
         import redgrease
@@ -121,7 +121,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
     Allowing for **all** Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of *manually* invoking the corresponding commmand string using ``execute()``. 
     It is basically the `redis <https://pypi.org/project/redis/>`_ client, but with ``execute_command()`` rewired to use the Gears-native ``execute()`` instead under the hood. 
 
-    .. code-block:: python3
+    .. code-block:: python
         :emphasize-lines: 8, 11, 13
 
         import redgrease
@@ -159,7 +159,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     |br|
 
-    .. code-block:: python3
+    .. code-block:: python
 
         import redgrease
         from redgrease.utils import as_is
