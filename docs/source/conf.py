@@ -49,7 +49,7 @@ exclude_patterns: List[str] = []
 
 # -- Options for HTML output -------------------------------------------------
 
-pygments_style = "fruity"
+# pygments_style = "fruity"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -73,4 +73,5 @@ html_favicon = "../images/LyngonIcon_v3.ico"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 # custom.css is inside one of the html_static_path folders (e.g. _static)
-html_css_files = ["custom.css"]
+# html_css_files = ["custom.css"]
+html_css_files = []  # type: List[str]
