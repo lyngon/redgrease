@@ -35,6 +35,8 @@ extensions: List[str] = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
+    "sphinx_tabs.tabs",
+    #    "sphinxcontrib.osexample",
 ]
 # ["recommonmark"]
 
