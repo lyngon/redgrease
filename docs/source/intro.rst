@@ -12,7 +12,7 @@ RedGrease is a Python client and runtime package attempting to make it as easy a
 
     Overview
 
-:ref:`Redgrease <intro_redgrease>` makes it easy  to write concise but expressive Python functions to query and/or react to data in Redis in realtime. The functions are automatically distributed and run across the shards of the Redis cluster, providing an excellent balance of performance of distributed computations and expressiveness and power of Python.
+:ref:`RedGrease <intro_redgrease>` makes it easy  to write concise but expressive Python functions to query and/or react to data in Redis in realtime. The functions are automatically distributed and run across the shards of the Redis cluster, providing an excellent balance of performance of distributed computations and expressiveness and power of Python.
 
 It may help you create:
 
@@ -143,7 +143,12 @@ The RedGrease package provides a number of functionalities that facilitates writ
             )
             return image_key
 
-        redgrease.GB(redgrease.ReaderType.KeysReader, "annotation:*").map(redgrease.utils.record).foreach(download_image).run()
+        gear_fun = (
+            redgrease.GearsBuilder(redgrease.ReaderType.KeysReader, "annotation:*")
+            .map(redgrease.utils.record)
+            .foreach(download_image, requirements=["requests"])
+            .run()
+        )
 
 #. First class :ref:`GearFunction objects <readers>`.
 
