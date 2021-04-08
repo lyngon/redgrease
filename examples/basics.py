@@ -56,10 +56,10 @@ print(f"Total number of keys: {key_count_result}")
 
 
 # Simple Aggregation
-simple_sum = (
+sum_gear = (
     redgrease.KeysReader("*-fighter")
     .map(lambda record: int(record["value"]))
     .aggregate(0, add, add)
-    .run(on=r)
 )
+simple_sum = sum_gear.run(on=r)
 print(f"Sum of '-fighter'-keys values: {simple_sum}")

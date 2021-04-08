@@ -3,6 +3,7 @@ import random
 from concurrent.futures import ThreadPoolExecutor
 
 import redgrease
+from redgrease.data import ExecutionStatus
 
 user_count = 5
 min_start_balance = 100
@@ -10,6 +11,27 @@ max_start_balance = 1000
 
 
 r = redgrease.RedisGears()
+
+
+def cleanup(r):
+    # # Cleanup
+    # Unregister all registrations
+    for reg in r.gears.dumpregistrations():
+        r.gears.unregister(reg.id)
+
+    # Remove all executions
+    for exe in r.gears.dumpexecutions():
+        r.gears.dropexecution(str(exe.executionId))
+
+    # Clear all keys
+    r.flushall()
+
+    # Check that there are no keys
+    r.keys()
+
+
+cleanup(r)
+
 
 # Create some 'user' accounts with some existing balance
 for user_id in range(user_count):
@@ -50,7 +72,7 @@ def balance_sheet():
         )
         print(
             f"User {user_id} balance: {current_balance} "
-            " ({current_balance-start_balance})"
+            f" ({current_balance-start_balance})"
         )
         sum_balance += current_balance
     print("----------------------------")
@@ -58,6 +80,8 @@ def balance_sheet():
     return sum_balance
 
 
+print()
+print("Initial user balance distribution")
 start_total_balance = balance_sheet()
 
 
@@ -126,8 +150,9 @@ transsaction_pipe = (
 
 
 # Register the processing pipeline
+print()
+print("Register Gear function.")
 transsaction_pipe.on(r)
-
 
 # # Check Balance
 for registration in r.gears.dumpregistrations():
@@ -136,8 +161,10 @@ for registration in r.gears.dumpregistrations():
         f"triggered {registration.RegistrationData.numTriggered} times."
     )
 
+print()
+print("Do one single random transaction.")
 attempt_random_transaction("sample")
-
+print("Balance after first transaction.")
 balance_sheet()
 
 # # Parallel Transactions
@@ -165,12 +192,27 @@ def run_in_parallell(jobs):
             worker.submit(job)
 
 
+print()
+print(
+    f"Run {parallell_transaction_job_count} batches of "
+    f"{sequential_transactions_count} transactions, in paralell."
+)
 run_in_parallell(
     [sequential_transactions(nm) for nm in range(parallell_transaction_job_count)]
 )
 
+print()
+print("Please wait for all transactions to complete...")
+while not (
+    all([exe.status == ExecutionStatus.done for exe in r.gears.dumpexecutions()])
+):
+    pass
+
+print("Done!")
+print()
 
 # # Final Balance
+print("Final Balance:")
 end_total_balance = balance_sheet()
 print(f"Total difference: {start_total_balance - end_total_balance}")
 print()
@@ -179,19 +221,3 @@ for registration in r.gears.dumpregistrations():
         f"Registered Gear function {registration.id} has been "
         f"triggered {registration.RegistrationData.numTriggered} times."
     )
-
-
-# # Cleanup
-# Unregister all registrations
-for reg in r.gears.dumpregistrations():
-    r.gears.unregister(reg.id)
-
-# Remove all executions
-for exe in r.gears.dumpexecutions():
-    r.gears.dropexecution(str(exe.executionId))
-
-# Clear all keys
-r.flushall()
-
-# Check that there are no keys
-r.keys()
