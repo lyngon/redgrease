@@ -318,27 +318,215 @@ Here is a quick run down of how it works:
 The chapter :ref:`Readers <readers>` will go through the various types of readers, ant the chapter :ref:`Operations <operations>` will go through the various types of operations, and how to use them.
 
 
-.. _quick_example_query:
+.. _quick_example_gears_comparisons:
 
-Keyspace Batch Query
---------------------
+RedgGrease Gear Function Comparisons
+------------------------------------
 
-Now let's move on to a little more interesting example of a batch query.
+Now let's move on to some more examles of  smaller Gear functions, before we move on to some more elaborate examples.
 
-.. include :: wip.rst
+The examples in this section are basically comparisons of how the examples in the `official Gears documentation <https://oss.redislabs.com/redisgears/master/examples.html>`_, could be simplified by using RedGrease.
 
-.. _quick_example_event_proc:
-
-Event Processing
-----------------
-.. literalinclude:: ../../examples/transaction_stream.py
-    :caption: Transaction Stream Processing Example:
+.. note::
+    RedGrease is backwards compatible with the "vanilla" syntax and structure, and all versions below are still perfectly valid Gear functions when executing using RedGrease.
 
 
-Clean-up
-~~~~~~~~
+Word Count
+~~~~~~~~~~
+Counting of words.
+
+Assumptions
+...........
+All keys store Redis String values. Each value is a sentence. 
+
+Vanilla Version
+...............
+
+This is the the `'Word Count' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#word-count>`_.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_example_wordcount.py
+    :caption: Vanlilla - Word Count
+
+RedGrease Version
+.................
+
+This is an example of how the same Gear function could be rewritten using RedgGrease.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_mod_example_wordcount.py
+    :caption: RedGrease - Word Count
 
 
+Delete by Key Prefix
+~~~~~~~~~~~~~~~~~~~~
+Deletes all keys whose name begins with a specified prefix and return their count.
+
+Assumptions
+...........
+There may be keys in the database. Some of these may have names beginning with the "delete_me:" prefix.
+
+Vanilla Version
+...............
+
+This is the the `'Delete by Key Prefix' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#delete-by-key-prefix>`_.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_example_deletebykeyprefix.py
+    :caption: Vanlilla - Delete by Key Prefix
+
+RedGrease Version
+.................
+
+This is an example of how the same Gear function could be rewritten using RedgGrease.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_mod_example_deletebykeyprefix.py
+    :caption: RedGrease - Delete by Key Prefix
+
+
+    Keyspace Notification Processing
+~~~~~~~~~~~~~~~~~~~~
+Copy every new message from a Redis Stream to a Redis Hash key. 
+
+Assumptions
+...........
+An input Redis Stream is stored under the "mystream" key. 
+
+Vanilla Version
+...............
+
+This is the the `'Keyspace Notification Processing' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#basic-redis-stream-processing>`_.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_example_basicredisstreamprocessing.py
+    :caption: Vanlilla - Basic Redis Stream Processing
+
+RedGrease Version
+.................
+
+This is an example of how the same Gear function could be rewritten using RedgGrease.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_mod_example_basicredisstreamprocessing.py
+    :caption: RedGrease - Basic Redis Stream Processing
+
+
+
+Automatic Expiry
+~~~~~~~~~~
+Sets the time to live (TTL) for every updated key to one hour. 
+
+Assumptions
+...........
+None. 
+
+Vanilla Version
+...............
+
+This is the the `'Automatic Expiry' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#automatic-expiry>`_.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_example_automaticexpiry.py
+    :caption: Vanlilla - Automatic Expiry
+
+RedGrease Version
+.................
+
+This is an example of how the same Gear function could be rewritten using RedgGrease.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_mod_example_automaticexpiry.py
+    :caption: RedGrease - Automatic Expiry
+
+
+Keyspace Notification Processing
+~~~~~~~~~~
+This example demonstrates a two-step process that:
+
+#. Synchronously captures distributed keyspace events
+#. Asynchronously processes the events' stream
+
+
+Assumptions
+...........
+The example assumes there is a ``process`` funtion defined, that does the actual processing of the deleted records. For the purpose of the exaple we can assume that it just outputs the name of the expired keys to the Redis logs, as follows:
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_example_keyspacenotificationprocessing.py
+    :lines: -9
+
+Vanilla Version
+...............
+
+This is the the `'Keyspace Notification Processing' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#keyspace-notification-processing>`_.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_example_keyspacenotificationprocessing.py
+    :caption: Vanlilla - Keyspace Notification Processing
+    :lines: 11-
+
+RedGrease Version
+.................
+
+This is an example of how the same Gear function could be rewritten using RedgGrease.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_mod_example_keyspacenotificationprocessing.py
+    :caption: RedGrease - Keyspace Notification Processing
+    :lines: 1, 2, 14-
+
+
+Reliable Keyspace Notification
+~~~~~~~~~~
+Capture each keyspace event and store to a Stream.
+
+Assumptions
+...........
+...
+
+Vanilla Version
+...............
+
+This is the the `'Reliable Keyspace Notification' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#reliable-keyspace-notification>`_.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_example_reliablekeyspacenotification.py
+    :caption: Vanlilla - Reliable Keyspace Notification
+
+RedGrease Version
+.................
+
+This is an example of how the same Gear function could be rewritten using RedgGrease.
+
+.. literalinclude:: ../../tests/gear_scripts/redislabs_mod_example_reliablekeyspacenotification.py
+    :caption: RedGrease - Reliable Keyspace Notification
+
+
+.. Distributed Monte Carlo to Estimate *π*
+.. ~~~~~~~~~~
+.. Estimate pi by throwing darts at a carefully-constructed dartboard.
+
+.. .. warning::
+..     **There are fare better way to get the value of π**
+
+..     This example is intended for educational purposes only. For all practical purposes, you'd be better off using the constant value 3.14159265359.
+
+.. Assumptions
+.. ...........
+
+.. The following two functions are defined, as they are the same in both versions:
+
+.. .. literalinclude:: ../../tests/gear_scripts/redislabs_example_distributedmontecarlotoestimatepi.py
+..     :caption: Common - Distributed Monte Carlo to Estimate *π*
+..     :lines: 1-11, 28-34
+
+.. Vanilla Version
+.. ...............
+
+.. This is the the `'Distributed Monte Carlo to Estimate pi' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#distributed-monte-carlo-to-estimate-pi>`_.
+
+.. .. literalinclude:: ../../tests/gear_scripts/redislabs_example_distributedmontecarlotoestimatepi.py
+..     :caption: Vanlilla - Distributed Monte Carlo to Estimate *π*
+..     :lines: 12-26, 36-
+
+.. RedGrease Version
+.. .................
+
+.. This is an example of how the same Gear function could be rewritten using RedgGrease.
+
+.. .. literalinclude:: ../../tests/gear_scripts/redislabs_mod_example_distributedmontecarlotoestimatepi.py
+..     :caption: RedGrease - Distributed Monte Carlo to Estimate *π*
+..     :lines: 1, 12-26, 36-
+..     :emphasize-lines: 8
 
 
 .. _quick_example_command:
@@ -346,7 +534,7 @@ Clean-up
 Cache Get Command
 ---------------
 
-As a final example of this quickstart tutorial, let's look at how we can build caching into Redis as a new command, with the help of Redis Gears and RedgGrease.
+As a final example of this quickstart tutorial, let's look at how we can build caching into Redis as a new command, with the help of Redis Gears and RedGrease.
 
 Assume that you have multiple worker clients that needs to read resources from urls, like for example images, and that it is a relatively high probability that more than one clients need to read the same image at roughly the same time.
 
@@ -355,6 +543,8 @@ This is a typical scenario where Redis might be used to cache the images, and ha
 This kind of caching can help save a lot to time fetching resources, as we only need to fetch each resource from the external source if it hasn't been fetched ant cached, which ideally only would happen once per image, the firs time it is requested by a client. 
 
 This is great but it suffers from a couple of flaws:
+
+.. _quick_caching_issues:
 
 #. **Unecessary Downloads** There is a possilility that more than one client downloads the resource from the remote source at the same time. This would happen to any requests starting after the first requests but before the resource has been uploaded back to the cache. Such duplicate downloads are not only unecessary, they also compete an parasitize on the network bandwidth to the source.
 
@@ -403,6 +593,25 @@ Ignore the details and just look at the highligthed lines, and notice:
     - A cached value (line 42)
 
 Which is exactly what you would expect from a cached feching function. 
+
+.. note::
+    As mentioned, most of the complexity of the function comes from addressing :ref:`issue 1 <quick_caching_issues>`. If we did not want to address that issue the function might simply look like this:
+
+    .. code-block:: python
+
+        def cache_get(url):
+            if redgrease.cmd.exists(url):
+                return bytes(redgrease.cmd.get(url))
+            
+            response = requests.get(url)
+            
+            if response.status_code != 200:
+                return bytes()
+            
+            response_data = bytes(response.content)
+            redgrease.cmd.set(url, response_data)
+            
+            return response_data
 
 The rest of the logic is mostly for ensuring that only one of the requests trigger the download and storing in the cache, while blocking new requests until the data is stored (or timed out or failed).
 

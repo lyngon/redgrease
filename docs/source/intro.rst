@@ -21,9 +21,9 @@ It may help you create:
 - Custom Redis commands and interactions,
 - And much, much more...
 
-... all written i Python and running distributed ON your Redis nodes.
+... all written in Python and running distributed ON your Redis nodes.
 
-The Gears functions may include and use third party dependecies like for example ``numpy``, ``requests``, ``SQLAlchemy``, ``gensim`` or pretty much any other Python package distribution you may need for your use-case.
+The Gear functions may include and use third party dependecies like for example ``numpy``, ``requests``, ``SQLAlchemy``, ``gensim`` or pretty much any other Python package distribution you may need for your use-case.
 
 
 .. _intro_redis:
@@ -32,7 +32,7 @@ Redis
 -----
 
 `Redis <https://redis.io/>`_ is a popular in-memory data structure store, used as a distributed, in-memory key–value database, cache and message broker, with optional durability.
-Redis supports different kinds of abstract data structures, such as strings, lists, maps, sets, sorted sets, HyperLogLogs, bitmaps, streams, and spatial indexes. The project is developed and maintained by a project core team and as of 2015 is sponsored by `Redis Labs <https://redislabs.com/>`_. 
+Redis supports different kinds of abstract data structures, such as strings, lists, maps, sets, sorted sets, HyperLogLogs, bitmaps, streams, and spatial indexes. The project is developed and maintained by `Redis Labs <https://redislabs.com/>`_. 
 It is `open-source <https://github.com/redis/redis>`_ software released under a BSD 3-clause license.
 
 
@@ -41,7 +41,7 @@ It is `open-source <https://github.com/redis/redis>`_ software released under a 
 Redis Gears
 -----------
 
-`Redis Gears <https://redislabs.com/modules/redis-gears/>`_  is an official extension module for Redis, developed by `Redis Labs <https://redislabs.com/>`_, which allows for distributed Python computations on the Redis server itself.
+`Redis Gears <https://redislabs.com/modules/redis-gears/>`_  is an official extension module for Redis, also developed by `Redis Labs <https://redislabs.com/>`_, which allows for distributed Python computations on the Redis server itself.
 
 From the `official Redis Gears site <https://redislabs.com/modules/redis-gears/>`_:
 
@@ -49,7 +49,7 @@ From the `official Redis Gears site <https://redislabs.com/modules/redis-gears/>
 
 When the Redis Gears module is loaded onto the Redis engines, the Redis engine command set is extended with new commands to register, distribute, manage and run so called :ref:`Gear Functions <intro_gear_functions>`, written in Python, across across the shards of the Redis database. 
 
-Client applications can define and submit such Python Gear Functions, either to run immedeately in batch or to be registered to be triggered on events, such as Redis keyspace changes, stream writes or external triggers. The Redis Gears module handles all the complexities of distribution, cooridnation, scheduling and execution of the Gear Functions.
+Client applications can define and submit such Python Gear Functions, either to run immedeately as 'batch jobs', or to be registered to be triggered on events, such as Redis keyspace changes, stream writes or external triggers. The Redis Gears module handles all the complexities of distribution, cooridnation, scheduling and execution of the Gear Functions.
 
 .. figure:: ../images/Gear_Function6_white.png
     :width: 512
@@ -62,13 +62,13 @@ Client applications can define and submit such Python Gear Functions, either to 
 Gear Functions
 ~~~~~~~~~~~~~~~
 
-Gear Functions consists of a sequence steps, or operations, such as for example Map, Filter, Aggregate, GroupBy and more. 
+Gear Functions are composed as a sequence steps, or operations, such as for example Map, Filter, Aggregate, GroupBy and more. 
 
-These operations are parameterized with any Python functions, that you create according to your needs.
+These operations are parameterized with Python functions, that you define according to your needs.
 
-The the steps / operations are 'piped' togetrer by the Redis Gears runtime such that the output of of one step / operation becomes the input to the subsequent step / operation. 
+The the steps / operations are 'piped' together by the Redis Gears runtime such that the output of of one step / operation becomes the input to the subsequent step / operation. 
 
-The first step / operation of any Gear Function is always one of six "Reader", that defines what the initial input:
+The first step / operation of any Gear Function is always one of six available "Readers", defining the source of the input to the first step / operation:
 
 - :ref:`KeysReader <reader_keysreader>` : Redis keys and values.
 - :ref:`KeysOnlyReader <reader_keysonlyreader>` : Redis keys.
@@ -77,11 +77,11 @@ The first step / operation of any Gear Function is always one of six "Reader", t
 - :ref:`PythonReader <reader_pythonreader>` : Arbitrary Python generator.
 - :ref:`CommandReader <reader_commandreader>` : Command aguments from application client.
 
-Readers can be parameterized to define which subset of data it should operate on, for example by specifying a pattern, for the keys or streams it should read. 
+Readers can be parameterized to narrow down the subset of data it should operate on, for example by specifying a pattern for the keys or streams it should read. 
 
-Depending on the reader type, Gear Functions can either be run immedeately, on demand, as batch jobs or in an event-driven manner by regestrig it to trigger automatically on various types of events.
+Depending on the reader type, Gear Functions can either be run immedeately, on demand, as batch jobs or in an event-driven manner by registering it to trigger automatically on various types of events.
 
-Each shard of the Redis Cluster executes its own 'instance' of the Gear Function in parallell on the relevant local shard data, unless or until the data is finally collected and reduced to its final global result.
+Each shard of the Redis Cluster executes its own 'instance' of the Gear Function in parallell on the relevant local shard data, unless expliclt collected, or until it is implicitly reduced to its final global result at the end of the function.
 
 You can find more details about the interals of Gear Functions in the `official Documentation <https://oss.redislabs.com/redisgears/master/functions.html>`_.
 
@@ -111,14 +111,14 @@ The RedGrease package provides a number of functionalities that facilitates writ
 #. :ref:`Runtime functions <runtime>` wrappers. 
 
     The Redis Gears server `runtime environment <https://oss.redislabs.com/redisgears/runtime.html>`_ automatically loads a number of special functions into the top leve scope (e.g. ``GearsBuilder``, ``GB``, ``atomic``, ``execute``, ``log`` etc). 
-    RedGrease provides placeholder versions that provide **&docstrings**, **auto completion** and **type hints** during development, and does not clash with the actual runtime.
+    RedGrease provides placeholder versions that provide **docstrings**, **auto completion** and **type hints** during development, and does not clash with the actual runtime.
 
     .. image:: ../images/basic_usage_hints.jpg
 
 
 #. :ref:`Server-side Redis commands <red_commands>`.
 
-    Allowing for **all** Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of *manually* invoking the corresponding commmand string using ``execute()``. 
+    Allowing for **all** Redis (v.6) commands to be executed in the serverside function, as if using a Redis 'client' class, instead of *explicitly* invoking the corresponding commmand string using ``execute()``. 
     It is basically the `redis <https://pypi.org/project/redis/>`_ client, but with ``execute_command()`` rewired to use the Gears-native ``execute()`` instead under the hood. 
 
     .. code-block:: python
@@ -156,11 +156,11 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     * Can be created without a Redis connection.
 
-    * Several GearFuctions can reuse the the initial steps.
+    * Supports reuse of 'partial' Gear functions.
 
     * Can be executed in a few different convenient ways.
     
-    * Requirements can be specified per step, instead of at execution.
+    * Requirements can be specified per step, instead of only at execution.
 
     |br|
 
@@ -191,7 +191,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
 #. :ref:`A Command Line Tool <cli>`.
 
-    Helps running and or loading of Gears scripts onto a Redis Gears server. 
+    Helps running and/or loading of Gears script files onto a Redis Gears instance. 
     Particularly useful for "trigger-based" CommandReader Gears.
 
     It also provides a simple form of 'hot-reloading' of Redis Gears scripts, by continously monitoring directories containing Redis Gears scripts and automatically 'pyexecute' them on a Redis Gear instance if it detects modifications. 
@@ -231,15 +231,15 @@ The RedGrease package provides a number of functionalities that facilitates writ
 Example Use-Cases
 -----------------
 
-The possible use-cases for Redis Gears, and subsequently RedGrease, is virtually endless, but some commomn, or otherwise interesting use-cases include:
+The possible use-cases for Redis Gears, and subsequently RedGrease, is virtually endless, but some common, or otherwise interesting use-cases include:
 
 * Automatic Cache-miss handling.
 
-    Make Redis automatically fetch and cache the requested resource if it isn't found, so that clients do not have to handle it.
+    Make Redis automatically fetch and cache the requested resource, so that clients do not have to handle cache-misses.
 
-* Automatic batched Write-Through / Write-Behind.
+* Automatic batched write-through / write-behind.
     
-    Make Redis automatically write back updates to slower, high latency datastore, efficently using batch writes. Allowing clients to write high velocity updates uninterupted to Redis only 
+    Make Redis automatically write back updates to slower, high latency datastore, efficently using batch writes. Allowing clients to write high velocity updates uninterupted to Redis, without bothering with the slow data store.
 
     .. figure:: ../images/Gears_Example_2_white.png
 
