@@ -7,6 +7,11 @@ Advanced Concepts
 
 .. include :: wip.rst
 
+.. _adv_extras:
+
+Redgrease Extras Options
+------------------------
+
 .. _adv_pyver:
 
 Python 3.6 and 3.8+ 
