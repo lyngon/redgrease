@@ -656,9 +656,9 @@ This means that you can now call the decorated function, just as if it was a loc
 
 This may look like it is actually executing the function locally, but the ``cache_get`` function is actually executed on the server.
 
-Note that the registered ``cache_get`` Gear function can not only be triggered by the client that defined the decorated function, but by any client by invoking the Redis Gear ``RG.TRIGGER <https://oss.redislabs.com/redisgears/commands.html#rgtrigger>``_ command with the the functions' trigger name and arguments.
+Note that the registered ``cache_get`` Gear function can not only be triggered by the client that defined the decorated function, but by any client by invoking the Redis Gear `RG.TRIGGER <https://oss.redislabs.com/redisgears/commands.html#rgtrigger>`_ command with the the functions' trigger name and arguments.
 
-The arguments for the :function:`redgreaes.trigger <.trigger>` decorator, are the same as to the :method:``register <.CommandReader.register>`` method of the :class:`CommandReader <.CommandReader>` class.
+The arguments for the :func:`redgrease.trigger <.trigger>` decorator, are the same as to the :method:``register <.CommandReader.register>`` method of the :class:`CommandReader <.CommandReader>` class.
 
 .. note:: 
 
