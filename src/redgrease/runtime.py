@@ -26,16 +26,25 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
+from typing import TYPE_CHECKING, Hashable, Iterable, TypeVar
 
 import redgrease.gears
 import redgrease.sugar as sugar
+
+if TYPE_CHECKING:
+    import redgrease.typing as optype
+
+T = TypeVar("T")
 
 
 class GearsBuilder(redgrease.gears.PartialGearFunction):
     """The GearsBuilder class is imported to the runtime's environment by default.
 
     It exposes the functionality of the function's context builder.
+
+    Unlike Readers, the GearsBuilder mutates its function instead of creating a new one
+    for each operation. This behaviour is deliberate, in order to be consistent with
+    the "raw" string Gear functions.
     """
 
     def __init__(
@@ -74,9 +83,331 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
         """
         requirements = kwargs.pop("requirements", None)
         reader_op = redgrease.gears.Reader(reader, defaultArg, desc, *args, **kwargs)
-        super().__init__(
-            operation=reader_op, input_function=None, requirements=requirements
+        self._function: redgrease.gears.PartialGearFunction = (
+            redgrease.gears.PartialGearFunction(
+                operation=reader_op,
+                requirements=requirements,
+            )
         )
+
+    def run(
+        self,
+        arg: str = None,  # TODO: This can also be a Python generator
+        convertToStr: bool = True,
+        collect: bool = True,
+        # Helpers, all must be None
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        on=None,
+        # Other Redis Gears args
+        **kwargs,
+        # TODO: Add all the Reader specific args here
+    ) -> redgrease.gears.ClosedGearFunction:
+        return self._function.run(
+            arg=arg,
+            convertToStr=convertToStr,
+            collect=collect,
+            requirements=requirements,
+            on=on,
+            **kwargs,
+        )
+
+    def register(  # noqa: C901
+        self,
+        prefix: str = "*",
+        convertToStr: bool = True,
+        collect: bool = True,
+        # Helpers, all must be None
+        mode: str = None,
+        onRegistered: "optype.Callback" = None,
+        eventTypes: Iterable[str] = None,
+        keyTypes: Iterable[str] = None,
+        readValue: bool = None,
+        batch: int = None,
+        duration: int = None,
+        onFailedPolcy: str = None,
+        onFailedRetryInterval: int = None,
+        trimStream: bool = None,
+        trigger: str = None,  # Reader Specific: CommandReader
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        on=None,
+        # Other Redis Gears args
+        **kwargs,
+        # TODO: Add all the Reader specific args here
+    ) -> redgrease.gears.ClosedGearFunction:
+        return self._function.register(
+            prefix=prefix,
+            convertToStr=convertToStr,
+            collect=collect,
+            # Helpers
+            mode=mode,
+            onRegistered=onRegistered,
+            eventTypes=eventTypes,
+            keyTypes=keyTypes,
+            readValue=readValue,
+            batch=batch,
+            duration=duration,
+            onFailedPolcy=onFailedPolcy,
+            onFailedRetryInterval=onFailedRetryInterval,
+            trimStream=trimStream,
+            trigger=trigger,  # CommandReader specific
+            # Other Redgrease args
+            requirements=requirements,
+            on=on,
+            # Other Redis Gears args
+            **kwargs,
+        )
+
+    def map(
+        self,
+        op: "optype.Mapper[optype.InputRecord, optype.OutputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.map(op=op, requirements=requirements, **kwargs)
+
+        return self
+
+    def flatmap(
+        self,
+        op: "optype.Expander[optype.InputRecord, optype.OutputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.flatmap(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def foreach(
+        self,
+        op: "optype.Processor[optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.foreach(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def filter(
+        self,
+        op: "optype.Filterer[optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.filter(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def accumulate(
+        self,
+        op: "optype.Accumulator[T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.accumulate(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def localgroupby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        if self._function:
+            self._function = self._function.localgroupby(
+                extractor=extractor,
+                reducer=reducer,
+                requirements=requirements,
+                **kwargs,
+            )
+
+        return self
+
+    def limit(
+        self,
+        length: int,
+        start: int = 0,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.limit(length=length, start=start, **kwargs)
+
+        return self
+
+    def collect(self, **kwargs) -> "GearsBuilder":
+        if self._function:
+            self._function = self._function.collect(**kwargs)
+
+        return self
+
+    def repartition(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, Hashable]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.repartition(
+            extractor=extractor, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def aggregate(
+        self,
+        zero: T,
+        seqOp: "optype.Accumulator[T, optype.InputRecord]",
+        combOp: "optype.Accumulator[T, T]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.aggregate(
+            zero=zero,
+            seqOp=seqOp,
+            combOp=combOp,
+            requirements=requirements,
+            **kwargs,
+        )
+
+        return self
+
+    def aggregateby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        zero: T,
+        seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        combOp: "optype.Reducer[optype.Key, T, T]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.aggregateby(
+            extractor=extractor,
+            zero=zero,
+            seqOp=seqOp,
+            combOp=combOp,
+            requirements=requirements,
+            **kwargs,
+        )
+
+        return self
+
+    def groupby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.groupby(
+            extractor=extractor, reducer=reducer, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def batchgroupby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.batchgroupby(
+            extractor=extractor, reducer=reducer, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def sort(
+        self,
+        reverse: bool = True,
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.sort(
+            reverse=reverse, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def distinct(self, **kwargs) -> "GearsBuilder":
+        self._function = self._function.distinct(**kwargs)
+
+        return self
+
+    def count(self, **kwargs) -> "GearsBuilder":
+        self._function = self._function.count(**kwargs)
+
+        return self
+
+    def countby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, Hashable]" = lambda x: str(x),
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.countby(
+            extractor=extractor,
+            # Other Redgrease args
+            requirements=requirements,
+            # Other Redis Gears args
+            **kwargs,
+        )
+
+        return self
+
+    def avg(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(x),
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        self._function = self._function.avg(
+            extractor=extractor,
+            # Other Redgrease args
+            requirements=requirements,
+            # Other Redis Gears args
+            **kwargs,
+        )
+
+        return self
 
 
 GB = GearsBuilder

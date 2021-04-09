@@ -286,3 +286,24 @@ def test_register(rg: RedisGears):
     assert res
     # Todo: Is this the desired output?
     assert res == [b"test", b"this", b"is", b"a", b"test"]
+
+
+@pytest.mark.xfail(
+    sys.version_info[:2] != redis_py_ver[:2],
+    reason="Incompatible Python versions",
+    raises=redis.exceptions.ResponseError,
+)
+def test_mutable_builder(rg: RedisGears):
+    rg.set("x", "1")
+    rg.set("y", "1")
+    rg.set("z", "2")
+    rg.set("t", "2")
+    gb = GearsBuilder()
+    gb.map(lambda x: x["value"])
+    gb.aggregateby(lambda x: x, 0, lambda _, a, r: a + int(r), lambda _, a, r: a + r)
+    gb.map(lambda x: (x["key"], x["value"]))
+    gb.sort()
+    gb.run()
+    res = rg.gears.pyexecute(gb)
+    assert res == [("1", 2), ("2", 4)]
+    assert res.errors == []

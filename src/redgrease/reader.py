@@ -29,11 +29,11 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 from typing import Iterable, Optional
 
-import redgrease.runtime
+import redgrease.gears
 import redgrease.sugar
 
 
-class GearReader(redgrease.runtime.GearsBuilder):
+class GearReader(redgrease.gears.PartialGearFunction):
     """Base class for the Reader sugar classes.
 
     Extends `redgrease.runtime.GearsBuilder' with arguments for collecting
@@ -76,12 +76,8 @@ class GearReader(redgrease.runtime.GearsBuilder):
                 Package lependencies for the gear train.
                 Defaults to None.
         """
-        super().__init__(
-            reader=reader,
-            defaultArg=defaultArg,
-            desc=desc,
-            requirements=requirements,
-        )
+        reader_op = redgrease.gears.Reader(reader, defaultArg, desc)
+        super().__init__(operation=reader_op, requirements=requirements)
 
 
 class KeysReader(GearReader):
