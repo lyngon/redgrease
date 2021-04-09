@@ -57,6 +57,7 @@ import redgrease.data
 import redgrease.gears
 import redgrease.reader
 import redgrease.requirements
+import redgrease.runtime
 from redgrease.utils import (
     CaseInsensitiveDict,
     bool_ok,
@@ -261,7 +262,9 @@ class Gears:
 
     def pyexecute(
         self,
-        gear_function: Union[str, redgrease.gears.ClosedGearFunction] = "",
+        gear_function: Union[
+            str, redgrease.runtime.GearsBuilder, redgrease.gears.GearFunction
+        ] = "",
         unblocking=False,
         requirements: Optional[
             Iterable[Union[str, redgrease.requirements.Requirement]]
@@ -343,6 +346,9 @@ class Gears:
 
         requirements = set(requirements if requirements else [])
         result_function = None
+
+        if isinstance(gear_function, redgrease.runtime.GearsBuilder):
+            gear_function = gear_function._function
 
         if isinstance(gear_function, redgrease.gears.GearFunction):
             # If the input is a GearFunction, we get the requirements from it,

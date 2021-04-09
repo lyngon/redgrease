@@ -1693,6 +1693,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a Map operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Map(op=op, **kwargs),
@@ -1727,6 +1731,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a FlatMap operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             FlatMap(op=op, **kwargs),
@@ -1760,6 +1768,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a ForEach operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             ForEach(op=op, **kwargs),
@@ -1795,6 +1807,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a FIlter operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Filter(op=op, **kwargs),
@@ -1833,6 +1849,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with Accumulate operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Accumulate(op=op, **kwargs),
@@ -1877,6 +1897,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a LocalGroupBy operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             LocalGroupBy(extractor=extractor, reducer=reducer, **kwargs),
@@ -1911,6 +1935,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a Limit operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Limit(length=length, start=start, **kwargs),
@@ -1927,6 +1955,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a Collect operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Collect(**kwargs),
@@ -1964,6 +1996,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a Repartition operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Repartition(extractor=extractor, **kwargs),
@@ -2017,6 +2053,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a Aggregate operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Aggregate(zero=zero, seqOp=seqOp, combOp=combOp, **kwargs),
@@ -2077,6 +2117,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a AggregateBy operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             AggregateBy(
@@ -2121,6 +2165,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a GroupBy operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             GroupBy(extractor=extractor, reducer=reducer, **kwargs),
@@ -2163,6 +2211,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a BatchGroupBy operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             BatchGroupBy(extractor=extractor, reducer=reducer, **kwargs),
@@ -2195,6 +2247,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a Sort operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Sort(reverse=reverse, **kwargs),
@@ -2212,6 +2268,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a Distinct operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Distinct(**kwargs),
@@ -2228,6 +2288,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a Count operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Count(**kwargs),
@@ -2262,6 +2326,10 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with a CountBy operation as last step.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             CountBy(extractor=extractor, **kwargs),
@@ -2297,6 +2365,11 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
         Returns:
             PartialGearFunction:
                 A new partial gear function with an avg operation as last step.
+                GearsBuilder - The same GearBuilder, but with updated function.
+
+                Note that for GearBuilder this method does **not** return a new
+                GearFunction, but instead returns the same GearBuilder, but with its
+                internal function updaded.
         """
         return PartialGearFunction(
             Avg(extractor=extractor, **kwargs),

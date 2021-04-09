@@ -674,7 +674,7 @@ def deseralize_gear_function(
         raise
 
 
-def seralize_gear_function(gear_function: redgrease.gears.ClosedGearFunction) -> str:
+def seralize_gear_function(gear_function: redgrease.gears.GearFunction) -> str:
     """Serializes a GearFunction into a wrapper code-string that can be sent to the
     Gear server to execute.
 
