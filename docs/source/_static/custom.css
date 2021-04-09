@@ -1,5 +1,21 @@
-/* 
-.wy-side-nav-search, .wy-nav-top {
-    background: #7a0c00;
-} 
-*/
+.toggle {
+    border: 1px solid darkcyan;
+}
+
+.toggle .header {
+    display: block;
+    clear: both;
+    background-color: darkcyan;
+    color: lightcyan;
+    padding-left: 15px;
+    padding-top: 3px;
+
+}
+
+.toggle .header::before {
+    content: "▶ Show";
+}
+
+.toggle .header.open::before {
+    content: "▼ Hide";
+}
