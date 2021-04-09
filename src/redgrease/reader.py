@@ -77,9 +77,7 @@ class GearReader(redgrease.gears.PartialGearFunction):
                 Defaults to None.
         """
         reader_op = redgrease.gears.Reader(reader, defaultArg, desc)
-        super().__init__(
-            operation=reader_op, input_function=self, requirements=requirements
-        )
+        super().__init__(operation=reader_op, requirements=requirements)
 
 
 class KeysReader(GearReader):

@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-class GearsBuilder:  # (redgrease.gears.PartialGearFunction):
+class GearsBuilder:
     """The GearsBuilder class is imported to the runtime's environment by default.
 
     It exposes the functionality of the function's context builder.
