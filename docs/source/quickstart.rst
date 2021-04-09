@@ -173,7 +173,7 @@ The next chapter ":ref:`Redgrease Client <client>`", goes into each command in m
 
 You can take a sneak-peek at the full code we'll walk through in this section, by expanding the block below (click "▶ Show").
 
-If you find this rather selfself-explanatory, then you can probably jump directly to the next example of :ref:`more involved Redis Gears query-function <quick_example_query>`.
+If you find this rather selfself-explanatory, then you can probably jump directly to the next section where we :ref:`compare examples of Gear functions, with and without using RedGrease <quick_example_gears_comparisons>`.
 
 Otherwise just contiue reading and well, go it through step-by-step.
 
