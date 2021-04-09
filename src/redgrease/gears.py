@@ -46,6 +46,11 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
+################################################################################
+#                                Operations                                    #
+################################################################################
+
+
 class Operation:
     """Abstract base class for Gear function operations.
 
@@ -85,9 +90,33 @@ class Operation:
                 subclass.
         """
         raise NotImplementedError(
-            "Operation has not implemented the `add_to` method: "
+            "Builder Operation has not implemented the `add_to` method: "
             f"'{self.__class__.__name__}'"
         )
+
+
+class Nop(Operation):
+    """No Operation.
+
+    This Operation does nothing.
+    """
+
+    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
+        """Returns the function, unmodified.
+
+        Args:
+            function (Union[Type, PartialGearFunction]):
+                The partial gear function to append this operation to.
+
+                If, and only if, the operation is a reader function (always and only
+                the first operation in any Gear function), then the `function`
+                argument must instead be a GearsBuilder class/type.
+
+        Returns:
+            PartialGearFunction:
+                The function unmodified.
+        """
+        return function
 
 
 class Reader(Operation):
@@ -1208,6 +1237,11 @@ class Avg(Operation):
         return function.avg(self.extractor, **self.kwargs)
 
 
+################################################################################
+#                               GearFunctions                                  #
+################################################################################
+
+
 class GearFunction(Generic[T]):
     """Abstract base class for both partial and closed Gear functions.
     The base `GearFunction` class is not intended to be instantiated by API users.
@@ -1230,7 +1264,7 @@ class GearFunction(Generic[T]):
     def __init__(
         self,
         operation: Operation,
-        input_function: "PartialGearFunction" = None,
+        input_function: "PartialGearFunction",
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
         """Instaniate a GearFunction
@@ -1249,13 +1283,14 @@ class GearFunction(Generic[T]):
                 operation requires in order to execute.
                 Defaults to None.
         """
-        self.input_function: Optional[GearFunction] = input_function
+
         self.operation = operation
 
         self.requirements = set(requirements if requirements else [])
 
-        if input_function:
+        if input_function is not self:
             self.requirements = self.requirements.union(input_function.requirements)
+            self.input_function = input_function
 
     @property
     def reader(self) -> Optional[str]:
@@ -2262,7 +2297,7 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a XXX operation as last step.
+                A new partial gear function with an avg operation as last step.
         """
         return PartialGearFunction(
             Avg(extractor=extractor, **kwargs),

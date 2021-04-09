@@ -26,10 +26,15 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
+from typing import TYPE_CHECKING, Hashable, Iterable, TypeVar
 
 import redgrease.gears
 import redgrease.sugar as sugar
+
+if TYPE_CHECKING:
+    import redgrease.typing as optype
+
+T = TypeVar("T")
 
 
 class GearsBuilder(redgrease.gears.PartialGearFunction):
@@ -74,9 +79,673 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
         """
         requirements = kwargs.pop("requirements", None)
         reader_op = redgrease.gears.Reader(reader, defaultArg, desc, *args, **kwargs)
+
         super().__init__(
-            operation=reader_op, input_function=None, requirements=requirements
+            operation=redgrease.gears.Nop(),
+            input_function=redgrease.gears.PartialGearFunction(
+                operation=reader_op, input_function=self, requirements=requirements
+            ),
         )
+
+    def map(
+        self,
+        op: "optype.Mapper[optype.InputRecord, optype.OutputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Instance-local Map operation that performs a one-to-one (1:1) mapping of
+        records.
+
+        Args:
+            op (redgrease.typing.Mapper):
+                Function to map on the input records.
+                The function must take one argument as input (input record) and
+                return something as an output (output record).
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the Map operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a Map operation as last step.
+        """
+        self.input_function = self.input_function.map(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def flatmap(
+        self,
+        op: "optype.Expander[optype.InputRecord, optype.OutputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Instance-local FlatMap operation that performs one-to-many (1:N) mapping
+        of records.
+
+        Args:
+            op (redgrease.typing.Expander):
+                Function to map on the input records.
+                The function must take one argument as input (input record) and
+                return an iterable as an output (output records).
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the FlatMap operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a FlatMap operation as last step.
+        """
+        self.input_function = self.input_function.flatmap(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def foreach(
+        self,
+        op: "optype.Processor[optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Instance-local ForEach operation performs one-to-the-same (1=1) mapping.
+
+        Args:
+            op (redgrease.typing.Processor):
+                Function to run on each of the input records.
+                The function must take one argument as input (input record) and
+                should not return anything.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the ForEach operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a ForEach operation as last step.
+        """
+        self.input_function = self.input_function.foreach(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def filter(
+        self,
+        op: "optype.Filterer[optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Instance-local Filter operation performs one-to-zero-or-one (1:bool)
+        filtering of records.
+
+        Args:
+            op (redgrease.typing.Filterer):
+                Function to apply on the input records, to decide which ones to keep.
+                The function must take one argument as input (input record) and
+                return a bool. The input records evaluated to `True` will be kept as
+                output records.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the Filter operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a FIlter operation as last step.
+        """
+        self.input_function = self.input_function.filter(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def accumulate(
+        self,
+        op: "optype.Accumulator[T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Instance-local Accumulate operation performs many-to-one mapping (N:1) of
+        records.
+
+        Args:
+            op (redgrease.typing.Accumulator):
+                Function to to apply on the input records.
+                The function must take two arguments as input:
+                    - the input record, and
+                    - An accumulator value.
+                It should aggregate the input record into the accumulator variable,
+                which stores the state between the function's invocations.
+                The function must return the accumulator's updated value.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the Accumulate operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with Accumulate operation as last step.
+        """
+        self.input_function = self.input_function.accumulate(
+            op=op, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def localgroupby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Instance-local LocalGroupBy operation performs many-to-less mapping (N:M)
+        of records.
+
+        Args:
+            extractor (redgrease.typing.Extractor):
+                Function to apply on the input records, to extact the grouping key.
+                The function must take one argument as input (input record) and
+                return a string (key).
+                The groups are defined by the value of the key.
+
+            reducer (redgrease.typing.Reducer):
+                Function to apply on the records of each group, to reduce to a single
+                value (per group).
+                The function must take (a) a key, (b) an input record and (c) a
+                variable that's called an accumulator.
+                It performs similarly to the accumulator callback, with the difference
+                being that it maintains an accumulator per reduced key / group.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the LocalGroupBy operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a LocalGroupBy operation as last step.
+        """
+        if self.input_function:
+            self.input_function = self.input_function.localgroupby(
+                extractor=extractor,
+                reducer=reducer,
+                requirements=requirements,
+                **kwargs,
+            )
+
+        return self
+
+    def limit(
+        self,
+        length: int,
+        start: int = 0,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Instance-local Limit operation limits the number of records.
+
+        Args:
+            length (int):
+                The maximum number of records.
+
+            start (int, optional):
+                The index of the first input record.
+                Defaults to 0.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the Limit operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a Limit operation as last step.
+        """
+        if self.input_function:
+            self.input_function = self.input_function.limit(
+                length=length, start=start, **kwargs
+            )
+
+        return self
+
+    def collect(self, **kwargs) -> "GearsBuilder":
+        """Cluster-global Collect operation collects the result records.
+
+        Args:
+            **kwargs:
+                Additional parameters to the Collect operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a Collect operation as last step.
+        """
+        if self.input_function:
+            self.input_function = self.input_function.collect(**kwargs)
+
+        return self
+
+    def repartition(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, Hashable]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Cluster-global Repartition operation repartitions the records by shuffling
+        them between shards.
+
+        Args:
+            extractor (redgrease.typing.Extractor):
+                Function that takes a record and calculates a key that is used to
+                determine the hash slot, and consequently the shard, that the record
+                should migrate to to.
+                The function must take one argument as input (input record) and
+                return a string (key).
+                The hash slot, and consequently the destination shard, is determined by
+                hthe value of the key.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the Repartition operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a Repartition operation as last step.
+        """
+        if self.input_function:
+            self.input_function = self.input_function.repartition(
+                extractor=extractor, requirements=requirements, **kwargs
+            )
+
+        return self
+
+    def aggregate(
+        self,
+        zero: T,
+        seqOp: "optype.Accumulator[T, optype.InputRecord]",
+        combOp: "optype.Accumulator[T, T]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Perform aggregation on all the execution data.
+
+        Args:
+            zero (Any):
+                The initial / zero value of the accumulator variable.
+
+            seqOp (redgrease.typing.Accumulator):
+                A function to be applied on each of the input records, locally per
+                shard.
+                It must take two parameters:
+                - an accumulator value, from previous calls
+                - an input record
+                The functoin aggregates the input into the accumulator variable,
+                which stores the state between the function's invocations.
+                The function must return the accumulator's updated value.
+
+            combOp (redgrease.typing.Accumulator):
+                A function to be applied on each of the aggregated results of the local
+                aggregation (i.e. the output of `seqOp`).
+                It must take two parameters:
+                - an accumulator value, from previous calls
+                - an input record
+                The functoin aggregates the input into the accumulator variable,
+                which stores the state between the function's invocations.
+                The function must return the accumulator's updated value.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the Aggregate operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a Aggregate operation as last step.
+        """
+        if self.input_function:
+            self.input_function = self.input_function.aggregate(
+                zero=zero,
+                seqOp=seqOp,
+                combOp=combOp,
+                requirements=requirements,
+                **kwargs,
+            )
+
+        return self
+
+    def aggregateby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        zero: T,
+        seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        combOp: "optype.Reducer[optype.Key, T, T]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Like aggregate, but on each key, the key is extracted using the extractor.
+
+        Args:
+            extractor (redgrease.typing.Extractor):
+                Function to apply on the input records, to extact the grouping key.
+                The function must take one argument as input (input record) and
+                return a string (key).
+                The groups are defined by the value of the key.
+
+            zero (Any):
+                The initial / zero value of the accumulator variable.
+
+            seqOp (redgrease.typing.Accumulator):
+                A function to be applied on each of the input records, locally per
+                shard and group.
+                It must take two parameters:
+                - an accumulator value, from previous calls
+                - an input record
+                The functoin aggregates the input into the accumulator variable,
+                which stores the state between the function's invocations.
+                The function must return the accumulator's updated value.
+
+            combOp (redgrease.typing.Accumulator):
+                A function to be applied on each of the aggregated results of the local
+                aggregation (i.e. the output of `seqOp`).
+                It must take two parameters:
+                - an accumulator value, from previous calls
+                - an input record
+                The functoin aggregates the input into the accumulator variable,
+                which stores the state between the function's invocations.
+                The function must return the accumulator's updated value.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the AggregateBy operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a AggregateBy operation as last step.
+        """
+        if self.input_function:
+            self.input_function = self.input_function.aggregateby(
+                extractor=extractor,
+                zero=zero,
+                seqOp=seqOp,
+                combOp=combOp,
+                requirements=requirements,
+                **kwargs,
+            )
+
+        return self
+
+    def groupby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Perform a many-to-less (N:M) grouping of records.
+
+        Args:
+            extractor (redgrease.typing.Extractor):
+                Function to apply on the input records, to extact the grouping key.
+                The function must take one argument as input (input record) and
+                return a string (key).
+                The groups are defined by the value of the key.
+
+            reducer (redgrease.typing.Reducer):
+                Function to apply on the records of each group, to reduce to a single
+                value (per group).
+                The function must take (a) a key, (b) an input record and (c) a
+                variable that's called an accumulator.
+                It performs similarly to the accumulator callback, with the difference
+                being that it maintains an accumulator per reduced key / group.
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the GroupBy operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated withh a GroupBy operation as last step.
+        """
+        self.input_function = self.input_function.groupby(
+            extractor=extractor, reducer=reducer, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def batchgroupby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
+        reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]",
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Many-to-less (N:M) grouping of records.
+
+            Note: Using this operation may cause a substantial increase in memory usage
+                during runtime. Consider using the GroupBy
+
+        Args:
+            extractor (redgrease.typing.Extractor):
+                Function to apply on the input records, to extact the grouping key.
+                The function must take one argument as input (input record) and
+                return a string (key).
+                The groups are defined by the value of the key.
+
+            reducer (redgrease.typing.Reducer):
+                Function to apply on the records of each group, to reduce to a single
+                value (per group).
+                The function must take (a) a key, (b) an input record and (c) a
+                variable that's called an accumulator.
+                It performs similarly to the accumulator callback, with the difference
+                being that it maintains an accumulator per reduced key / group.
+
+            **kwargs:
+                Additional parameters to the BatchGroupBy operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a BatchGroupBy operation as last step.
+        """
+        self.input_function = self.input_function.batchgroupby(
+            extractor=extractor, reducer=reducer, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def sort(
+        self,
+        reverse: bool = True,
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Sort the records
+
+        Args:
+            reverse (bool, optional):
+                Sort in descending order (higer to lower).
+                Defaults to True.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the Sort operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a Sort operation as last step.
+        """
+        self.input_function = self.input_function.sort(
+            reverse=reverse, requirements=requirements, **kwargs
+        )
+
+        return self
+
+    def distinct(self, **kwargs) -> "GearsBuilder":
+        """Keep only the distinct values in the data.
+
+        Args:
+            **kwargs:
+                Additional parameters to the Distinct operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a Distinct operation as last step.
+        """
+        self.input_function = self.input_function.distinct(**kwargs)
+
+        return self
+
+    def count(self, **kwargs) -> "GearsBuilder":
+        """Count the number of records in the execution.
+
+        Args:
+            **kwargs:
+                Additional parameters to the Count operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated witha Count operation as last step.
+        """
+        self.input_function = self.input_function.count(**kwargs)
+
+        return self
+
+    def countby(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, Hashable]" = lambda x: str(x),
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Counts the records grouped by key.
+
+        Args:
+            extractor (redgrease.typing.Extractor):
+                Function to apply on the input records, to extact the grouping key.
+                The function must take one argument as input (input record) and
+                return a string (key).
+                The groups are defined by the value of the key.
+                Defaults to 'lambda x: str(x)'.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the CountBy operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated with a CountBy operation as last step.
+        """
+        self.input_function = self.input_function.countby(
+            extractor=extractor,
+            # Other Redgrease args
+            requirements=requirements,
+            # Other Redis Gears args
+            **kwargs,
+        )
+
+        return self
+
+    def avg(
+        self,
+        extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(x),
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
+    ) -> "GearsBuilder":
+        """Calculating arithmetic average of the records.
+
+        Args:
+            extractor (redgrease.typing.Extractor):
+                Function to apply on the input records, to extact the grouping key.
+                The function must take one argument as input (input record) and
+                return a string (key).
+                The groups are defined by the value of the key.
+                Defaults to 'lambda x: float(x)'.
+
+            requirements (Iterable[str], optional):
+                Additional requirements / dedpendency Python packages.
+                Defaults to None.
+
+            **kwargs:
+                Additional parameters to the map operation.
+
+        Returns:
+            redgrease.runtime.GearsBuilder:
+                The GearsBuilder, updated withh an avg operation as last step.
+        """
+        self.input_function = self.input_function.avg(
+            extractor=extractor,
+            # Other Redgrease args
+            requirements=requirements,
+            # Other Redis Gears args
+            **kwargs,
+        )
+
+        return self
 
 
 GB = GearsBuilder
