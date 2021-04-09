@@ -1264,7 +1264,7 @@ class GearFunction(Generic[T]):
     def __init__(
         self,
         operation: Operation,
-        input_function: "PartialGearFunction",
+        input_function: "PartialGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
         """Instaniate a GearFunction
@@ -1285,12 +1285,11 @@ class GearFunction(Generic[T]):
         """
 
         self.operation = operation
-
+        self.input_function = input_function
         self.requirements = set(requirements if requirements else [])
 
-        if input_function is not self:
+        if input_function:
             self.requirements = self.requirements.union(input_function.requirements)
-            self.input_function = input_function
 
     @property
     def reader(self) -> Optional[str]:
