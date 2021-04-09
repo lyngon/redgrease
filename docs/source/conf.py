@@ -75,5 +75,10 @@ html_favicon = "../images/LyngonIcon_v3.ico"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 # custom.css is inside one of the html_static_path folders (e.g. _static)
-# html_css_files = ["custom.css"]
-html_css_files = []  # type: List[str]
+html_css_files = ["custom.css"]
+
+ml_css_files = []  # type: List[str]
+
+
+# def setup(app):
+#     app.add_stylesheet("custom.css")

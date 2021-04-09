@@ -167,15 +167,28 @@ With Python 3.7 installed on your system:
 Basic Commands
 --------------
 
-Let's look at some code examples of how to use RedGrease, warming up with the basics.
+In this section we'll walk through some of the basic commands and interactions with the RedGrease Gears client, including executing some very basic Gear functions.
 
-.. literalinclude::  ../../examples/basics.py
-    :caption: From examples/basics.py on the official `GitHub repo <https://github.com/lyngon/redgrease>`_:
-    :linenos:
+The next chapter ":ref:`Redgrease Client <client>`", goes into each command in more details, but for now we'll just look at the most important thing.
+
+You can take a sneak-peek at the full code we'll walk through in this section, by expanding the block below (click "▶ Show").
 
 If you find this rather selfself-explanatory, then you can probably jump directly to the next example of :ref:`more involved Redis Gears query-function <quick_example_query>`.
 
-We will also go into more details of the client / connetion object in the next chapter ":ref:`Redgrease Client <client>`", but for now, let's break the above example down and go it through step-by-step.
+Otherwise just contiue reading and well, go it through step-by-step.
+
+.. container:: toggle
+
+    .. container:: header
+
+        Full code of this section.
+
+    .. literalinclude::  ../../examples/basics.py
+        :caption: From examples/basics.py on the official `GitHub repo <https://github.com/lyngon/redgrease>`_:
+        :linenos:
+
+|br|
+Let's look at some code examples of how to use RedGrease, warming up with the basics.
 
 Instantiation
 ~~~~~~~~~~~~~
@@ -381,7 +394,7 @@ This is an example of how the same Gear function could be rewritten using RedgGr
     :caption: RedGrease - Delete by Key Prefix
 
 
-    Keyspace Notification Processing
+Keyspace Notification Processing
 ~~~~~~~~~~~~~~~~~~~~
 Copy every new message from a Redis Stream to a Redis Hash key. 
 
@@ -489,6 +502,7 @@ This is an example of how the same Gear function could be rewritten using RedgGr
 
 .. literalinclude:: ../../tests/gear_scripts/redislabs_mod_example_reliablekeyspacenotification.py
     :caption: RedGrease - Reliable Keyspace Notification
+    :emphasize-lines: 4
 
 
 .. Distributed Monte Carlo to Estimate *π*
@@ -556,14 +570,19 @@ So ideally, you'd want to have the caching logic in a single place (mitigates 3.
 
 Luckily this is something we can do with Redis Gears, and RedGrease makes it quite easy.
 
-Here is the full code.
+.. container:: toggle
 
-.. literalinclude:: ../../examples/cache_get_command.py
-    :caption: Simple Caching command:
+    .. container:: header
 
-It may look a bit intimidating at first, but theres actually not not that much to it. 
-Most of it is just comments, logging or testing code. 
+        Full code.
 
+    It may look a bit intimidating at first, but theres actually not not that much to it. 
+    Most of it is just comments, logging or testing code. 
+
+    .. literalinclude:: ../../examples/cache_get_command.py
+        :caption: Simple Caching command:
+
+|br|
 Let's go throug it step by step, and it will hopefully be very clear.
 
 .. literalinclude:: ../../examples/cache_get_command.py
@@ -580,9 +599,10 @@ Lets now go for the meat of the solution; The code that we want to run on Redis 
 .. literalinclude:: ../../examples/cache_get_command.py
     :lines: 14-
     :end-before: Test caching on some images
-    :caption: CAche handling function:
+    :caption: Cache handling function:
     :emphasize-lines: 1, 29, 37, 47, 72
     :lineno-match:
+
 
 Ignore the details and just look at the highligthed lines, and notice:
 
@@ -705,3 +725,7 @@ The last piece of code is jut to clean up the database by unregistering the ``ca
 That wraps up the Quickstart Guide! Good luck building Gears! 
 
 .. include :: footer.rst
+
+.. |br| raw:: html
+
+    <br />
