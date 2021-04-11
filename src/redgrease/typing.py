@@ -84,92 +84,73 @@ Record = Dict
 """The type of a record from KeysReader and others."""
 
 
-class Callback(Protocol[InputRecord]):
-    """Protocol Type for general Callbacks
+Callback = Callable[[InputRecord], Any]
+""""Type for General Callbacks.
 
     An function of Callback type can be called with a single argument:
 
         - A record, of type InputRecord
 
         The function a value, of any type.
-    """
+"""
 
-    def __call__(self, record: InputRecord) -> Any:
-        ...
-
-
-class Extractor(Protocol[InputRecord, OutputRecord]):
-    """Protocol Type for Extractor functions
+Extractor = Callable[[InputRecord], OutputRecord]
+"""Type for Extractor functions.
 
     An function of Extractor type can be called with a single argument:
 
         - A record, of type InputRecord
 
     The function a value, of type OutputRecord.
-    """
-
-    def __call__(self, record: InputRecord) -> OutputRecord:
-        ...
+"""
 
 
-class Mapper(Protocol[InputRecord, OutputRecord]):
-    """Protocol Type for Mapper functions
+Mapper = Callable[[InputRecord], OutputRecord]
+"""Type for Mapper functions.
 
     An function of Mapper type can be called with a single argument:
 
         - A record, of type InputRecord
 
     The function returns a value, of type OutputRecord.
-    """
-
-    def __call__(self, record: InputRecord) -> OutputRecord:
-        ...
+"""
 
 
-class Expander(Protocol[InputRecord, OutputRecord]):
-    """Protocol Type for Expander functions
+Expander = Callable[[InputRecord], Iterable[OutputRecord]]
+"""Type for Expander functions.
 
     An function of Expander type can be called with a single argument:
 
         - A record, of type InputRecord
 
         The function returns an **Iterable** of any type, OutputRecord.
-    """
-
-    def __call__(self, record: InputRecord) -> Iterable[OutputRecord]:
-        ...
+"""
 
 
-class Processor(Protocol[InputRecord]):
-    """Protocol Type for Processor functions
+Processor = Callable[[InputRecord], None]
+"""Type for Processor functions.
 
     An function of Processor type can be called with a single argument:
 
         - A record, of type InputRecord
 
     The function does not return anything.
-    """
-
-    def __call__(self, record: InputRecord) -> None:
-        ...
+"""
 
 
-class Filterer(Protocol[InputRecord]):
-    """Protocol Type for Filterer functions
+Filterer = Callable[[InputRecord], bool]
+"""Type for Filterer functions.
 
     An function of Filterer type can be called with a single argument:
 
         - A record, of type InputRecord
 
     The function returns a bool.
-    """
-
-    def __call__(self, record: InputRecord) -> bool:
-        ...
+"""
 
 
-class Accumulator(Protocol[T, InputRecord]):
-    """Protocol Type for Accumulator functions
+Accumulator = Callable[[T, InputRecord], T]
+"""Type for Accumulator functions.
 
     An function of Accumulator type can be called with a two arguments:
 
@@ -177,14 +158,11 @@ class Accumulator(Protocol[T, InputRecord]):
         - A record, of type InputRecord
 
     The function returns a value of the same type as the accumulator value, T.
-    """
-
-    def __call__(self, accumulator: T, record: InputRecord) -> T:
-        ...
+"""
 
 
-class Reducer(Protocol[Key, T, InputRecord]):
-    """Protocol Type for Reducer functions
+Reducer = Callable[[Key, T, InputRecord], T]
+"""Type for Reducer functions.
 
     An function of Reducer type can be called with a three arguments:
 
@@ -193,14 +171,11 @@ class Reducer(Protocol[Key, T, InputRecord]):
         - A record, of type InputRecord
 
     The function returns a value of the same type as the accumulator value, T.
-    """
-
-    def __call__(self, key: Key, accumulator: T, record: InputRecord) -> T:
-        ...
+"""
 
 
-class BatchReducer(Protocol[Key, OutputRecord, InputRecord]):
-    """Protocol Type for BatchReducer functions
+BatchReducer = Callable[[Key, Iterable[InputRecord]], OutputRecord]
+"""Type for BatchReducer functions.
 
     An function of BatchReducer type can be called with a three arguments:
 
@@ -208,7 +183,4 @@ class BatchReducer(Protocol[Key, OutputRecord, InputRecord]):
         - An Iterable collection of records, of type InputRecord
 
     The function returns a value of the same type as the accumulator value, T.
-    """
-
-    def __call__(self, key: Key, records: Iterable[InputRecord]) -> OutputRecord:
-        ...
+"""

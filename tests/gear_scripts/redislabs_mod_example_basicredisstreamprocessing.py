@@ -1,5 +1,5 @@
 from redgrease import StreamReader, cmd
 
-StreamReader().foreach(
-    lambda x: cmd.hmset(x["streamId"], *x)  # write to Redis Hash
-).register("mystream")
+StreamReader().foreach(lambda x: cmd.hmset(x["id"], x)).register(  # write to Redis Hash
+    "mystream"
+)

@@ -26,22 +26,10 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Generic,
-    Hashable,
-    Iterable,
-    Optional,
-    Type,
-    TypeVar,
-)
+from typing import Any, Dict, Generic, Hashable, Iterable, Optional, Type, TypeVar
 
 import redgrease.sugar as sugar
-
-if TYPE_CHECKING:
-    import redgrease.typing as optype
+import redgrease.typing as optype
 
 T = TypeVar("T")
 
@@ -1387,7 +1375,7 @@ class ClosedGearFunction(GearFunction[T]):
         )
 
 
-class PartialGearFunction(GearFunction["optype.InputRecord"]):
+class PartialGearFunction(GearFunction[optype.InputRecord]):
     """A partial Gear function is a Gear function that is not yet 'closed' with a `run`
     action or a `register` action.
 
@@ -2339,7 +2327,9 @@ class PartialGearFunction(GearFunction["optype.InputRecord"]):
 
     def avg(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(x),
+        extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(
+            x if isinstance(x, (int, float, str)) else str(x)
+        ),
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
