@@ -13,7 +13,7 @@ def process(x):
 
 # Capture an expiration event and adds it to the shard's local 'expired' stream
 KeysReader().keys().foreach(
-    lambda key: cmd.xadd(f"expired:{hashtag()}", "*", "key", key)
+    lambda key: cmd.xadd(f"expired:{hashtag()}", {"key": key})
 ).register(prefix="*", mode="sync", eventTypes=["expired"], readValue=False)
 
 # Consume new messages from expiration streams and process them somehow

@@ -393,7 +393,9 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def avg(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(x),
+        extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(
+            x if isinstance(x, (int, float, str)) else str(x)
+        ),
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
