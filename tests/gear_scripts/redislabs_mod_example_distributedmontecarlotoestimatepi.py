@@ -15,12 +15,11 @@ def throws():
     """ Calculates each shard's number of throws """
     global TOTAL_DARTS
     throws = TOTAL_DARTS
-    ci = cmd.gears.infocluster()
-    if type(ci) is not str:  # assume a cluster
-        n = len(ci[2])  # number of shards
-        me = ci[1]  # my shard's ID
-        ids = [x[1] for x in ci[2]].sort()  # shards' IDs list
-        i = ids.index(me)  # my index
+    cluster = cmd.gears.infocluster()
+    if cluster:  # assume a cluster
+        n = len(cluster.shards)  # number of shards
+        ids = sorted([shard.id for shard in cluster.shards])  # shards' IDs list
+        i = ids.index(cluster.my_id)  # my index
         throws = TOTAL_DARTS // n  # minimum throws per shard
         if i == 0 and TOTAL_DARTS % n > 0:  # first shard gets remainder
             throws += 1
