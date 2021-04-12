@@ -255,7 +255,7 @@ def parse_execute_response(response) -> ExecutionResult:
         return ExecutionResult(response)
 
 
-def parse_trigger_response(response, pickled=False) -> ExecutionResult:
+def parse_trigger_response(response) -> ExecutionResult:
     """Parses raw responses from `trigger` into a `redgrease.data.ExecuteResponse`
     object.
 
@@ -273,8 +273,10 @@ def parse_trigger_response(response, pickled=False) -> ExecutionResult:
         ExecutionResult[T]:
             A parsed execution response
     """
-    if pickled:
+    try:
         response = [cloudpickle.loads(value) for value in response]
+    except (TypeError, cloudpickle.pickle.UnpicklingError):
+        pass
 
     if len(response) == 1:
         response = response[0]
