@@ -134,7 +134,7 @@ class Gears:
         """Abort the execution of a function mid-flight
 
         Args:
-            id (Union[redgrease.data.ExecID, bytes, str]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 The execution id to abort
 
         Returns:
@@ -151,7 +151,7 @@ class Gears:
         """Remove the execution of a function from the executions list.
 
         Args:
-            id (Union[redgrease.data.ExecID, bytes, str]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution ID to remove
 
         Returns:
@@ -191,7 +191,7 @@ class Gears:
         """Get the executoin plan details for a function in the execution list.
 
         Args:
-            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, str, bytes]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the function to fetch execution plan for.
 
             locality (Optional[redgrease.data.ExecLocality], optional):
@@ -217,7 +217,7 @@ class Gears:
         """Get the results of a function in the execution list.
 
         Args:
-            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, str, bytes]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the fuction to fetch the output for.
 
         Returns:
@@ -241,7 +241,7 @@ class Gears:
         ends.
 
         Args:
-            id (Union[ExecutionInfo, ExecID, str, bytes]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the fuction to fetch the results and errors
                 for.
 
@@ -462,7 +462,7 @@ class Gears:
         """Removes the registration of a function
 
         Args:
-            id (Union[ExecutionInfo, ExecID, str, bytes]):
+            id (Union[redgrease.data.Registration, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the function to unregister.
 
         Returns:
