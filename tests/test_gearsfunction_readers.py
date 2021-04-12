@@ -171,8 +171,7 @@ def test_command_reader(rg: RedisGears):
     assert res
     res = rg.gears.trigger("test", "this", "is", "a", "test")
     assert res
-    # Todo: Is this the desired output? NO! Related to issue #48?
-    assert res == [b"test", b"this", b"is", b"a", b"test"]
+    assert res == ["test", "this", "is", "a", "test"]
 
 
 @pytest.mark.xfail(
@@ -187,8 +186,7 @@ def test_command_reader_args(rg: RedisGears):
     assert res
     res = rg.gears.trigger("test", "this", "is", "a", "test")
     assert res
-    # Todo: Is this the desired output? NO! Related to issue #48?
-    assert res == [b"this", b"is", b"a", b"test"]
+    assert res == ["this", "is", "a", "test"]
 
 
 @pytest.mark.xfail(
@@ -203,8 +201,7 @@ def test_command_reader_args_2(rg: RedisGears):
     assert res
     res = rg.gears.trigger("test", "this", "is", "a", "test")
     assert res
-    # Todo: Is this the desired output? NO! Related to issue #48?
-    assert res == [b"this", b"is"]
+    assert res == ["this", "is"]
 
 
 @pytest.mark.xfail(
@@ -224,7 +221,6 @@ def test_command_reader_apply(rg: RedisGears):
     assert res
     res = rg.gears.trigger("test", "this", "is", "a", "test")
     assert res
-    # Todo: Is this the desired output?
     assert res == 11
 
 

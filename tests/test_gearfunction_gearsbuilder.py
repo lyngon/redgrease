@@ -284,8 +284,7 @@ def test_register(rg: RedisGears):
     assert res
     res = rg.gears.trigger("test", "this", "is", "a", "test")
     assert res
-    # Todo: Is this the desired output?
-    assert res == [b"test", b"this", b"is", b"a", b"test"]
+    assert res == ["test", "this", "is", "a", "test"]
 
 
 @pytest.mark.xfail(
