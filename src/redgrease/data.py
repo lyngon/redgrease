@@ -222,10 +222,6 @@ def parse_execute_response(response) -> ExecutionResult:
             (e.g. in the absence of a closing `run()` operation) or an excecution ID
             (e.g. for non-blocking executions).
 
-        pickled (bool, optional):
-            Indicates if the response is pickled and need to be unpickled.
-            Defaults to False.
-
     Returns:
         ExecutionResult[T]:
             A parsed execution response

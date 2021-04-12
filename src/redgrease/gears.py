@@ -254,8 +254,6 @@ class Run(Operation):
             self.arg, False, self.collect, **self.kwargs
         )
 
-        # return function.run(self.arg, self.convertToStr, self.collect, **self.kwargs)
-
 
 class Register(Operation):
     """Register action
@@ -357,7 +355,7 @@ class Register(Operation):
 
         return function.map(lambda x: cloudpickle.dumps(x, protocol=4)).register(
             self.prefix,
-            False,  # self.convertToStr,
+            False,
             self.collect,
             mode=self.mode,
             onRegistered=self.onRegistered,

@@ -403,7 +403,6 @@ class Gears:
             "RG.PYEXECUTE",
             function_string,
             *params,
-            # pickled=isinstance(gear_function, redgrease.gears.GearFunction),
         )
         if result_function and command_response:
             return redgrease.data.ExecutionResult(result_function)
