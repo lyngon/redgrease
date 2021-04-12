@@ -69,6 +69,12 @@ from redgrease.utils import (
 
 log = logging.getLogger(__name__)
 
+ExecutionID = Union[bytes, str, redgrease.data.ExecID, redgrease.data.ExecutionInfo]
+"""Type alias for valid execution identifiers"""
+
+RegistrationID = Union[bytes, str, redgrease.data.ExecID, redgrease.data.Registration]
+"""Type alias for valid registration identifiers"""
+
 
 class Gears:
     """Client class for Redis Gears commands.
@@ -124,11 +130,11 @@ class Gears:
         """
         return self.config.MaxExecutions > 0
 
-    def abortexecution(self, id: Union[redgrease.data.ExecID, bytes, str]) -> bool:
+    def abortexecution(self, id: ExecutionID) -> bool:
         """Abort the execution of a function mid-flight
 
         Args:
-            id (Union[redgrease.data.ExecID, bytes, str]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 The execution id to abort
 
         Returns:
@@ -136,13 +142,16 @@ class Gears:
                 True or an error if the execution does not exist or had already
                 finished.
         """
-        return self.redis.execute_command("RG.ABORTEXECUTION", id)
+        if isinstance(id, redgrease.data.ExecutionInfo):
+            id = id.executionId
 
-    def dropexecution(self, id: Union[redgrease.data.ExecID, bytes, str]) -> bool:
+        return self.redis.execute_command("RG.ABORTEXECUTION", to_redis_type(id))
+
+    def dropexecution(self, id: ExecutionID) -> bool:
         """Remove the execution of a function from the executions list.
 
         Args:
-            id (Union[redgrease.data.ExecID, bytes, str]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution ID to remove
 
         Returns:
@@ -150,7 +159,9 @@ class Gears:
                 True if successful, or an error if the execution does not exist or is
                 still running.
         """
-        return self.redis.execute_command("RG.DROPEXECUTION", id)
+        if isinstance(id, redgrease.data.ExecutionInfo):
+            id = id.executionId
+        return self.redis.execute_command("RG.DROPEXECUTION", to_redis_type(id))
 
     def dumpexecutions(self) -> List[redgrease.data.ExecutionInfo]:
         """Get list of function executions.
@@ -174,13 +185,13 @@ class Gears:
 
     def getexecution(
         self,
-        id: Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, str, bytes],
+        id: ExecutionID,
         locality: Optional[redgrease.data.ExecLocality] = None,
     ) -> Mapping[bytes, redgrease.data.ExecutionPlan]:
         """Get the executoin plan details for a function in the execution list.
 
         Args:
-            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, str, bytes]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the function to fetch execution plan for.
 
             locality (Optional[redgrease.data.ExecLocality], optional):
@@ -201,12 +212,12 @@ class Gears:
 
     def getresults(
         self,
-        id: Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, str, bytes],
+        id: ExecutionID,
     ) -> redgrease.data.ExecutionResult:
         """Get the results of a function in the execution list.
 
         Args:
-            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, str, bytes]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the fuction to fetch the output for.
 
         Returns:
@@ -221,20 +232,16 @@ class Gears:
 
         if isinstance(id, redgrease.data.ExecutionInfo):
             id = id.executionId
-        if isinstance(id, redgrease.data.ExecID):
-            id = str(id)
 
-        return self.redis.execute_command("RG.GETRESULTS", id)
+        return self.redis.execute_command("RG.GETRESULTS", to_redis_type(id))
 
-    def getresultsblocking(
-        self, id: Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, str, bytes]
-    ) -> redgrease.data.ExecutionResult:
+    def getresultsblocking(self, id: ExecutionID) -> redgrease.data.ExecutionResult:
         """Get the results and errors from the execution details of a function.
         If the execution is not finished, the call is blocked until execution
         ends.
 
         Args:
-            id (Union[ExecutionInfo, ExecID, str, bytes]):
+            id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the fuction to fetch the results and errors
                 for.
 
@@ -249,7 +256,7 @@ class Gears:
         if isinstance(id, redgrease.data.ExecutionInfo):
             id = id.executionId
 
-        return self.redis.execute_command("RG.GETRESULTSBLOCKING", id)
+        return self.redis.execute_command("RG.GETRESULTSBLOCKING", to_redis_type(id))
 
     def infocluster(self) -> redgrease.data.ClusterInfo:
         """Gets information about the cluster and its shards.
@@ -451,13 +458,11 @@ class Gears:
         """
         return self.redis.execute_command("RG.TRIGGER", safe_str(trigger_name), *args)
 
-    def unregister(
-        self, id: Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, str, bytes]
-    ) -> bool:
+    def unregister(self, id: RegistrationID) -> bool:
         """Removes the registration of a function
 
         Args:
-            id (Union[ExecutionInfo, ExecID, str, bytes]):
+            id (Union[redgrease.data.Registration, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the function to unregister.
 
         Returns:
@@ -468,12 +473,10 @@ class Gears:
                 If the registration ID doesn't exist or if the function's reader
                 doesn't support the unregister operation.
         """
-        if isinstance(id, redgrease.data.ExecutionInfo):
-            id = id.executionId
-        if isinstance(id, redgrease.data.ExecID):
-            id = str(id)
+        if isinstance(id, redgrease.data.Registration):
+            id = id.id
 
-        return self.redis.execute_command("RG.UNREGISTER", id)
+        return self.redis.execute_command("RG.UNREGISTER", to_redis_type(id))
 
 
 class Redis(redis.Redis):

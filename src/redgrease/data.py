@@ -377,7 +377,7 @@ class ExecutionInfo(RedisObject):
     status: ExecutionStatus = attr.ib(converter=ExecutionStatus)
     """The status"""
 
-    registered: bool
+    registered: bool = attr.ib(converter=safe_bool)
     """Indicates whether this is a registered execution"""
 
 
