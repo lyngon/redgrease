@@ -248,13 +248,13 @@ class Run(Operation):
             ClosedGearFunction:
                 A closed Gear batch function that is ready to run on a Gears cluster.
         """
-        # import cloudpickle
+        import cloudpickle
 
-        # return function.map(lambda x: cloudpickle.dumps(x, protocol=4)).run(
-        #     self.arg, False, self.collect, **self.kwargs
-        # )
+        return function.map(lambda x: cloudpickle.dumps(x, protocol=4)).run(
+            self.arg, False, self.collect, **self.kwargs
+        )
 
-        return function.run(self.arg, self.convertToStr, self.collect, **self.kwargs)
+        # return function.run(self.arg, self.convertToStr, self.collect, **self.kwargs)
 
 
 class Register(Operation):
@@ -353,7 +353,9 @@ class Register(Operation):
                 A closed Gear event function that is ready to be regisetered on a
                 Gears cluster.
         """
-        return function.register(
+        import cloudpickle
+
+        return function.map(lambda x: cloudpickle.dumps(x, protocol=4)).register(
             self.prefix,
             self.convertToStr,
             self.collect,

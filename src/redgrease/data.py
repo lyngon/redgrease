@@ -208,7 +208,7 @@ class ExecutionResult(wrapt.ObjectProxy, Generic[T]):
         return self.value(*args, **kwds)
 
 
-def parse_execute_response(response, pickled=False) -> ExecutionResult:
+def parse_execute_response(response) -> ExecutionResult:
     """Parses raw responses from `pyexecute`, `getresults` and `getresultsblocking`
     into a `redgrease.data.ExecuteResponse` object.
 
@@ -244,8 +244,10 @@ def parse_execute_response(response, pickled=False) -> ExecutionResult:
 
         result, errors = response
         if isinstance(result, list):
-            if pickled:
+            try:
                 result = [cloudpickle.loads(value) for value in result]
+            except (TypeError, cloudpickle.pickle.UnpicklingError):
+                pass
             if len(result) == 1:
                 result = result[0]
         return ExecutionResult(result, errors=errors)
