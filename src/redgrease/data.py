@@ -208,7 +208,7 @@ class ExecutionResult(wrapt.ObjectProxy, Generic[T]):
         return self.value(*args, **kwds)
 
 
-def parse_execute_response(response, pickled=False) -> ExecutionResult:
+def parse_execute_response(response) -> ExecutionResult:
     """Parses raw responses from `pyexecute`, `getresults` and `getresultsblocking`
     into a `redgrease.data.ExecuteResponse` object.
 
@@ -221,10 +221,6 @@ def parse_execute_response(response, pickled=False) -> ExecutionResult:
             For some scenarios the response may take other forms, like a simple `Ok`
             (e.g. in the absence of a closing `run()` operation) or an excecution ID
             (e.g. for non-blocking executions).
-
-        pickled (bool, optional):
-            Indicates if the response is pickled and need to be unpickled.
-            Defaults to False.
 
     Returns:
         ExecutionResult[T]:
@@ -244,8 +240,10 @@ def parse_execute_response(response, pickled=False) -> ExecutionResult:
 
         result, errors = response
         if isinstance(result, list):
-            if pickled:
+            try:
                 result = [cloudpickle.loads(value) for value in result]
+            except (TypeError, cloudpickle.pickle.UnpicklingError):
+                pass
             if len(result) == 1:
                 result = result[0]
         return ExecutionResult(result, errors=errors)
@@ -257,7 +255,7 @@ def parse_execute_response(response, pickled=False) -> ExecutionResult:
         return ExecutionResult(response)
 
 
-def parse_trigger_response(response, pickled=False) -> ExecutionResult:
+def parse_trigger_response(response) -> ExecutionResult:
     """Parses raw responses from `trigger` into a `redgrease.data.ExecuteResponse`
     object.
 
@@ -275,8 +273,10 @@ def parse_trigger_response(response, pickled=False) -> ExecutionResult:
         ExecutionResult[T]:
             A parsed execution response
     """
-    if pickled:
+    try:
         response = [cloudpickle.loads(value) for value in response]
+    except (TypeError, cloudpickle.pickle.UnpicklingError):
+        pass
 
     if len(response) == 1:
         response = response[0]

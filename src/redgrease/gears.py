@@ -351,9 +351,11 @@ class Register(Operation):
                 A closed Gear event function that is ready to be regisetered on a
                 Gears cluster.
         """
-        return function.register(
+        import cloudpickle
+
+        return function.map(lambda x: cloudpickle.dumps(x, protocol=4)).register(
             self.prefix,
-            self.convertToStr,
+            False,
             self.collect,
             mode=self.mode,
             onRegistered=self.onRegistered,
