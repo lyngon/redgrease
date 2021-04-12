@@ -252,24 +252,115 @@ def test_getresults(rg: redgrease.RedisGears):
     assert int(res) == 2
 
 
-@pytest.mark.xfail(reason="Testcase not implemented")
 def test_getresultsblocking(rg: redgrease.RedisGears):
-    assert False
+    fun_str = """
+import time
+
+def long_running():
+    for x in range(3):
+        yield x
+        time.sleep(1)
+
+def sum(a, b):
+    return a+b
+
+GB("PythonReader").aggregate(0,sum,sum).run(long_running)
+"""
+    exe_id = rg.gears.pyexecute(fun_str, unblocking=True)
+    assert exe_id
+    assert isinstance(exe_id.value, redgrease.data.ExecID)
+    res = rg.gears.getresultsblocking(exe_id)
+    assert res
+    assert isinstance(res, redgrease.data.ExecutionResult)
+    assert res.value == b"3"
+    assert not res.errors
 
 
-@pytest.mark.xfail(reason="Testcase not implemented")
 def test_dumpexecutions(rg: redgrease.RedisGears):
-    assert False
+    fun_str = """
+import time
+
+def long_running():
+    for x in range(60):
+        yield str(x)
+        time.sleep(1)
+
+GB("PythonReader").foreach(lambda x: log(x)).run(long_running)
+"""
+    exe_id = rg.gears.pyexecute(fun_str, unblocking=True)
+    assert exe_id
+    assert isinstance(exe_id.value, redgrease.data.ExecID)
+    time.sleep(1)
+
+    for status in [
+        redgrease.data.ExecutionStatus.running,
+        redgrease.data.ExecutionStatus.done,
+    ]:
+
+        executions = rg.gears.dumpexecutions()
+        assert executions
+        assert isinstance(executions, list)
+        assert len(executions) == 1
+        for exe in executions:
+            assert isinstance(exe, redgrease.data.ExecutionInfo)
+            assert isinstance(exe.executionId, redgrease.data.ExecID)
+            assert isinstance(exe.status, redgrease.data.ExecutionStatus)
+            assert exe.status == status
+            assert isinstance(exe.registered, bool)
+            assert not exe.registered
+            # For some reason it is ok to abort an already aborted execution
+            assert rg.gears.abortexecution(exe)
 
 
-@pytest.mark.xfail(reason="Testcase not implemented")
 def test_dropexecution(rg: redgrease.RedisGears):
-    assert False
+    fun_str = """
+import time
+
+def long_running():
+    for x in range(60):
+        yield str(x)
+        time.sleep(1)
+
+GB("PythonReader").run(long_running)
+"""
+    exe_id = rg.gears.pyexecute(fun_str, unblocking=True)
+    assert exe_id
+    assert isinstance(exe_id.value, redgrease.data.ExecID)
+    time.sleep(1)
+
+    executions = rg.gears.dumpexecutions()
+    assert executions
+    assert isinstance(executions, list)
+    assert len(executions) == 1
+    exe = executions[0]
+
+    assert exe.status == redgrease.data.ExecutionStatus.running
+
+    assert rg.gears.abortexecution(exe)
+
+    assert rg.gears.dumpexecutions()[0].status == redgrease.data.ExecutionStatus.done
+
+    assert rg.gears.dropexecution(exe)
+
+    assert len(rg.gears.dumpexecutions()) == 0
 
 
-@pytest.mark.xfail(reason="Testcase not implemented")
 def test_abortexecution(rg: redgrease.RedisGears):
-    assert False
+    fun_str = """
+import time
+import redgrease
+
+def long_running():
+    for x in range(60):
+        yield str(x)
+        time.sleep(1)
+
+GB("PythonReader").foreach(lambda x: log(x)).run(long_running)
+"""
+    exe_id = rg.gears.pyexecute(fun_str, unblocking=True)
+    assert exe_id
+    assert isinstance(exe_id.value, redgrease.data.ExecID)
+    assert rg.gears.abortexecution(exe_id)
 
 
 def test_pystats(rg: redgrease.RedisGears):
