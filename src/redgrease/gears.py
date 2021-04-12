@@ -357,7 +357,7 @@ class Register(Operation):
 
         return function.map(lambda x: cloudpickle.dumps(x, protocol=4)).register(
             self.prefix,
-            self.convertToStr,
+            False,  # self.convertToStr,
             self.collect,
             mode=self.mode,
             onRegistered=self.onRegistered,
