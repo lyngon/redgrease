@@ -569,7 +569,7 @@ class ClusterInfo(RedisObject):
                 A ClusterInfo object or None (if not in cluster mode).s
         """
 
-        if not res or res == b"no cluster mode":
+        if not res or safe_str(res) == "no cluster mode":
             return None
 
         cluster_info = ClusterInfo(
