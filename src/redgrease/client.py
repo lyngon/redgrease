@@ -276,23 +276,24 @@ class Gears:
         requirements: Optional[
             Iterable[Union[str, redgrease.requirements.Requirement]]
         ] = None,
-        enforce_redgrease: redgrease.requirements.PackageOption = False,
+        enforce_redgrease: redgrease.requirements.PackageOption = None,
     ) -> redgrease.data.ExecutionResult:
         """Execute a gear function.
 
         Args:
             gear_function (Union[str, redgrease.gears.GearFunction], optional):
-                - A serialized Gears Python function as per the official documentation.
+                - A string containgg a clear-text serialized Gears Python function as
+                    per the official documentation.
                     (https://oss.redislabs.com/redisgears/intro.html#the-simplest-example)
 
-                - A GearFunction object. Notes:
-                    * Only Python 3.7 is supported
+                - A GearsBuilder or GearFunction object. Notes:
+                    * Python version must match the Gear runtime.
                     * If the function is not "closed" with a `run()` or `register()`
-                    operation, an empty `run()` operation will be assumed, and
-                    automatically added to the function to close it.
+                    operation, an `run()` operation without arguments will be assumed,
+                    and automatically added to the function to close it.
                     * The default for `enforce_redgrease` is True.
 
-                - A file path to a gear script.
+                - A file path to a gear script. This script can
 
                 Defaults to "" (no function).
 
@@ -310,13 +311,14 @@ class Gears:
                 and potentially which version and/or extras or source.
                 It can take several optional types::
 
-                    - None : enforces that 'redgrease' is NOT in thequirements,
-                        any redgrease requirements will be removed from the function.
+                    - None :  no enforcing. Requirements are passed through,
+                            with or without 'redgrease'.
 
                     - bool :
                         True - enforces latest 'redgrease[runtime] ' package on PyPi,
-                        False - no enforcing. Requirements are passed through,
-                            with or without 'redgrease'.
+                        False - enforces that 'redgrease' is NOT in the requirements,
+                            any redgrease requirements will be removed from the function.
+                            Note that it will not force redgrease to be uninstalled.
 
                     - str :
                         a. Specific version. E.g. "1.2.3".
@@ -325,13 +327,13 @@ class Gears:
                             Will enforce the latest version on PyPi, with this/these extras
                         d. Full requirement qualifier or source. E.g:
                             "redgrease[all]>=1.2.3"
-                            "redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@some_branch"
+                            "redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@main"
 
                     - Version : behaves just as string version (a.)
 
-                    - Requirment : behaves just as string version (d.)
+                    - Requirement : behaves just as string version (d.)
 
-                efaults to False (for str function), True for GearFunction objects.
+                Defaults to False (for str function), True for GearFunction objects.
 
         Returns:
             redgrease.data.ExecutionResult:
@@ -370,6 +372,8 @@ class Gears:
 
             function_string = redgrease.data.seralize_gear_function(gear_function)
 
+            # Special case for CommandReader functions:
+            # return a new function that calls its "trigger" and returns the results.
             if gear_function.reader == "CommandReader":
 
                 def result_function(*args):
@@ -391,6 +395,7 @@ class Gears:
         if unblocking:
             params.append("UNBLOCKING")
 
+        # Resolve requirement conflicts, remove duplicates
         requirements = redgrease.requirements.resolve_requirements(
             requirements, enforce_redgrease=enforce_redgrease
         )
@@ -404,6 +409,7 @@ class Gears:
             function_string,
             *params,
         )
+
         if result_function and command_response:
             return redgrease.data.ExecutionResult(result_function)
 
