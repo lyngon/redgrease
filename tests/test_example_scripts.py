@@ -29,13 +29,11 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 """
 import os
 import re
-import unittest.mock
 from pathlib import Path
 from typing import Dict
 
 import importlib_metadata
 import pytest
-import redis.exceptions
 
 from redgrease import RedisGears
 

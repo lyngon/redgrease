@@ -1,3 +1,5 @@
+from typing import Callable, Dict
+
 import rediscluster
 import rediscluster.exceptions
 
@@ -48,7 +50,7 @@ class RedisCluster(rediscluster.RedisCluster):
         },
     }
 
-    RESPONSE_CALLBACKS = {
+    RESPONSE_CALLBACKS: Dict[str, Callable] = {
         **rediscluster.RedisCluster.RESPONSE_CALLBACKS,
         **redgrease.client.Gears.RESPONSE_CALLBACKS,
     }

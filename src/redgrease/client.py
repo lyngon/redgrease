@@ -48,7 +48,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 import logging
 import os.path
-from typing import Any, Iterable, List, Mapping, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
 
 import redis
 
@@ -88,7 +88,7 @@ class Gears:
             Redis Gears Configuration 'client'
     """
 
-    RESPONSE_CALLBACKS = {
+    RESPONSE_CALLBACKS: Dict[str, Callable] = {
         "RG.ABORTEXECUTION": bool_ok,
         "RG.CONFIGGET": dict_of(
             CaseInsensitiveDict(redgrease.config.Config.ValueTypes)
