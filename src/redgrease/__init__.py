@@ -32,6 +32,8 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 import sys
 
+from redgrease.data import T
+
 from .func import trigger
 from .gears import ClosedGearFunction, GearFunction, PartialGearFunction
 from .reader import (
@@ -128,6 +130,7 @@ except ModuleNotFoundError:
 # or not (e.g. dev or client)
 if "redisgears" in sys.modules:
     # Server Gears runtime environment
+    GEARS_RUNTIME = True
     # Import the default functions and classes
     # pyright: reportMissingImports=false
     from __main__ import GB as GB
@@ -138,8 +141,10 @@ if "redisgears" in sys.modules:
     from redisgears import executeCommand as execute
     from redisgears import getMyHashTag as hashtag
     from redisgears import log as log
+
 else:
     # Dev or Client environment
+    GEARS_RUNTIME = False
     # Import placeholder functions and
     from .runtime import (
         GB,
@@ -161,4 +166,5 @@ __all__ += [
     "gearsConfigGet",
     "hashtag",
     "log",
+    "GEARS_RUNTIME",
 ]

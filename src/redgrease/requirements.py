@@ -156,13 +156,13 @@ def resolve_requirements(
 
             It can take several optional types::
 
-                - None : enforces that 'redgrease' is NOT in thequirements,
-                    any redgrease requirements will be removed.
+                - None : no enforcing. requirements are only deduplicated, with or
+                    without 'redgrease'
 
                 - bool :
                     True, enforces latest 'redgrease' package on PyPi,
-                    False, no enforcing. requirements are passed as-is,
-                        with or without 'redgrease'
+                    False, enforces that 'redgrease' is NOT in the quirements set,
+                        any redgrease requirements will be removed.
 
                 - str :
                     a. Specific version. E.g. "1.2.3".
@@ -187,26 +187,31 @@ def resolve_requirements(
         InvalidRequirement:
             If any of the requirements are not well-formed.
     """
-    requirements_set = set(
-        [packaging.requirements.Requirement(str(req)) for req in requirements]
+    # Parse requirments and, remove duplicates
+    requirements_set = (
+        {packaging.requirements.Requirement(str(req)) for req in set(requirements)}
         if requirements
-        else []
+        else set()
     )
+
+    if enforce_redgrease is None:
+        # If there is no requirement to keep nor remove redgrease,
+        # then the requirments are returned, as-is
+        return requirements_set
 
     packages = to_packages_dict(requirements_set)
 
-    if enforce_redgrease is None:
-        # enforce_redgrease is explicitly None, meaning we enforce that
-        # redgrease should NOT be in ther requirements set
-        # so we remove it
-        if "redgrease" in packages:
-            del packages["redgrease"]
-        return from_packages_dict(packages)
-
     if isinstance(enforce_redgrease, bool):
-        if enforce_redgrease and "redgrease" not in packages:
+        if not enforce_redgrease:
+            # enforce_redgrease is explicitly False, meaning we enforce that
+            # redgrease should NOT be in ther requirements set
+            # so we remove it
+            packages.pop("redgrease", None)
+            return from_packages_dict(packages)
+
+        if "redgrease" not in packages:
             # enforce_redgrease is True  (i.e: any version of redgrease)
-            # and it is not currently in the requirement set
+            # but it is not currently specified in the requirement set
             # so we add the latest version from PyPi,
             packages["redgrease"] = [default_redgrease]
         return from_packages_dict(packages)

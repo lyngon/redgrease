@@ -26,8 +26,10 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+
 from typing import Any, Dict, Generic, Hashable, Iterable, Optional, Type, TypeVar
 
+import redgrease
 import redgrease.sugar as sugar
 import redgrease.typing as optype
 
@@ -1450,6 +1452,9 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
             requirements=requirements,
         )
 
+        if redgrease.GEARS_RUNTIME:
+            return redgrease.runtime.run(gear_fun, redgrease.GearsBuilder)
+
         if on:
             return gear_fun.on(on)
 
@@ -1650,6 +1655,9 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
             input_function=self,
             requirements=requirements,
         )
+
+        if redgrease.GEARS_RUNTIME:
+            return redgrease.runtime.run(gear_fun, redgrease.GearsBuilder)
 
         if on:
             return gear_fun.on(on)
