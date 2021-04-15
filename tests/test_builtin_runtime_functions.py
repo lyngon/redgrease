@@ -84,7 +84,7 @@ def test_builtin_runtime_functions(
 ):
     """Tests that
     (a) all Gears' builtin runtime functions are callable,
-    (b) regardless how they were iported, and
+    (b) regardless how they were imported, and
     (c) regardless of which redgrease extras have been installed.
 
     Details:
@@ -121,7 +121,7 @@ def test_builtin_runtime_functions(
         time.sleep(1)
 
     assert (
-        rg.gears.pyexecute("", requirements=[f"redgrease{extras}=={redgrease_version}"])
+        rg.gears.pyexecute(requirements=[f"redgrease{extras}=={redgrease_version}"])
         is not None
     )
 
@@ -161,8 +161,8 @@ GB().run()
 
     if extras:
         # With any of the extras installed, it should be
-        # possibleto run gears that import both
-        # 'redgrease.command' as well as 'redis'
+        # possible to run gears that import both
+        # 'redgrease.cmd' as well as 'redis'
         assert rg.gears.pyexecute(runtime_extras_import) is not None
         assert rg.gears.pyexecute(redis_import) is not None
     else:

@@ -394,7 +394,7 @@ This is an example of how the same Gear function could be rewritten using RedgGr
     :caption: RedGrease - Delete by Key Prefix
 
 
-Keyspace Notification Processing
+Basic Redis Stream Processing
 ~~~~~~~~~~~~~~~~~~~~
 Copy every new message from a Redis Stream to a Redis Hash key. 
 
@@ -405,7 +405,7 @@ An input Redis Stream is stored under the "mystream" key.
 Vanilla Version
 ...............
 
-This is the the `'Keyspace Notification Processing' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#basic-redis-stream-processing>`_.
+This is the the `'Basic Redis Stream Processing' example from the official RedisGears documentation <https://oss.redislabs.com/redisgears/master/examples.html#basic-redis-stream-processing>`_.
 
 .. literalinclude:: ../../tests/gear_scripts/redislabs_example_basicredisstreamprocessing.py
     :caption: Vanlilla - Basic Redis Stream Processing

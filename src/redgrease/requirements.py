@@ -140,7 +140,7 @@ def from_packages_dict(
 
 def resolve_requirements(
     requirements: Iterable[Union[str, Requirement]],
-    enforce_redgrease: PackageOption = False,
+    enforce_redgrease: PackageOption = None,
 ) -> Set[Requirement]:
     """Attempts to resolve the given requirements, and that the desired version of
     redgrease is, or is NOT, included.
@@ -177,7 +177,7 @@ def resolve_requirements(
 
                 - Requirment : behaves just as string version (d.)
 
-            Defaults to False.
+            Defaults to None.
 
     Returns:
         Set[Requirement]:
