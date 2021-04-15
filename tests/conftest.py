@@ -41,6 +41,7 @@ from docker import DockerClient
 from docker.errors import APIError as DockerError
 
 import redgrease
+import redgrease.requirements
 
 redgrease_version = os.getenv(
     "REDGREASE_VERSION", importlib_metadata.version("redgrease")
@@ -48,11 +49,6 @@ redgrease_version = os.getenv(
 
 redgrease_runtime_repo = "lyngon/redgrease"
 redgrease_runtime_image_name = f"{redgrease_runtime_repo}:{redgrease_version}"
-
-redgrease_runtime_package = os.getenv(
-    "REDGREASE_RUNTIME_PACKAGE", f"redgrease[runtime]=={redgrease_version}"
-)
-
 redis_port = "6379/tcp"
 redisgears_repo = os.getenv("REDISGEARS_IMAGE", "redislabs/redisgears:latest")
 redisgears_image = docker.fetch(repository=redisgears_repo)
@@ -62,6 +58,15 @@ redisgears_image = docker.fetch(repository=redisgears_repo)
 redisgears_container = docker.container(
     image="{redisgears_image.id}", ports={redis_port: None}
 )
+
+
+def get_init_packages(redgrease_package=None):
+    return redgrease.requirements.resolve_requirements(
+        [],  # No additional packages, beyond redgrease
+        enforce_redgrease=redgrease_package
+        if redgrease_package
+        else os.getenv("REDGREASE_RUNTIME_PACKAGE", redgrease_version),
+    )
 
 
 def instantiate(client_cls: Callable[..., redis.Redis], *args, **kwargs):
@@ -91,9 +96,8 @@ def redgrease_runtime_image(docker_client: DockerClient, redisgears_container):
         # TODO: Use this approach inst
         # f"redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@{branch}"
 
-        r.execute_command(
-            "RG.PYEXECUTE", "", "REQUIREMENTS", f"{redgrease_runtime_package}"
-        )
+        packages = get_init_packages()
+        r.execute_command("RG.PYEXECUTE", "", "REQUIREMENTS", *map(str, packages))
         redisgears_container = docker_client.containers.get(redisgears_container.id)
 
         redisgears_container.commit(redgrease_runtime_repo, redgrease_version)
