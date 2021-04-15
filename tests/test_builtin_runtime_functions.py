@@ -161,8 +161,8 @@ GB().run()
 
     if extras:
         # With any of the extras installed, it should be
-        # possibleto run gears that import both
-        # 'redgrease.command' as well as 'redis'
+        # possible to run gears that import both
+        # 'redgrease.cmd' as well as 'redis'
         assert rg.gears.pyexecute(runtime_extras_import) is not None
         assert rg.gears.pyexecute(redis_import) is not None
     else:
