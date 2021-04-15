@@ -32,8 +32,6 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 import sys
 
-from redgrease.data import T
-
 from .func import trigger
 from .gears import ClosedGearFunction, GearFunction, PartialGearFunction
 from .reader import (
