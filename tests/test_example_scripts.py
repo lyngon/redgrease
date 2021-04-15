@@ -36,7 +36,6 @@ from typing import Dict
 
 import importlib_metadata
 import pytest
-from docker.api.container import ContainerApiMixin
 
 from redgrease import RedisGears
 from redgrease.utils import safe_str
@@ -241,7 +240,8 @@ def test_example_keyspacenotificationprocessing(
 def test_example_reliablekeyspacenotification(
     rg: RedisGears, script_file: str, vanilla: bool, enforce_redgrease
 ):
-    # All hash records matching "person:*" are written to the stream "notifications-stream"
+    # All hash records matching "person:*" are written
+    # to the stream "notifications-stream"
     res = rg.gears.pyexecute(script_file, enforce_redgrease=enforce_redgrease)
     assert res.value is True
 

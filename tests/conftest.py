@@ -29,7 +29,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 import os
 import time
 from datetime import datetime
-from typing import Callable
+from typing import Callable, List
 from uuid import uuid4
 
 import importlib_metadata
@@ -60,15 +60,6 @@ redisgears_container = docker.container(
 )
 
 
-def get_init_packages(redgrease_package=None):
-    return redgrease.requirements.resolve_requirements(
-        [],  # No additional packages, beyond redgrease
-        enforce_redgrease=redgrease_package
-        if redgrease_package
-        else os.getenv("REDGREASE_RUNTIME_PACKAGE", redgrease_version),
-    )
-
-
 def instantiate(client_cls: Callable[..., redis.Redis], *args, **kwargs):
     """Helper function to ensure that the SOT Redis Gears client object use the same
     instantiation logic as for the baseline Redis client object.
@@ -86,18 +77,24 @@ def instantiate(client_cls: Callable[..., redis.Redis], *args, **kwargs):
 
 
 @pytest.fixture()
-def redgrease_runtime_image(docker_client: DockerClient, redisgears_container):
+def base_packages():
+    return redgrease.requirements.resolve_requirements(
+        [],  # No additional packages, beyond redgrease
+        enforce_redgrease=os.getenv("REDGREASE_RUNTIME_PACKAGE", redgrease_version),
+    )
+
+
+@pytest.fixture()
+def redgrease_runtime_image(
+    docker_client: DockerClient, redisgears_container, base_packages: List
+):
     try:
         image = docker_client.images.get(redgrease_runtime_image_name)
     except DockerError:
         ip, port = redisgears_container.get_addr(redis_port)
         r = instantiate(redis.Redis, host=ip, port=port)
 
-        # TODO: Use this approach inst
-        # f"redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@{branch}"
-
-        packages = get_init_packages()
-        r.execute_command("RG.PYEXECUTE", "", "REQUIREMENTS", *map(str, packages))
+        r.execute_command("RG.PYEXECUTE", "", "REQUIREMENTS", *map(str, base_packages))
         redisgears_container = docker_client.containers.get(redisgears_container.id)
 
         redisgears_container.commit(redgrease_runtime_repo, redgrease_version)
