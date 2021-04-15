@@ -27,15 +27,19 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import ast
 import os
 import re
+import time
 from pathlib import Path
 from typing import Dict
 
 import importlib_metadata
 import pytest
+from docker.api.container import ContainerApiMixin
 
 from redgrease import RedisGears
+from redgrease.utils import safe_str
 
 redgrease_version = importlib_metadata.version("redgrease")
 
@@ -67,13 +71,18 @@ def read(file_pattern):
 # ################################# #
 @pytest.mark.parametrize("enforce_redgrease", [True])
 @pytest.mark.parametrize(
-    "script_file",
+    "script_file,vanilla",
     [
-        gear_script("redislabs_example_wordcount.py"),
-        gear_script("redislabs_mod_example_wordcount.py"),
+        (gear_script("redislabs_example_wordcount.py"), True),
+        (gear_script("redislabs_mod_example_wordcount.py"), False),
     ],
+    ids=lambda arg: Path(arg).name
+    if isinstance(arg, str) and arg.endswith(".py")
+    else None,
 )
-def test_example_wordcount(rg: RedisGears, script_file: str, enforce_redgrease):
+def test_example_wordcount(
+    rg: RedisGears, script_file: str, vanilla: bool, enforce_redgrease
+):
     lines = [
         "this is the first sentence of a lot of nonsense",
         "the lines don`t mean a thing at all",
@@ -91,3 +100,167 @@ def test_example_wordcount(rg: RedisGears, script_file: str, enforce_redgrease):
         assert res
         assert isinstance(res.value, list)
         assert len(res.value) == len(reference_word_counts)
+        for word_count in res.value:
+            if vanilla:
+                word_count = ast.literal_eval(safe_str(word_count))
+
+            assert word_count["value"] == reference_word_counts[word_count["key"]]
+
+
+@pytest.mark.parametrize("enforce_redgrease", [True])
+@pytest.mark.parametrize(
+    "script_file,vanilla",
+    [
+        (gear_script("redislabs_example_deletebykeyprefix.py"), True),
+        (gear_script("redislabs_mod_example_deletebykeyprefix.py"), False),
+    ],
+    ids=lambda arg: Path(arg).name
+    if isinstance(arg, str) and arg.endswith(".py")
+    else None,
+)
+def test_example_deletebykeprefix(
+    rg: RedisGears, script_file: str, vanilla: bool, enforce_redgrease
+):
+
+    rg.set("delete_me:unimportant", "Merble!")
+    rg.set("keep_me:important", "Gerbil!")
+    rg.hset("delete_me:data", mapping={"a": 1, "b": 2})
+    rg.xadd("dont_delete_me:", {"some": "interesting", "data": "here"})
+
+    assert len(rg.keys()) == 4
+
+    res = rg.gears.pyexecute(script_file, enforce_redgrease=enforce_redgrease)
+
+    assert res.value
+    assert len(rg.keys()) == 2
+
+
+@pytest.mark.parametrize("enforce_redgrease", [True])
+@pytest.mark.parametrize(
+    "script_file,vanilla",
+    [
+        (gear_script("redislabs_example_basicredisstreamprocessing.py"), True),
+        (gear_script("redislabs_mod_example_basicredisstreamprocessing.py"), False),
+    ],
+    ids=lambda arg: Path(arg).name
+    if isinstance(arg, str) and arg.endswith(".py")
+    else None,
+)
+def test_example_basicredisstreamprocessing(
+    rg: RedisGears, script_file: str, vanilla: bool, enforce_redgrease
+):
+    res = rg.gears.pyexecute(script_file, enforce_redgrease=enforce_redgrease)
+
+    assert res.value is True
+
+    original_message = {"a": 1, "b": 2}
+    msgid = rg.xadd("mystream", original_message)
+    time.sleep(0.1)
+    message_envelope = rg.hgetall(msgid)
+
+    assert message_envelope
+
+    stored_message = message_envelope[b"value"]
+
+    stored_message = ast.literal_eval(safe_str(stored_message))
+
+    assert message_envelope[b"key"] == b"mystream"
+    assert message_envelope[b"id"] == msgid
+
+    assert len(original_message) == len(stored_message)
+    print(f"MESSAGE: {stored_message}")
+    for k, v in stored_message.items():
+        assert safe_str(original_message[safe_str(k)]) == safe_str(v)
+
+
+@pytest.mark.parametrize("enforce_redgrease", [True])
+@pytest.mark.parametrize(
+    "script_file,vanilla",
+    [
+        (gear_script("redislabs_example_automaticexpiry.py"), True),
+        (gear_script("redislabs_mod_example_automaticexpiry.py"), False),
+    ],
+    ids=lambda arg: Path(arg).name
+    if isinstance(arg, str) and arg.endswith(".py")
+    else None,
+)
+def test_example_automaticexpiry(
+    rg: RedisGears, script_file: str, vanilla: bool, enforce_redgrease
+):
+    res = rg.gears.pyexecute(script_file, enforce_redgrease=enforce_redgrease)
+    assert res.value is True
+
+    rg.set("Foo", "Bar")
+    time.sleep(0.1)
+    ttl = rg.ttl("Foo")
+    assert int(ttl) <= 3600
+    assert int(ttl) > 3590
+
+
+@pytest.mark.parametrize("enforce_redgrease", [True])
+@pytest.mark.parametrize(
+    "script_file,vanilla",
+    [
+        (gear_script("redislabs_example_keyspacenotificationprocessing.py"), True),
+        (gear_script("redislabs_mod_example_keyspacenotificationprocessing.py"), False),
+    ],
+    ids=lambda arg: Path(arg).name
+    if isinstance(arg, str) and arg.endswith(".py")
+    else None,
+)
+def test_example_keyspacenotificationprocessing(
+    redgrease_runtime_container,
+    rg: RedisGears,
+    script_file: str,
+    vanilla: bool,
+    enforce_redgrease,
+):
+    res = rg.gears.pyexecute(script_file, enforce_redgrease=enforce_redgrease)
+    assert res.value is True
+
+    rg.set("Foo", "Bar", ex=1)
+    expected_log_entry = "Key 'Foo' expired at "
+    logs = redgrease_runtime_container.logs()
+    assert expected_log_entry not in logs
+    time.sleep(1.5)
+    logs = redgrease_runtime_container.logs()
+    assert expected_log_entry in logs
+
+
+@pytest.mark.parametrize("enforce_redgrease", [True])
+@pytest.mark.parametrize(
+    "script_file,vanilla",
+    [
+        (gear_script("redislabs_example_reliablekeyspacenotification.py"), True),
+        (gear_script("redislabs_mod_example_reliablekeyspacenotification.py"), False),
+    ],
+    ids=lambda arg: Path(arg).name
+    if isinstance(arg, str) and arg.endswith(".py")
+    else None,
+)
+def test_example_reliablekeyspacenotification(
+    rg: RedisGears, script_file: str, vanilla: bool, enforce_redgrease
+):
+    # All hash records matching "person:*" are written to the stream "notifications-stream"
+    res = rg.gears.pyexecute(script_file, enforce_redgrease=enforce_redgrease)
+    assert res.value is True
+
+    rg.set("person:ignore", "Igno Re")  # should be ignored because it is not a hash
+    rg.hset(
+        "dog:Fido", mapping={"gender": "boy", "behavior": "good"}
+    )  # should be ignored because of key name
+
+    assert not rg.exists("notifications-stream")
+
+    msg = {"gender": "male", "behavior": "naugty"}
+    rg.hset("person:anders", mapping=msg)
+
+    time.sleep(0.5)
+
+    assert rg.exists("notifications-stream")
+    events = rg.xrange("notifications-stream")
+
+    assert len(events) == 1
+    _, msg_envelope = events[0]
+    assert safe_str(msg_envelope[b"key"]) == "person:anders"
+    assert safe_str(msg_envelope[b"value"]) == safe_str(msg)
