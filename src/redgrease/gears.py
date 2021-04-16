@@ -25,13 +25,14 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
-
 from typing import Any, Dict, Generic, Hashable, Iterable, Optional, Type, TypeVar
 
 import redgrease
+import redgrease.data
+import redgrease.exceptions
 import redgrease.sugar as sugar
 import redgrease.typing as optype
+from redgrease.utils import safe_str
 
 T = TypeVar("T")
 
@@ -1346,6 +1347,7 @@ class ClosedGearFunction(GearFunction[T]):
         gears_server,
         unblocking: bool = False,
         requirements: Iterable[str] = None,
+        replace: bool = None,
         **kwargs,
     ):
         """Execute the function on a Redis Gear server / cluster.
@@ -1374,9 +1376,33 @@ class ClosedGearFunction(GearFunction[T]):
 
             gears_server = Gears(gears_server)
 
-        return gears_server.pyexecute(
-            self, unblocking=unblocking, requirements=requirements, **kwargs
-        )
+        try:
+            return gears_server.pyexecute(
+                self, unblocking=unblocking, requirements=requirements, **kwargs
+            )
+        except redgrease.exceptions.DuplicateTriggerError:
+            # If we get an error because the trigger already is registered,
+            # then we check the 'replace' argument for what to do:
+            # - `replace is None` : Re-raise the error
+            # - `replace is False` : Ignore the error
+            # - `replace is True` : Unregister the previous and re-register the new
+            if replace is None or "trigger" not in self.operation.kwargs:
+                raise
+
+            if replace is False:
+                return gears_server._trigger_proxy(self.operation.kwargs["trigger"])
+
+            # Find and replace the registered trigger.
+            trigger = self.operation.kwargs["trigger"]
+            regs = gears_server.dumpregistrations(trigger=trigger)
+            if len(regs) != 1:
+                raise
+            gears_server.unregister(reg.id)
+
+            # Try registering again
+            return gears_server.pyexecute(
+                self, unblocking=unblocking, requirements=requirements, **kwargs
+            )
 
 
 class PartialGearFunction(GearFunction[optype.InputRecord]):
@@ -1645,6 +1671,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         if trigger is not None:
             kwargs["trigger"] = trigger
 
+        replace = kwargs.pop("replace", None)
+
         gear_fun = ClosedGearFunction["optype.InputRecord"](
             Register(
                 prefix=prefix,
@@ -1660,7 +1688,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
             return redgrease.runtime.run(gear_fun, redgrease.GearsBuilder)
 
         if on:
-            return gear_fun.on(on)
+            return gear_fun.on(on, replace=replace)
 
         return gear_fun
 

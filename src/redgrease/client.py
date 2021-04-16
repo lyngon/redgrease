@@ -46,14 +46,17 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import ast
+import fnmatch
 import logging
-import os.path
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
 
 import redis
 
 import redgrease.config
 import redgrease.data
+import redgrease.exceptions
+import redgrease.gearialization
 import redgrease.gears
 import redgrease.reader
 import redgrease.requirements
@@ -130,6 +133,12 @@ class Gears:
         """
         return self.config.MaxExecutions > 0
 
+    def _trigger_proxy(self, trigger):
+        def trigger_function(*args):
+            return self.trigger(trigger, *args)
+
+        return redgrease.data.ExecutionResult(trigger_function)
+
     def abortexecution(self, id: ExecutionID) -> bool:
         """Abort the execution of a function mid-flight
 
@@ -174,14 +183,52 @@ class Gears:
         """
         return self.redis.execute_command("RG.DUMPEXECUTIONS")
 
-    def dumpregistrations(self) -> List[redgrease.data.Registration]:
+    def dumpregistrations(
+        self,
+        reader: str = None,
+        desc: str = None,
+        mode: str = None,
+        key: str = None,
+        stream: str = None,
+        trigger: str = None,
+    ) -> List[redgrease.data.Registration]:
         """Get list of function registrations.
 
         Returns:
             List[redgrease.data.Registration]:
                 A list of Registration, with one entry per registered function.
         """
-        return self.redis.execute_command("RG.DUMPREGISTRATIONS")
+        registrations: List[redgrease.data.Registration] = []
+        registrations = self.redis.execute_command("RG.DUMPREGISTRATIONS")
+
+        if reader or desc or mode or key or stream or trigger:
+            filtered_regsistrations = []
+            for reg in registrations:
+                if trigger and (
+                    "trigger" not in reg.RegistrationData.args
+                    and safe_str(reg.RegistrationData.args["trigger"]) == trigger
+                ):
+                    continue
+                if stream and not fnmatch.fnmatch(
+                    stream, safe_str(reg.RegistrationData.args.get("stream", ""))
+                ):
+                    continue
+                if key and fnmatch.fnmatch(
+                    key, safe_str(reg.RegistrationData.args.get("regex", ""))
+                ):
+                    continue
+                if reader and reader != reg.reader:
+                    continue
+                if desc and reg.desc and not fnmatch.fnmatch(safe_str(reg.desc), desc):
+                    continue
+                if mode and mode != reg.RegistrationData.mode:
+                    continue
+
+                filtered_regsistrations.append(reg)
+
+            registrations = filtered_regsistrations
+
+        return registrations
 
     def getexecution(
         self,
@@ -352,44 +399,11 @@ class Gears:
             redis.exceptions.ResponseError:
                 If the funvction cannot be parsed.
         """  # noqa
-
         requirements = set(requirements if requirements else [])
-        result_function = None
 
-        if isinstance(gear_function, redgrease.runtime.GearsBuilder):
-            gear_function = gear_function._function
-
-        if isinstance(gear_function, redgrease.gears.GearFunction):
-            # If the input is a GearFunction, we get the requirements from it,
-            # and ensure that redgrease is included
-            requirements = requirements.union(gear_function.requirements)
-            enforce_redgrease = enforce_redgrease or True
-
-            if isinstance(gear_function, redgrease.gears.PartialGearFunction):
-                # If the function isn't closed with either 'run' or 'register'
-                # we assume it is meant to be closed with a 'run'
-                gear_function = gear_function.run()
-
-            function_string = redgrease.data.seralize_gear_function(gear_function)
-
-            # Special case for CommandReader functions:
-            # return a new function that calls its "trigger" and returns the results.
-            if gear_function.reader == "CommandReader":
-
-                def result_function(*args):
-                    return self.trigger(
-                        gear_function.operation.kwargs["trigger"], *args
-                    )
-
-        elif os.path.exists(gear_function):
-            # If the gear function is a fle path,
-            # then we load the contents of the file
-            with open(gear_function) as script_file:
-                function_string = script_file.read()
-
-        else:
-            # Otherwise we default to the string version of the function
-            function_string = str(gear_function)
+        function_string, ctx = redgrease.gearialization.get_function_string(
+            gear_function
+        )
 
         params = []
         if unblocking:
@@ -397,21 +411,28 @@ class Gears:
 
         # Resolve requirement conflicts, remove duplicates
         requirements = redgrease.requirements.resolve_requirements(
-            requirements, enforce_redgrease=enforce_redgrease
+            requirements.union(ctx.get("requirements", set())),
+            enforce_redgrease=ctx.get("enforce_redgrease", enforce_redgrease),
         )
 
         if requirements:
             params.append("REQUIREMENTS")
             params += list(map(str, requirements))
 
-        command_response = self.redis.execute_command(
-            "RG.PYEXECUTE",
-            function_string,
-            *params,
-        )
+        try:
+            command_response = self.redis.execute_command(
+                "RG.PYEXECUTE",
+                function_string,
+                *params,
+            )
+        except redis.exceptions.ResponseError as ex:
+            ex.args = ast.literal_eval(ex.args[0])
+            if "trigger already registered" in ex.args[-1]:
+                raise redgrease.exceptions.DuplicateTriggerError() from ex
+            raise
 
-        if result_function and command_response:
-            return redgrease.data.ExecutionResult(result_function)
+        if command_response and "trigger" in ctx:
+            return self._trigger_proxy(ctx["trigger"])
 
         return command_response
 
