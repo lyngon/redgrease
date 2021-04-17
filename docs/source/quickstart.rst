@@ -644,9 +644,13 @@ The really intersting part, however, is this little line.
     :emphasize-lines: 3
     :lineno-match:
 
-All the Redis Gears magic is hidden in this function decorator, and it does two important things:
-- It ensures that the function contents is redgistered as a ``CommandReader`` Gear function on Redis.
-- That the resulting decorated function, when called, triggers the corresponding registered Gear function, and returns the result.
+All the Redis Gears magic is hidden in this function decorator, and it does a couple of important things:
+
+- It embeds the function in a ``CommandReader`` Gear function.
+- It ensures that the function is redgistered on our Redis server(s).
+- It captures the relevant requirements, for the function to work.
+- It ensures that we only register this function once. 
+- It creates a new function, with the same name that, when called, triggers the corresponding registered Gear function, and returns the result from the server.
 
 This means that you can now call the decorated function, just as if it was a local function:
 
@@ -656,9 +660,15 @@ This means that you can now call the decorated function, just as if it was a loc
 
 This may look like it is actually executing the function locally, but the ``cache_get`` function is actually executed on the server.
 
-Note that the registered ``cache_get`` Gear function can not only be triggered by the client that defined the decorated function, but by any client by invoking the Redis Gear `RG.TRIGGER <https://oss.redislabs.com/redisgears/commands.html#rgtrigger>`_ command with the the functions' trigger name and arguments.
+This means that the registered ``cache_get`` Gear function can not only be triggered by the client that defined the decorated function, but **can be triggered by any client** by invoking the Redis Gear `RG.TRIGGER <https://oss.redislabs.com/redisgears/commands.html#rgtrigger>`_ command with the the functions' trigger name and arguments. 
 
-The arguments for the :func:`redgrease.trigger <.trigger>` decorator, are the same as to the :method:``register <.CommandReader.register>`` method of the :class:`CommandReader <.CommandReader>` class.
+In our case, using `redis-cli` as an example:
+
+.. code-block:: console
+
+    > RG.TRIGGER cache_get http://images.cocodataset.org/train2017/000000169188.jpg
+
+The arguments for the :func:`redgrease.command <.command>` decorator, are the same as to the :method:``register <.CommandReader.register>`` method of the :class:`CommandReader <.CommandReader>` class.
 
 .. note:: 
 
