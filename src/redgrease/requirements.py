@@ -53,12 +53,46 @@ PackageOption = Optional[Union[bool, str, Version, Requirement]]
 
 
 def safe_requirement(req: Any) -> Requirement:
+    """Parse a Requirement safely
+
+    Args:
+        req (Any):
+            Value to parse
+
+    Returns:
+        Requirement:
+            Parsed Requirement object
+
+    Raises:
+        packaging.requirements.InvalidRequirement
+            If input could not be parsed.
+    """
     if not isinstance(req, Requirement):
         req = Requirement(safe_str(req))
     return req
 
 
 def same_name(req1: Any, req2: Any) -> bool:
+    """Check if two requirements have the same name.
+
+    Version numbers, extras etc is ignored.
+
+    This means that `foo>1.2.3` will match `foo[bar]==0.1.2`,
+    because both are from the same `foo` package.
+
+
+    Args:
+        req1 (Any):
+            First requirement to parse.
+
+        req2 (Any):
+            Second requirement to parse.
+
+    Returns:
+        bool:
+            `True` if the two requirements share the same name.
+            `False` if they don't share name, or if there was a parse error.
+    """
     try:
         return safe_requirement(req1).name == safe_requirement(req2).name
     except packaging.requirements.InvalidRequirement:
