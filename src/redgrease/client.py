@@ -66,6 +66,7 @@ from redgrease.utils import (
     bool_ok,
     dict_of,
     list_parser,
+    safe_bool,
     safe_str,
     to_redis_type,
 )
@@ -172,16 +173,49 @@ class Gears:
             id = id.executionId
         return self.redis.execute_command("RG.DROPEXECUTION", to_redis_type(id))
 
-    def dumpexecutions(self) -> List[redgrease.data.ExecutionInfo]:
+    def dumpexecutions(
+        self,
+        status: Union[str, redgrease.data.ExecutionStatus] = None,
+        registered: bool = None,
+    ) -> List[redgrease.data.ExecutionInfo]:
         """Get list of function executions.
         The executions list's length is capped by the 'MaxExecutions' configuration
         option.
+
+        Args:
+            status (Union[str, redgrease.data.ExecutionStatus], optional):
+                Only return executions that match this status.
+                Either: "created", "running", "done", "aborted", "pending_cluster",
+                "pending_run", "pending_receive" or "pending_termination".
+                Defaults to None.
+
+            registered (bool, optional):
+                If `True`, only return registered executions.
+                If `False`, only return non-registered executions.
+
+                Defaults to None.
 
         Returns:
             List[redgrease.data.ExecutionInfo]:
                 A list of ExecutionInfo, with an entry per execution.
         """
-        return self.redis.execute_command("RG.DUMPEXECUTIONS")
+        executions: List[redgrease.data.ExecutionInfo] = []
+        executions = self.redis.execute_command("RG.DUMPEXECUTIONS")
+
+        if status or registered is not None:
+            filtered_executions = []
+            for exe in executions:
+                if status and safe_str(status) != safe_str(exe.status):
+                    continue
+
+                if registered is not None and registered != safe_bool(exe.registered):
+                    continue
+
+                filtered_executions.append(exe)
+
+            executions = filtered_executions
+
+        return executions
 
     def dumpregistrations(
         self,
@@ -193,6 +227,37 @@ class Gears:
         trigger: str = None,
     ) -> List[redgrease.data.Registration]:
         """Get list of function registrations.
+
+        Args:
+            reader (str, optional):
+                Only return registrations of this reader type.
+                E.g: "StreamReader"
+                Defaults to None.
+
+            desc (str, optional):
+                Only return registrations, where the description match this pattern.
+                E.g: "transaction*log*"
+                Defaults to None.
+
+            mode (str, optional):
+                Only return registrations, in this mode.
+                Either "async", "async_local" or "sync".
+                Defaults to None.
+
+            key (str, optional):
+                Only return (KeysReader) registrations, where the key pattern match
+                this key.
+                Defaults to None.
+
+            stream (str, optional):
+                Only return (StreamReader) registrations, where the stream pattern
+                match this key.
+                Defaults to None.
+
+            trigger (str, optional):
+                Only return (CommandReader) registrations, where the trigger pattern
+                match this key.
+                Defaults to None.
 
         Returns:
             List[redgrease.data.Registration]:
@@ -446,15 +511,52 @@ class Gears:
         """
         return self.redis.execute_command("RG.PYSTATS")
 
-    def pydumpreqs(self) -> List[redgrease.data.PyRequirementInfo]:
+    def pydumpreqs(
+        self, name: str = None, is_downloaded: bool = None, is_installed: bool = None
+    ) -> List[redgrease.data.PyRequirementInfo]:
         """Gets all the python requirements available (with information about
         each requirement).
+
+        Args:
+            name (str, optional):
+                Only return packages with this **base name**.
+                I.e. it is not filtering on version number, extras etc.
+                Defaults to None.
+
+            is_downloaded (bool, optional):
+                If `True`, only return requirements that have been downloaded.
+                If `False`, only return requirements that have NOT been downloaded.
+                Defaults to None.
+
+            is_installed (bool, optional):
+                If `True`, only return requirements that have been installed.
+                If `False`, only return requirements that have NOT been installed.
+                Defaults to None.
 
         Returns:
             List[redgrease.data.PyRequirementInfo]:
                 List of Python requirement information objects.
         """
-        return self.redis.execute_command("RG.PYDUMPREQS")
+        requirements: List[redgrease.data.PyRequirementInfo] = []
+        requirements = self.redis.execute_command("RG.PYDUMPREQS")
+
+        if name or is_downloaded is not None or is_installed is not None:
+            filtered_requirements = []
+            for req in requirements:
+                if name and not redgrease.requirements.same_name(name, req.Name):
+                    continue
+                if is_downloaded is not None and is_downloaded != safe_bool(
+                    req.IsDownloaded
+                ):
+                    continue
+                if is_installed is not None and is_installed != safe_bool(
+                    req.IsInstalled
+                ):
+                    continue
+            filtered_requirements.append(req)
+        requirements = filtered_requirements
+
+        return requirements
 
     def refreshcluster(self) -> bool:
         """Refreshes the local node's view of the cluster topology.
