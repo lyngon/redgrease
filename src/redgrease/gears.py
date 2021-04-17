@@ -32,7 +32,6 @@ import redgrease.data
 import redgrease.exceptions
 import redgrease.sugar as sugar
 import redgrease.typing as optype
-from redgrease.utils import safe_str
 
 T = TypeVar("T")
 
@@ -1397,7 +1396,7 @@ class ClosedGearFunction(GearFunction[T]):
             regs = gears_server.dumpregistrations(trigger=trigger)
             if len(regs) != 1:
                 raise
-            gears_server.unregister(reg.id)
+            gears_server.unregister(regs[0].id)
 
             # Try registering again
             return gears_server.pyexecute(
