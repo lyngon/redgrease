@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Datatypes and parsers for the various structures, specific to Redis Gears.
-
-These datatypes are returend from various redgrease functions, merely for the purpose
-of providig more convenient structure, typing and documentation compared to the native
-'list-based' structures.
-
-They are generally not intended to be instantiated by end-users.
+Helper functions for searialization, de-serialization, reading and writing Gear 
+functions.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -104,12 +99,9 @@ def seralize_gear_function(gear_function: redgrease.gears.GearFunction) -> str:
     # Gear function and run it.
 
     return f"""
-try:
-    from redgrease.gearialization import deseralize_gear_function
-except:
-    from redgrease.data import deseralize_gear_function
+import redgrease.gearialization
 import redgrease.runtime
-gear_function = deseralize_gear_function(
+gear_function = redgrease.gearialization.deseralize_gear_function(
     {cloudpickle.dumps(gear_function, protocol=4)},
     python_version={tuple(sys.version_info)},
 )

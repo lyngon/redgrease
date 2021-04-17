@@ -570,12 +570,16 @@ class Record:
         value: Any = None,
         type: str = None,
         event: str = None,
+        **kwargs,
     ):
+        if not key:
+            raise ValueError(f"Record cannot be created with empty key '{key}'.")
 
-        self.key = key
+        self.key = safe_str(key)
         self.value = value
-        self.type = type
-        self.event = event
+        self.type = safe_str(type)
+        self.event = safe_str(event)
+        self.kwargs = kwargs
 
 
 class StreamRecord:
@@ -602,17 +606,22 @@ class StreamRecord:
         key: str,
         id: str = None,
         value: Any = None,
+        **kwargs,
     ):
-        self.key = key
-        self.id = id
+        if not key:
+            raise ValueError(f"Record cannot be created with empty key '{key}'.")
+
+        self.key = safe_str(key)
+        self.id = safe_str(id) if id else None
         self.value = value
+        self.kwargs = kwargs
 
 
-def record(rec: Union[str, dict]) -> Record:
+def record(rec: Any) -> Record:
     """Create a Record
 
     Args:
-        rec (Union[str, dict]):
+        rec (Any):
             the value to parse. Either a string (key only) or a dict with at minimum
             the key `key` present and optionally any of the keys `value`, `type`
             and/or `event`.
@@ -627,15 +636,14 @@ def record(rec: Union[str, dict]) -> Record:
     if isinstance(rec, dict):
         return Record(**rec)
 
-    if isinstance(rec, str):
-        return Record(rec)
+    return Record(rec)
 
 
-def stream_record(rec: dict) -> StreamRecord:
+def stream_record(rec: Any) -> StreamRecord:
     """Create a Record
 
     Args:
-        rec (Union[str, dict]):
+        rec (Any):
             the value to parse. Either a string (key only) or a dict with at minimum
             the key `key` present and optionally any of the keys `value`, `type`
             and/or `event`.
@@ -647,7 +655,10 @@ def stream_record(rec: dict) -> StreamRecord:
     if isinstance(rec, StreamRecord):
         return rec
 
-    return StreamRecord(**rec)
+    if isinstance(rec, dict):
+        return StreamRecord(**rec)
+
+    return StreamRecord(rec)
 
 
 def compose(*function: Callable) -> Callable:

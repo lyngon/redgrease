@@ -156,6 +156,8 @@ else:
         log,
     )
 
+from .runtime import hashtag3
+
 __all__ += [
     "GB",
     "GearsBuilder",
@@ -164,6 +166,7 @@ __all__ += [
     "execute",
     "gearsConfigGet",
     "hashtag",
+    "hashtag3",
     "log",
     "GEARS_RUNTIME",
 ]

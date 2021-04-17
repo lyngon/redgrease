@@ -25,19 +25,12 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from typing import Type, Union
 
 import pytest
 
 import redgrease.data
 import redgrease.utils as utils
-
-
-class test_REnum:
-    pass
-
-
-class test_CaseInsensitiveDict:
-    pass
 
 
 @pytest.mark.parametrize(
@@ -424,3 +417,126 @@ def test_dict_of(constructors, input, ckeys, output):
     dict_parser = utils.dict_of(constructors)
     assert callable(dict_parser)
     assert dict_parser(input, ckeys) == output
+
+
+@pytest.mark.parametrize(
+    "input, output",
+    [
+        (None, ValueError),
+        ("", ValueError),
+        ([], ValueError),
+        ("apa", utils.Record(key="apa")),
+        (b"apa", utils.Record(key="apa")),
+        ({"key": None, "value": "v"}, ValueError),
+        ({"key": 0, "value": "v"}, ValueError),
+        ({"key": "", "value": "v"}, ValueError),
+        ({"key": "k"}, utils.Record(key="k")),
+        ({"value": "v"}, TypeError),
+        ({"key": "k", "value": "v"}, utils.Record(key="k", value="v")),
+        (
+            {"key": "k", "value": "v", "type": "t", "event": "e"},
+            utils.Record(key="k", value="v", type="t", event="e"),
+        ),
+        (
+            {"key": "k", "value": "v", "type": "t", "event": "e", "extra": "x"},
+            utils.Record(key="k", value="v", type="t", event="e", extra="x"),
+        ),
+    ],
+)
+def test_record(input, output: Union[utils.Record, Type]):
+    def run():
+        rec = utils.record(input)
+        assert rec
+        assert isinstance(rec, utils.Record)
+        assert rec.key == output.key
+        assert rec.value == output.value
+        assert rec.type == output.type
+        assert rec.event == output.event
+
+    if isinstance(output, type(Exception)):
+        with pytest.raises(output):
+            run()
+    else:
+        run()
+
+
+@pytest.mark.parametrize(
+    "input, output",
+    [
+        (None, ValueError),
+        ("", ValueError),
+        ([], ValueError),
+        ("apa", utils.StreamRecord(key="apa")),
+        (b"apa", utils.StreamRecord(key="apa")),
+        ({"key": None, "value": "v"}, ValueError),
+        ({"key": 0, "value": "v"}, ValueError),
+        ({"key": "", "value": "v"}, ValueError),
+        ({"key": "k"}, utils.StreamRecord(key="k")),
+        ({"value": "v"}, TypeError),
+        ({"key": "k", "value": "v"}, utils.StreamRecord(key="k", value="v")),
+        (
+            {"key": "k", "value": "v", "id": "i"},
+            utils.StreamRecord(key="k", value="v", id="i"),
+        ),
+        (
+            {"key": "k", "value": "v", "id": "i", "extra": "x"},
+            utils.StreamRecord(key="k", value="v", id="i", extra="x"),
+        ),
+    ],
+)
+def test_stream_record(input, output: Union[utils.StreamRecord, Type]):
+    def run():
+        rec = utils.stream_record(input)
+        assert rec
+        assert isinstance(rec, utils.StreamRecord)
+        assert rec.key == output.key
+        assert rec.id == output.id
+        assert rec.value == output.value
+
+    if isinstance(output, type(Exception)):
+        with pytest.raises(output):
+            run()
+    else:
+        run()
+
+
+def test_compose():
+    def foo(x):
+        return x * 3
+
+    def bar(y):
+        return y + 7
+
+    for x in range(10):
+        assert utils.compose(foo, bar)(x) == foo(bar(x))
+
+
+@pytest.mark.parametrize(
+    "args,input,result",
+    [
+        ({}, {}, True),
+        ({"a": 1}, {}, False),
+        ({}, {"a": 1}, True),
+        ({"a": 1}, {"b": 1}, False),
+        ({"a": 1}, {"a": 1}, True),
+        ({"a": int}, {"a": 1}, True),
+        ({"a": [1, 2, 3]}, {"a": 1}, True),
+        ({"a": ...}, {"a": 1}, True),
+        ({"a": str}, {"a": 1}, False),
+        ({"a": [2, 3, 4]}, {"a": 1}, False),
+        ({"a": 1}, {"a": 1, "b": False, "c": "foo"}, True),
+        ({"a": 1, "b": bool}, {"a": 1, "b": False, "c": "foo"}, True),
+        (
+            {"a": [1, 2, 3], "b": bool, "c": ...},
+            {"a": 1, "b": False, "c": "foo", "d": None},
+            True,
+        ),
+        (
+            {"a": [1, 2, 3], "b": bool, "c": "bar"},
+            {"a": 1, "b": False, "c": "foo"},
+            False,
+        ),
+    ],
+)
+def test_dict_filter(args, input, result):
+    assert utils.dict_filter(**args)(input) == result

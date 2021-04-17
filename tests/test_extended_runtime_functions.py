@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Exceptions
+Tests for Redgrease extension fuctons to the  vanilla runtime.
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -25,9 +25,24 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import redgrease
+from redgrease.utils import safe_str
 
-import redis.exceptions
 
+def test_hastag3(rg: redgrease.RedisGears):
+    def once():
+        yield 1
 
-class DuplicateTriggerError(redis.exceptions.ResponseError):
-    pass
+    redgrease.PythonReader().map(
+        lambda _: redgrease.cmd.set("hashtag", redgrease.hashtag())
+    ).run(once, on=rg)
+
+    redgrease.PythonReader().map(
+        lambda _: redgrease.cmd.set("hashtag3", redgrease.hashtag3())
+    ).run(once, on=rg)
+
+    ht = rg.get("hashtag")
+    ht3 = rg.get("hashtag3")
+
+    assert safe_str(ht3) == "{" + safe_str(ht) + "}"
+    assert f"somethting {safe_str(ht3)} something"

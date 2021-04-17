@@ -22,14 +22,13 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
  PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHsER LIABILITY, WHETHER IN AN ACTION OF
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from typing import TYPE_CHECKING, Hashable, Iterable, TypeVar
 
 import redgrease.gears
-import redgrease.sugar as sugar
 
 if TYPE_CHECKING:
     import redgrease.typing as optype
@@ -49,7 +48,7 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def __init__(
         self,
-        reader: str = sugar.ReaderType.KeysReader,
+        reader: str = "KeysReader",
         defaultArg: str = "*",
         desc: str = None,
         *args,
@@ -455,7 +454,7 @@ def execute(command: str, *args) -> bytes:
     return redisExecute(command, *args)
 
 
-def hashtag() -> bytes:
+def hashtag() -> str:
     """Returns a hashtag that maps to the lowest hash slot served by the local
     engine's shard. Put differently, it is useful as a hashtag for partitioning
     in a cluster.
@@ -469,7 +468,26 @@ def hashtag() -> bytes:
     return redisHashtag()
 
 
-def log(message: str, level: str = sugar.LogLevel.Notice):
+def hashtag3() -> str:
+    """Provides a the same value as `hashtag`, but surrounded by curly braces.
+
+    For example, if `hashtag()` generates "06S", then `hashtag3' gives "{06S}".
+
+    This is useful for creating slot-specific keys using f-strings,
+    inside gear functions, as the braces are already escaped. Example:
+
+    .. code-block:: python
+
+        redgrease.cmd.set(f"{hastag}",  some_value)
+
+    Returns:
+        str:
+            A braces-enclosed hashtag string
+    """
+    return f"{{{hashtag()}}}"
+
+
+def log(message: str, level: str = "notice"):
     """Print a message to Redis' log.
 
     Args:
@@ -491,7 +509,7 @@ def log(message: str, level: str = sugar.LogLevel.Notice):
     return redisLog(str(message), level=level)
 
 
-def configGet(key: str) -> bytes:
+def configGet(key: str) -> str:
     """Fetches the current value of a RedisGears configuration option.
 
     Args:
@@ -503,7 +521,7 @@ def configGet(key: str) -> bytes:
     return redisConfigGet(key)
 
 
-def gearsConfigGet(key: str, default=None) -> bytes:
+def gearsConfigGet(key: str, default=None) -> str:
     """Fetches the current value of a RedisGears configuration option and returns a
     default value if that key does not exist.
 
