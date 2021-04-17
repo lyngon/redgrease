@@ -553,8 +553,10 @@ class Gears:
                     req.IsInstalled
                 ):
                     continue
-            filtered_requirements.append(req)
-        requirements = filtered_requirements
+
+                filtered_requirements.append(req)
+
+            requirements = filtered_requirements
 
         return requirements
 
