@@ -46,14 +46,17 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import ast
+import fnmatch
 import logging
-import os.path
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
 
 import redis
 
 import redgrease.config
 import redgrease.data
+import redgrease.exceptions
+import redgrease.gearialization
 import redgrease.gears
 import redgrease.reader
 import redgrease.requirements
@@ -63,6 +66,7 @@ from redgrease.utils import (
     bool_ok,
     dict_of,
     list_parser,
+    safe_bool,
     safe_str,
     to_redis_type,
 )
@@ -130,6 +134,12 @@ class Gears:
         """
         return self.config.MaxExecutions > 0
 
+    def _trigger_proxy(self, trigger):
+        def trigger_function(*args):
+            return self.trigger(trigger, *args)
+
+        return redgrease.data.ExecutionResult(trigger_function)
+
     def abortexecution(self, id: ExecutionID) -> bool:
         """Abort the execution of a function mid-flight
 
@@ -163,25 +173,127 @@ class Gears:
             id = id.executionId
         return self.redis.execute_command("RG.DROPEXECUTION", to_redis_type(id))
 
-    def dumpexecutions(self) -> List[redgrease.data.ExecutionInfo]:
+    def dumpexecutions(
+        self,
+        status: Union[str, redgrease.data.ExecutionStatus] = None,
+        registered: bool = None,
+    ) -> List[redgrease.data.ExecutionInfo]:
         """Get list of function executions.
         The executions list's length is capped by the 'MaxExecutions' configuration
         option.
+
+        Args:
+            status (Union[str, redgrease.data.ExecutionStatus], optional):
+                Only return executions that match this status.
+                Either: "created", "running", "done", "aborted", "pending_cluster",
+                "pending_run", "pending_receive" or "pending_termination".
+                Defaults to None.
+
+            registered (bool, optional):
+                If `True`, only return registered executions.
+                If `False`, only return non-registered executions.
+
+                Defaults to None.
 
         Returns:
             List[redgrease.data.ExecutionInfo]:
                 A list of ExecutionInfo, with an entry per execution.
         """
-        return self.redis.execute_command("RG.DUMPEXECUTIONS")
+        executions: List[redgrease.data.ExecutionInfo] = []
+        executions = self.redis.execute_command("RG.DUMPEXECUTIONS")
 
-    def dumpregistrations(self) -> List[redgrease.data.Registration]:
+        if status or registered is not None:
+            filtered_executions = []
+            for exe in executions:
+                if status and safe_str(status) != safe_str(exe.status):
+                    continue
+
+                if registered is not None and registered != safe_bool(exe.registered):
+                    continue
+
+                filtered_executions.append(exe)
+
+            executions = filtered_executions
+
+        return executions
+
+    def dumpregistrations(
+        self,
+        reader: str = None,
+        desc: str = None,
+        mode: str = None,
+        key: str = None,
+        stream: str = None,
+        trigger: str = None,
+    ) -> List[redgrease.data.Registration]:
         """Get list of function registrations.
+
+        Args:
+            reader (str, optional):
+                Only return registrations of this reader type.
+                E.g: "StreamReader"
+                Defaults to None.
+
+            desc (str, optional):
+                Only return registrations, where the description match this pattern.
+                E.g: "transaction*log*"
+                Defaults to None.
+
+            mode (str, optional):
+                Only return registrations, in this mode.
+                Either "async", "async_local" or "sync".
+                Defaults to None.
+
+            key (str, optional):
+                Only return (KeysReader) registrations, where the key pattern match
+                this key.
+                Defaults to None.
+
+            stream (str, optional):
+                Only return (StreamReader) registrations, where the stream pattern
+                match this key.
+                Defaults to None.
+
+            trigger (str, optional):
+                Only return (CommandReader) registrations, where the trigger pattern
+                match this key.
+                Defaults to None.
 
         Returns:
             List[redgrease.data.Registration]:
                 A list of Registration, with one entry per registered function.
         """
-        return self.redis.execute_command("RG.DUMPREGISTRATIONS")
+        registrations: List[redgrease.data.Registration] = []
+        registrations = self.redis.execute_command("RG.DUMPREGISTRATIONS")
+
+        if reader or desc or mode or key or stream or trigger:
+            filtered_regsistrations = []
+            for reg in registrations:
+                if trigger and (
+                    "trigger" not in reg.RegistrationData.args
+                    and safe_str(reg.RegistrationData.args["trigger"]) == trigger
+                ):
+                    continue
+                if stream and not fnmatch.fnmatch(
+                    stream, safe_str(reg.RegistrationData.args.get("stream", ""))
+                ):
+                    continue
+                if key and fnmatch.fnmatch(
+                    key, safe_str(reg.RegistrationData.args.get("regex", ""))
+                ):
+                    continue
+                if reader and reader != reg.reader:
+                    continue
+                if desc and reg.desc and not fnmatch.fnmatch(safe_str(reg.desc), desc):
+                    continue
+                if mode and mode != reg.RegistrationData.mode:
+                    continue
+
+                filtered_regsistrations.append(reg)
+
+            registrations = filtered_regsistrations
+
+        return registrations
 
     def getexecution(
         self,
@@ -352,44 +464,11 @@ class Gears:
             redis.exceptions.ResponseError:
                 If the funvction cannot be parsed.
         """  # noqa
-
         requirements = set(requirements if requirements else [])
-        result_function = None
 
-        if isinstance(gear_function, redgrease.runtime.GearsBuilder):
-            gear_function = gear_function._function
-
-        if isinstance(gear_function, redgrease.gears.GearFunction):
-            # If the input is a GearFunction, we get the requirements from it,
-            # and ensure that redgrease is included
-            requirements = requirements.union(gear_function.requirements)
-            enforce_redgrease = enforce_redgrease or True
-
-            if isinstance(gear_function, redgrease.gears.PartialGearFunction):
-                # If the function isn't closed with either 'run' or 'register'
-                # we assume it is meant to be closed with a 'run'
-                gear_function = gear_function.run()
-
-            function_string = redgrease.data.seralize_gear_function(gear_function)
-
-            # Special case for CommandReader functions:
-            # return a new function that calls its "trigger" and returns the results.
-            if gear_function.reader == "CommandReader":
-
-                def result_function(*args):
-                    return self.trigger(
-                        gear_function.operation.kwargs["trigger"], *args
-                    )
-
-        elif os.path.exists(gear_function):
-            # If the gear function is a fle path,
-            # then we load the contents of the file
-            with open(gear_function) as script_file:
-                function_string = script_file.read()
-
-        else:
-            # Otherwise we default to the string version of the function
-            function_string = str(gear_function)
+        function_string, ctx = redgrease.gearialization.get_function_string(
+            gear_function
+        )
 
         params = []
         if unblocking:
@@ -397,21 +476,28 @@ class Gears:
 
         # Resolve requirement conflicts, remove duplicates
         requirements = redgrease.requirements.resolve_requirements(
-            requirements, enforce_redgrease=enforce_redgrease
+            requirements.union(ctx.get("requirements", set())),
+            enforce_redgrease=ctx.get("enforce_redgrease", enforce_redgrease),
         )
 
         if requirements:
             params.append("REQUIREMENTS")
             params += list(map(str, requirements))
 
-        command_response = self.redis.execute_command(
-            "RG.PYEXECUTE",
-            function_string,
-            *params,
-        )
+        try:
+            command_response = self.redis.execute_command(
+                "RG.PYEXECUTE",
+                function_string,
+                *params,
+            )
+        except redis.exceptions.ResponseError as ex:
+            ex.args = ast.literal_eval(ex.args[0])
+            if "trigger already registered" in ex.args[-1]:
+                raise redgrease.exceptions.DuplicateTriggerError() from ex
+            raise
 
-        if result_function and command_response:
-            return redgrease.data.ExecutionResult(result_function)
+        if command_response and "trigger" in ctx:
+            return self._trigger_proxy(ctx["trigger"])
 
         return command_response
 
@@ -425,15 +511,54 @@ class Gears:
         """
         return self.redis.execute_command("RG.PYSTATS")
 
-    def pydumpreqs(self) -> List[redgrease.data.PyRequirementInfo]:
+    def pydumpreqs(
+        self, name: str = None, is_downloaded: bool = None, is_installed: bool = None
+    ) -> List[redgrease.data.PyRequirementInfo]:
         """Gets all the python requirements available (with information about
         each requirement).
+
+        Args:
+            name (str, optional):
+                Only return packages with this **base name**.
+                I.e. it is not filtering on version number, extras etc.
+                Defaults to None.
+
+            is_downloaded (bool, optional):
+                If `True`, only return requirements that have been downloaded.
+                If `False`, only return requirements that have NOT been downloaded.
+                Defaults to None.
+
+            is_installed (bool, optional):
+                If `True`, only return requirements that have been installed.
+                If `False`, only return requirements that have NOT been installed.
+                Defaults to None.
 
         Returns:
             List[redgrease.data.PyRequirementInfo]:
                 List of Python requirement information objects.
         """
-        return self.redis.execute_command("RG.PYDUMPREQS")
+        requirements: List[redgrease.data.PyRequirementInfo] = []
+        requirements = self.redis.execute_command("RG.PYDUMPREQS")
+
+        if name or is_downloaded is not None or is_installed is not None:
+            filtered_requirements = []
+            for req in requirements:
+                if name and not redgrease.requirements.same_name(name, req.Name):
+                    continue
+                if is_downloaded is not None and is_downloaded != safe_bool(
+                    req.IsDownloaded
+                ):
+                    continue
+                if is_installed is not None and is_installed != safe_bool(
+                    req.IsInstalled
+                ):
+                    continue
+
+                filtered_requirements.append(req)
+
+            requirements = filtered_requirements
+
+        return requirements
 
     def refreshcluster(self) -> bool:
         """Refreshes the local node's view of the cluster topology.

@@ -33,14 +33,12 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 """
 
 import ast
-import sys
 from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
 import attr
 import cloudpickle
 import wrapt
 
-import redgrease.gears
 from redgrease.utils import (
     REnum,
     bool_ok,
@@ -57,7 +55,7 @@ from redgrease.utils import (
 T = TypeVar("T")
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True, repr=False)
 class ExecID:
     """Execution ID
 
@@ -72,17 +70,18 @@ class ExecID:
     shard_id: str = "0000000000000000000000000000000000000000"
     sequence: int = 0
 
+    def __repr__(self) -> str:
+        class_name = self.__class__.__name__
+        if self.shard_id == "0000000000000000000000000000000000000000":
+            return f"{class_name}(sequence={self.sequence})"
+        else:
+            return f"""{class_name}("{self.shard_id}", {self.sequence})"""
+
     def __str__(self):
         return f"{self.shard_id}-{self.sequence}"
 
     def __bytes__(self):
         return str(self).encode()
-
-    def __repr__(self):
-        class_name = self.__class__.__name__
-        return (
-            f"{class_name}(" f"shard_id={self.shard_id}," f"sequence={self.sequence})"
-        )
 
     @staticmethod
     def parse(value: Union[str, bytes]) -> "ExecID":
@@ -437,7 +436,7 @@ class Registration(RedisObject):
     )
     """Registration Data, see `RegData`."""
 
-    PD: Dict[Any, Any] = attr.ib(converter=parse_PD)
+    PD: Dict[Any, Any] = attr.ib(converter=parse_PD, repr=False)
     """Private data"""
 
 
@@ -628,75 +627,3 @@ class PyRequirementInfo(RedisObject):
         else [safe_str(wheel) for wheel in wheels]
     )
     """A List of Wheels required by the requirement."""
-
-
-def deseralize_gear_function(
-    serialized_gear: str, python_version: str
-) -> redgrease.gears.GearFunction:
-    """Safely deserializes (unpickles) a serialized GearFunction.
-
-    This function is only executed on the Gear server.
-
-    It handles and appropriately reports errors due to mismatch between
-    client and server Python versions.
-
-    Args:
-        serialized_gear (str):
-            The serialized (cloudpickled) GearFunction.
-
-        python_version (str):
-            The python version of the client.
-
-    Raises:
-        SystemError:
-            If the Python versions of the client and server mismatch.
-
-    Returns:
-        redgrease.gears.GearFunction:
-            The Gear function, as created on at the client.
-    """
-    try:
-        return cloudpickle.loads(serialized_gear)
-    except Exception as err:
-        import sys
-
-        def pystr(pyver):
-            return "Python %s.%s" % pyver
-
-        runtime_python_version = sys.version_info[:2]
-        function_python_version = ast.literal_eval(str(python_version))[:2]
-        if runtime_python_version != function_python_version:
-            raise SystemError(
-                "Client / server Python version mismatch."
-                f"{pystr(runtime_python_version)} runtime unable to execute "
-                f"Gears functions created in {function_python_version}. "
-            ) from err
-        raise
-
-
-def seralize_gear_function(gear_function: redgrease.gears.GearFunction) -> str:
-    """Serializes a GearFunction into a wrapper code-string that can be sent to the
-    Gear server to execute.
-
-    Args:
-        gear_function (redgrease.gears.ClosedGearFunction):
-            GearFunction to serialize.
-
-    Returns:
-        str:
-            Code string that will execute the GearFunction on the server.
-    """
-
-    # The Gear function is serialized with 'cloudpickle' and embedded in a
-    # code string that will de-serialize it back and then 'construct' the actual
-    # Gear function and run it.
-
-    return f"""
-import redgrease.data
-import redgrease.runtime
-gear_function = redgrease.data.deseralize_gear_function(
-    {cloudpickle.dumps(gear_function, protocol=4)},
-    python_version={tuple(sys.version_info)},
-)
-redgrease.runtime.run(gear_function, GearsBuilder)
-"""

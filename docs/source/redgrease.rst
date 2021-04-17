@@ -46,10 +46,10 @@ redgrease.utils module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-.. redgrease.command module
+.. redgrease.runtime_client module
 .. ------------------------
 
-.. .. automodule:: redgrease.command
+.. .. automodule:: redgrease.runtime_client
 ..    :members:
 ..    :undoc-members:
 ..    :show-inheritance:

@@ -162,13 +162,13 @@ GB().run()
     if extras:
         # With any of the extras installed, it should be
         # possible to run gears that import both
-        # 'redgrease.cmd' as well as 'redis'
+        # 'redgrease.runtime_client' as well as 'redis'
         assert rg.gears.pyexecute(runtime_extras_import) is not None
         assert rg.gears.pyexecute(redis_import) is not None
     else:
         # If no redgrease extras are installed,
         # then we should not be able to import nither
-        # 'redgrease.command' nor 'redis'
+        # 'redgrease.runtime_client' nor 'redis'
         with pytest.raises(redis.exceptions.ResponseError):
             assert rg.gears.pyexecute(runtime_extras_import)
         with pytest.raises(redis.exceptions.ResponseError):

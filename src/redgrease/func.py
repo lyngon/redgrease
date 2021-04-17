@@ -34,10 +34,9 @@ from redgrease.gears import ClosedGearFunction
 from redgrease.typing import Callback
 
 
-def trigger(
+def command(
     trigger: str = None,
     prefix: str = "*",
-    convertToStr: bool = True,
     collect: bool = True,
     mode: str = redgrease.sugar.TriggerMode.Async,
     onRegistered: Callback = None,
@@ -48,17 +47,14 @@ def trigger(
     Args:
         trigger (str, optional):
             The trigger string
-            Will be a unique id if not specified.
+            Will be a the function name if not specified (None).
+            The special value `...` (Ellipsis) wil give the function a unique trigger.
+            Defaults to None
 
         prefix (str, optional):
             Register prefix.
             Same as for the `register` operation.
             Defaults to "*".
-
-        convertToStr (bool, optional):
-            Convert the results to str.
-            Same as for the `register` operation.
-            Defaults to True.
 
         collect (bool, optional):
             Add a `collect' operation to the end of the function.
@@ -82,19 +78,25 @@ def trigger(
             A ClosedGearFunction generator.
     """
 
+    if trigger is ...:  # type: ignore
+        trigger = str(uuid.uuid4())
+
     def command_gear(function):
         return (
             redgrease.reader.CommandReader()
-            .map(lambda commmand_params: function(*commmand_params[1:]))
+            .apply(function)
             .register(
                 prefix=prefix,
-                convertToStr=convertToStr,
                 collect=collect,
                 mode=mode,
                 onRegistered=onRegistered,
-                trigger=trigger if trigger else str(uuid.uuid4),
+                trigger=trigger if trigger else function.__name__,
                 **kargs,
             )
         )
 
     return command_gear
+
+
+trigger = command
+"""Deprecated, will be removed in v1.0.0"""

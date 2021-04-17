@@ -32,7 +32,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 import sys
 
-from .func import trigger
+from .func import command, trigger
 from .gears import ClosedGearFunction, GearFunction, PartialGearFunction
 from .reader import (
     CommandReader,
@@ -46,6 +46,7 @@ from .reader import (
 from .sugar import FailurePolicy, KeyType, LogLevel, ReaderType, TriggerMode
 
 __all__ = [
+    "command",
     "trigger",
     "ClosedGearFunction",
     "GearFunction",
@@ -89,7 +90,7 @@ except ModuleNotFoundError:
 
 try:
     # This will fail if redis package is not installed
-    from .command import cmd
+    from .runtime_client import cmd
 
     __all__ += ["cmd"]
 except ModuleNotFoundError:

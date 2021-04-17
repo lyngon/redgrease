@@ -8,9 +8,9 @@ r = redgrease.RedisGears()
 
 
 # CommandReader Decorator
-# The `trigger` decorator tunrs the function to a CommandRedader trigger
-# registerers on the Redis Gears sever provided using the `on` argument
-@redgrease.trigger(on=r, convertToStr=False, requirements=["requests"])
+# The `command` decorator tunrs the function to a CommandReader,
+# registerered on the Redis Gears sever if using the `on` argument
+@redgrease.command(on=r, requirements=["requests"], replace=False)
 def cache_get(url, expiry=None, timeout=10):
     import requests
 
@@ -143,4 +143,4 @@ def cleanup(r: redgrease.RedisGears):
     return len(r.keys()) == 0
 
 
-print(cleanup(r))
+# print(cleanup(r))
