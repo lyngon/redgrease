@@ -33,6 +33,8 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Union
 import packaging.requirements
 import packaging.version
 
+from redgrease.utils import safe_str
+
 default_redgrease = packaging.requirements.Requirement("redgrease[runtime]")
 """The default redgrease runtime package. Latest from PyPi."""
 
@@ -48,6 +50,19 @@ InvalidRequirement = packaging.requirements.InvalidRequirement
 
 PackageOption = Optional[Union[bool, str, Version, Requirement]]
 """Type alias for valid types of RedGrease package version specification."""
+
+
+def safe_requirement(req: Any) -> Requirement:
+    if not isinstance(req, Requirement):
+        req = Requirement(safe_str(req))
+    return req
+
+
+def same_name(req1: Any, req2: Any) -> bool:
+    try:
+        return safe_requirement(req1).name == safe_requirement(req2).name
+    except packaging.requirements.InvalidRequirement:
+        return False
 
 
 def read_requirements(
