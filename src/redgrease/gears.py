@@ -29,8 +29,6 @@ import numbers
 import operator
 from typing import Any, Dict, Generic, Hashable, Iterable, Optional, Type, TypeVar
 
-import redgrease
-import redgrease.data
 import redgrease.exceptions
 import redgrease.sugar as sugar
 import redgrease.typing as optype

@@ -151,7 +151,7 @@ def test_builtin_runtime_functions(
     assert not result.errors
 
     runtime_extras_import = """
-import redgrease.command
+from redgrease import cmd
 GB().run()
 """
     redis_import = """
