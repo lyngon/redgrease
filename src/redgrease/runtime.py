@@ -172,7 +172,7 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def flatmap(
         self,
-        op: "optype.Expander[optype.InputRecord, optype.OutputRecord]",
+        op: "optype.Expander[optype.InputRecord, optype.OutputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -200,7 +200,7 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def filter(
         self,
-        op: "optype.Filterer[optype.InputRecord]",
+        op: "optype.Filterer[optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -214,7 +214,7 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def accumulate(
         self,
-        op: "optype.Accumulator[T, optype.InputRecord]",
+        op: "optype.Accumulator[T, optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -228,8 +228,8 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def localgroupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
-        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -278,9 +278,9 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def aggregate(
         self,
-        zero: T,
-        seqOp: "optype.Accumulator[T, optype.InputRecord]",
-        combOp: "optype.Accumulator[T, T]",
+        zero: T = None,
+        seqOp: "optype.Accumulator[T, optype.InputRecord]" = None,
+        combOp: "optype.Accumulator[T, T]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -298,10 +298,10 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def aggregateby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
-        zero: T,
-        seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]",
-        combOp: "optype.Reducer[optype.Key, T, T]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        zero: T = None,
+        seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
+        combOp: "optype.Reducer[optype.Key, T, T]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -320,8 +320,8 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def groupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
-        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -335,8 +335,8 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
     def batchgroupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
-        reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
