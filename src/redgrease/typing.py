@@ -152,7 +152,7 @@ Filterer = Callable[[InputRecord], bool]
 Accumulator = Callable[[T, InputRecord], T]
 """Type for Accumulator functions.
 
-    An function of Accumulator type can be called with a two arguments:
+    An function of Accumulator type can be called with two arguments:
 
         - An accumulator value, of type T
         - A record, of type InputRecord
@@ -164,7 +164,7 @@ Accumulator = Callable[[T, InputRecord], T]
 Reducer = Callable[[Key, T, InputRecord], T]
 """Type for Reducer functions.
 
-    An function of Reducer type can be called with a three arguments:
+    An function of Reducer type can be called with three arguments:
 
         - A key value, of type Key
         - An accumulator value, of type T
@@ -177,10 +177,10 @@ Reducer = Callable[[Key, T, InputRecord], T]
 BatchReducer = Callable[[Key, Iterable[InputRecord]], OutputRecord]
 """Type for BatchReducer functions.
 
-    An function of BatchReducer type can be called with a three arguments:
+    An function of BatchReducer type can be called with two arguments:
 
         - A key value, of type Key
         - An Iterable collection of records, of type InputRecord
 
-    The function returns a value of the same type as the accumulator value, T.
+    The function returns a value, T, reduced from the iterable.
 """

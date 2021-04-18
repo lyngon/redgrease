@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Tests for GearFunctions, aka 'Programmatic / Dynamic / Remote Gears'
+Tests for vanilla GearsBuilder function factory and vanilla operations'
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"

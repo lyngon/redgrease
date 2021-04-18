@@ -15,13 +15,13 @@ def cache_get(url, expiry=None, timeout=10):
     import requests
 
     # Keys
-    cache_key = f"cache{{{url}}}"  #
-    status_key = f"status_{cache_key}"
+    value_key = f"cache:{{{url}}}:result"  #
+    status_key = f"cache:{{{url}}}:status"
 
     # Atomically check if cache miss, and the number of requestss, this inclusive
     with redgrease.atomic():
-        cache_miss = not redgrease.cmd.hexists(cache_key, "data")
-        requests_count = int(redgrease.cmd.hincrby(cache_key, "requests_count", 1))
+        cache_miss = not redgrease.cmd.hexists(value_key, "data")
+        requests_count = int(redgrease.cmd.hincrby(value_key, "requests_count", 1))
 
     redgrease.log(f"Cache request #{requests_count} for resource '{url}'")
 
@@ -39,7 +39,7 @@ def cache_get(url, expiry=None, timeout=10):
             redgrease.cmd.lpush(status_key, status_key, timeout)
 
     # Get the current cached data, if any
-    response_data = redgrease.cmd.hget(cache_key, "data")
+    response_data = redgrease.cmd.hget(value_key, "data")
 
     # We don't blindly trust the status code.
     # If the cached ressource data still does not exist in cache:
@@ -61,7 +61,7 @@ def cache_get(url, expiry=None, timeout=10):
             cache_fields["data"] = response_data
 
         redgrease.cmd.hset(
-            cache_key,
+            value_key,
             mapping=cache_fields,
         )
 
@@ -76,7 +76,7 @@ def cache_get(url, expiry=None, timeout=10):
     # Update the cache expiry, if set
     if expiry:
         redgrease.cmd.expire(status_key, expiry)
-        redgrease.cmd.expire(cache_key, expiry)
+        redgrease.cmd.expire(value_key, expiry)
 
     # Whatever the status is, push back to unblock any other blocked requests.
     redgrease.cmd.rpoplpush(status_key, status_key)

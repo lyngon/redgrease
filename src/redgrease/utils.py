@@ -723,3 +723,46 @@ def dict_filter(**kwargs) -> Filterer[Dict[str, Any]]:
         return True
 
     return predicate
+
+
+def passfun(fun: Optional[T] = None, default: Optional[T] = None) -> T:
+    """Create a Python 'function' object from any 'Callable', or constant.
+
+    RedisGears operator callbacks ony accept proper 'function's and not every type of
+    'Callable', such as for example 'method's (e.g. `redgrease.cmd.incr`) or
+    'method-desriptor's (e.g. `str.split`), wich forces users to write seemingly
+    "unecceary" lambda-functions to wrap these.
+
+    This function ensures that the argument is a proper 'function', and thus will be
+    accepted as RedisGears operator callback (asuming the type signature is correct).
+
+    It can also be used to create 'constant'-functions, if passing a non-callable,
+    or to create the 'identity-function`, if called with no arguments.
+
+
+    Args:
+        fun (Optional[T], optional):
+            Callable to turn into a 'function`
+            Alternatively a constant, to use to create a constant function,
+            i.e. a function that alway return the same thing, regarding of input.
+            If None, and no default, the 'identity-function' is returned.
+            Defaults to None.
+
+        default (Optional[T], optional):
+            Default Callable to use as fallback if the 'fun' argument isn't a callable.
+            Defaults to None.
+
+    Returns:
+        T:
+            [description]
+    """
+    if fun is None:
+        return passfun(default) if default else lambda x: x  # type: ignore
+
+    if type(fun).__name__ == "function":
+        return fun
+
+    if callable(fun):
+        return lambda *a, **kw: fun(*a, **kw)  # type: ignore
+
+    return passfun(default) if default else lambda *__, **_: fun  # type: ignore
