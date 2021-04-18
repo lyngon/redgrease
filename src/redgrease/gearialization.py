@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Helper functions for searialization, de-serialization, reading and writing Gear 
+Helper functions for searialization, de-serialization, reading and writing Gear
 functions.
 """
 __author__ = "Anders Åström"
