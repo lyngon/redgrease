@@ -32,6 +32,8 @@ class RedisCluster(rediscluster.RedisCluster):
             "RG.PYSTATS": "all-nodes",
             "RG.PYDUMPREQS": "random",
             "RG.REFRESHCLUSTER": "all-nodes",
+            "RG.DUMPEXECUTIONS": "random",
+            "RG.DUMPREGISTRATIONS": "random",
         },
     }
 
