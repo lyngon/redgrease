@@ -25,10 +25,22 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import sys
+
+import pytest
+import redis.exceptions
+
 import redgrease
 from redgrease.utils import safe_str
 
+redis_py_ver = (3, 7, 2, "final", 0)
 
+
+@pytest.mark.xfail(
+    sys.version_info[:2] != redis_py_ver[:2],
+    reason="Incompatible Python versions",
+    raises=redis.exceptions.ResponseError,
+)
 def test_hastag3(rg: redgrease.RedisGears):
     def once():
         yield 1
