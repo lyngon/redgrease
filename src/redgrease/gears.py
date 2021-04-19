@@ -29,7 +29,6 @@ import numbers
 import operator
 from typing import Any, Dict, Generic, Hashable, Iterable, Optional, Type, TypeVar
 
-import redgrease.exceptions
 import redgrease.sugar as sugar
 import redgrease.typing as optype
 import redgrease.utils
@@ -1402,7 +1401,11 @@ class ClosedGearFunction(GearFunction[T]):
             return gears_server.pyexecute(
                 self, unblocking=unblocking, requirements=requirements, **kwargs
             )
-        except redgrease.exceptions.DuplicateTriggerError:
+        except Exception as ex:
+            # TODO: This is ugly. just to keep 'redis' from being imported to "gears"
+            if ex.__class__.__name__ != "DuplicateTriggerError":
+                raise
+
             # If we get an error because the trigger already is registered,
             # then we check the 'replace' argument for what to do:
             # - `replace is None` : Re-raise the error
