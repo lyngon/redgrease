@@ -66,14 +66,35 @@ It may help you create:
 
 ... all written i Python and running distributed ON your Redis nodes.
 
-## Documentation
-Full documentation (WIP) [here](https://redgrease.readthedocs.io).
+## Read the [Documentation](https://redgrease.readthedocs.io)
 
 ## Installation
 - [Client](#client-installation) - I.e. Package used by application and/or during dev.
 - [Runtime](#runtime-installation) - I.e. Package installed on the Redis engine.
 
+## Quick Example:
+```python
+import redgrease as rdgr
 
+conn = rdgr.RedisGears(host='localhost', port=30001)
+
+# count for each genre how many times it appears
+
+results = (
+    rdgr.KeysReader()
+    .keys(type='hash')
+	.map(lambda key: rdgr.cmd.hget(key, 'genres'))
+	.filter(lambda x:x != '\\N')
+    .flatmap(lambda x: x.split(','))
+	.map(str.strip)
+	.countby()
+	.run(on=conn)
+)
+
+
+for res in results:
+    print(f"{res['key']::<15s}{res['value']}")
+```
 ## RedGrease consists of the followinig, components:
 
 1. [A Redis / Redis Gears client](https://redgrease.readthedocs.io), which is an extended version of the [redis](https://pypi.org/project/redis/) client, but with additional pythonic functions, mapping closely (1-to-1) to the Redis Gears command set (e.g. `RG.PYEXECUTE`, `RG.GETRESULT`, `RG.TRIGGER`, `RG.DUMPREGISTRATIONS` etc), outlined [here](https://oss.redislabs.com/redisgears/commands.html)
