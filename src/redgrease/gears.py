@@ -25,19 +25,41 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import numbers
+import operator
 from typing import Any, Dict, Generic, Hashable, Iterable, Optional, Type, TypeVar
 
-import redgrease
-import redgrease.data
-import redgrease.exceptions
 import redgrease.sugar as sugar
 import redgrease.typing as optype
+import redgrease.utils
 
 T = TypeVar("T")
 
+################################################################################
+#                               Default Operands                               #
+################################################################################
+
+
+def _default_accumulator(acc, r):
+    acc = acc if isinstance(acc, list) else [acc]
+    acc.append(r)
+    return acc
+
+
+def _default_extractor(r):
+    return hash(r)
+
+
+def _default_reducer(_, acc, r):
+    return _default_accumulator(acc, r)
+
+
+def _default_batch_reducer(_, records):
+    return len(records)
+
 
 ################################################################################
-#                                Operations                                    #
+#                                 Operations                                   #
 ################################################################################
 
 
@@ -1379,7 +1401,11 @@ class ClosedGearFunction(GearFunction[T]):
             return gears_server.pyexecute(
                 self, unblocking=unblocking, requirements=requirements, **kwargs
             )
-        except redgrease.exceptions.DuplicateTriggerError:
+        except Exception as ex:
+            # TODO: This is ugly. just to keep 'redis' from being imported to "gears"
+            if ex.__class__.__name__ != "DuplicateTriggerError":
+                raise
+
             # If we get an error because the trigger already is registered,
             # then we check the 'replace' argument for what to do:
             # - `replace is None` : Re-raise the error
@@ -1723,6 +1749,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+        op = redgrease.utils.passfun(op)
         return PartialGearFunction(
             Map(op=op, **kwargs),
             input_function=self,
@@ -1731,7 +1758,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
     def flatmap(
         self,
-        op: "optype.Expander[optype.InputRecord, optype.OutputRecord]",
+        op: "optype.Expander[optype.InputRecord, optype.OutputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -1741,10 +1768,12 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         of records.
 
         Args:
-            op (redgrease.typing.Expander):
+            op (redgrease.typing.Expander, optional):
                 Function to map on the input records.
                 The function must take one argument as input (input record) and
                 return an iterable as an output (output records).
+                Defaults to the 'identity-function', I.e. if input is an iterable will
+                be expanded.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
@@ -1761,6 +1790,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+        op = redgrease.utils.passfun(op)
         return PartialGearFunction(
             FlatMap(op=op, **kwargs),
             input_function=self,
@@ -1798,6 +1828,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+        op = redgrease.utils.passfun(op)
         return PartialGearFunction(
             ForEach(op=op, **kwargs),
             input_function=self,
@@ -1806,7 +1837,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
     def filter(
         self,
-        op: "optype.Filterer[optype.InputRecord]",
+        op: "optype.Filterer[optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -1816,11 +1847,13 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         filtering of records.
 
         Args:
-            op (redgrease.typing.Filterer):
+            op (redgrease.typing.Filterer, optional):
                 Function to apply on the input records, to decide which ones to keep.
                 The function must take one argument as input (input record) and
                 return a bool. The input records evaluated to `True` will be kept as
                 output records.
+                Defaults to the 'identity-function', i.e. records are filtered based on
+                their own truiness or falsiness.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
@@ -1837,6 +1870,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+        op = redgrease.utils.passfun(op)
         return PartialGearFunction(
             Filter(op=op, **kwargs),
             input_function=self,
@@ -1845,7 +1879,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
     def accumulate(
         self,
-        op: "optype.Accumulator[T, optype.InputRecord]",
+        op: "optype.Accumulator[T, optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -1855,14 +1889,16 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         records.
 
         Args:
-            op (redgrease.typing.Accumulator):
+            op (redgrease.typing.Accumulator, optional):
                 Function to to apply on the input records.
                 The function must take two arguments as input:
-                    - the input record, and
-                    - An accumulator value.
+                    - An accumulator value, and
+                    - The input record.
                 It should aggregate the input record into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
+                Defaults to a list accumulator, I.e. the output will be a list of
+                all inputs.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
@@ -1879,6 +1915,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+
+        op = redgrease.utils.passfun(op, default=_default_accumulator)
         return PartialGearFunction(
             Accumulate(op=op, **kwargs),
             input_function=self,
@@ -1887,8 +1925,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
     def localgroupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
-        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -1898,19 +1936,22 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         of records.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (redgrease.typing.Extractor, optional):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
+                Defaults to the hash of the input.
 
-            reducer (redgrease.typing.Reducer):
+            reducer (redgrease.typing.Reducer, optional):
                 Function to apply on the records of each group, to reduce to a single
                 value (per group).
                 The function must take (a) a key, (b) an input record and (c) a
                 variable that's called an accumulator.
                 It performs similarly to the accumulator callback, with the difference
                 being that it maintains an accumulator per reduced key / group.
+                Defaults to a list accumulator, I.e. the output will be a list of
+                all inputs, for each group.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
@@ -1927,6 +1968,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+        extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
+        reducer = redgrease.utils.passfun(reducer, default=_default_reducer)
         return PartialGearFunction(
             LocalGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
@@ -2034,9 +2077,9 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
     def aggregate(
         self,
-        zero: T,
-        seqOp: "optype.Accumulator[T, optype.InputRecord]",
-        combOp: "optype.Accumulator[T, T]",
+        zero: T = None,
+        seqOp: "optype.Accumulator[T, optype.InputRecord]" = None,
+        combOp: "optype.Accumulator[T, T]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -2045,10 +2088,11 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         """Perform aggregation on all the execution data.
 
         Args:
-            zero (Any):
+            zero (Any, optional):
                 The initial / zero value of the accumulator variable.
+                Defaults to an empty list.
 
-            seqOp (redgrease.typing.Accumulator):
+            seqOp (redgrease.typing.Accumulator, optional):
                 A function to be applied on each of the input records, locally per
                 shard.
                 It must take two parameters:
@@ -2057,8 +2101,10 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 The functoin aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
+                Defaults to addition, if 'zero' is a number and to a list accumulator
+                if 'zero' is a list.
 
-            combOp (redgrease.typing.Accumulator):
+            combOp (redgrease.typing.Accumulator, optional):
                 A function to be applied on each of the aggregated results of the local
                 aggregation (i.e. the output of `seqOp`).
                 It must take two parameters:
@@ -2067,6 +2113,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 The functoin aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
+                Defaults to re-use the `seqOp` function.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
@@ -2083,18 +2130,35 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+
+        _zero = zero if zero is not None else []
+
+        if not seqOp:
+            if isinstance(_zero, numbers.Number):
+                seqOp = operator.add
+            elif isinstance(_zero, list):
+                seqOp = _default_accumulator
+                combOp = combOp or operator.add
+            else:
+                raise ValueError(
+                    "No operatod provided, and unable to deduce a resonable default."
+                )
+
+        seqOp = redgrease.utils.passfun(seqOp)
+        combOp = redgrease.utils.passfun(combOp, default=seqOp)
+
         return PartialGearFunction(
-            Aggregate(zero=zero, seqOp=seqOp, combOp=combOp, **kwargs),
+            Aggregate(zero=_zero, seqOp=seqOp, combOp=combOp, **kwargs),
             input_function=self,
             requirements=requirements,
         )
 
     def aggregateby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
-        zero: T,
-        seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]",
-        combOp: "optype.Reducer[optype.Key, T, T]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        zero: T = None,
+        seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
+        combOp: "optype.Reducer[optype.Key, T, T]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -2103,16 +2167,18 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         """Like aggregate, but on each key, the key is extracted using the extractor.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (redgrease.typing.Extractor, optional):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
+                Defaults to the hash of the input.
 
-            zero (Any):
+            zero (Any, optional):
                 The initial / zero value of the accumulator variable.
+                Defaults to an empty list.
 
-            seqOp (redgrease.typing.Accumulator):
+            seqOp (redgrease.typing.Accumulator, optional):
                 A function to be applied on each of the input records, locally per
                 shard and group.
                 It must take two parameters:
@@ -2121,6 +2187,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 The functoin aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
+                Defaults to a list reducer.
 
             combOp (redgrease.typing.Accumulator):
                 A function to be applied on each of the aggregated results of the local
@@ -2131,6 +2198,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 The functoin aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
+                Defaults to re-use the `seqOp` function.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
@@ -2147,9 +2215,16 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+
+        _zero = zero if zero is not None else []
+
+        extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
+        seqOp = redgrease.utils.passfun(seqOp, _default_reducer)
+        combOp = redgrease.utils.passfun(combOp, seqOp)
+
         return PartialGearFunction(
             AggregateBy(
-                extractor=extractor, zero=zero, seqOp=seqOp, combOp=combOp, **kwargs
+                extractor=extractor, zero=_zero, seqOp=seqOp, combOp=combOp, **kwargs
             ),
             input_function=self,
             requirements=requirements,
@@ -2157,8 +2232,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
     def groupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
-        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -2167,19 +2242,22 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         """Perform a many-to-less (N:M) grouping of records.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (redgrease.typing.Extractor, optional):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
+                Defaults to the hash of the input.
 
-            reducer (redgrease.typing.Reducer):
+            reducer (redgrease.typing.Reducer, optional):
                 Function to apply on the records of each group, to reduce to a single
                 value (per group).
                 The function must take (a) a key, (b) an input record and (c) a
                 variable that's called an accumulator.
                 It performs similarly to the accumulator callback, with the difference
                 being that it maintains an accumulator per reduced key / group.
+                Defaults to a list reducer.
+
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
                 Defaults to None.
@@ -2195,6 +2273,9 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+        extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
+        reducer = redgrease.utils.passfun(reducer, default=_default_reducer)
+
         return PartialGearFunction(
             GroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
@@ -2203,8 +2284,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
     def batchgroupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]",
-        reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]",
+        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]" = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -2216,11 +2297,12 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 during runtime. Consider using the GroupBy
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (redgrease.typing.Extractor, optional):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
+                Defaults to the hash of the input.
 
             reducer (redgrease.typing.Reducer):
                 Function to apply on the records of each group, to reduce to a single
@@ -2229,6 +2311,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 variable that's called an accumulator.
                 It performs similarly to the accumulator callback, with the difference
                 being that it maintains an accumulator per reduced key / group.
+                Default is the length (`len`) of the input.
 
             **kwargs:
                 Additional parameters to the BatchGroupBy operation.
@@ -2241,6 +2324,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 GearFunction, but instead returns the same GearBuilder, but with its
                 internal function updaded.
         """
+        extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
+        reducer = redgrease.utils.passfun(reducer, default=_default_batch_reducer)
         return PartialGearFunction(
             BatchGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,

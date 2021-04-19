@@ -80,7 +80,7 @@ def read(file_pattern):
     "gears_script", read("buitin_runtime_func_*.py"), ids=lambda x: x[0]
 )
 def test_builtin_runtime_functions(
-    redisgears_container, extras, gears_script, redgrease_import
+    redisgears_container, extras, gears_script, redgrease_import, base_packages
 ):
     """Tests that
     (a) all Gears' builtin runtime functions are callable,
@@ -120,8 +120,16 @@ def test_builtin_runtime_functions(
     while not rg.ping():
         time.sleep(1)
 
+    print(f">>>> RUNTIME : {base_packages}")
+
+    # TODO: this ain't pretty... really need to sort this mess up.
     assert (
-        rg.gears.pyexecute(requirements=[f"redgrease{extras}=={redgrease_version}"])
+        # rg.gears.pyexecute(requirements=[f"redgrease{extras}=={redgrease_version}"])
+        rg.gears.pyexecute(
+            requirements=map(
+                lambda r: str.replace(str(r), "[runtime]", extras), base_packages
+            )
+        )
         is not None
     )
 
@@ -151,7 +159,7 @@ def test_builtin_runtime_functions(
     assert not result.errors
 
     runtime_extras_import = """
-import redgrease.command
+from redgrease import cmd
 GB().run()
 """
     redis_import = """
