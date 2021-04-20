@@ -26,24 +26,24 @@ This instantiation method is usuful if you are working with Redis from scratch a
     r = redgrease.RedisGears(host="localhost", port=6379)
 
 
-This instaniates a Redis client object that is a subclass of the popular `redis <https://github.com/andymccurdy/redis-py>`_ python client, but with an additional property ``gears`` through the :ref:`RedisGears commands can be accessed <client_gears_commands>`. 
+This instantiates a Redis client object that is a subclass of the ``Redis`` class of the popular `redis <https://github.com/andymccurdy/redis-py>`_ python client, but with an additional property ``gears`` through which the :ref:`RedisGears commands can be accessed <client_gears_commands>`. 
 
-The constructor takes all the same arguments as the normal Redis client, and naturally it expodes all the same mehtods.
+The constructor takes all the same arguments as the normal Redis client, and naturally it exposes all the same Redis command methods as the original.
 
-It also means that if you are running a Redis instance on the default Redis port 6379 locally, as above, then you dont need any arguments to instantiate the client object: ``r = redgreas.RedisGears()``.
+It also means that if you are running a Redis instance on the default Redis port (6379) locally, as above, then you don't need any arguments to instantiate the client object: ``r = redgrease.RedisGears()``.
 
 .. note::
 
-    RedGrease also supports cluster-mode. Instantiating ``RedisGears`` will automatically try to figure out if it is against a cluster, and in that case instead  instantiate an object which is a subtype of `redis-py-cluster <https://github.com/Grokzen/redis-py-cluster>`_ (which in turn also is a subclass of the original client).
+    RedGrease also supports cluster-mode. Instantiating ``RedisGears`` will automatically try to figure out if it is against a cluster, and in that case instead  instantiate an object which is a subclass of ``RedisCluster`` from the `redis-py-cluster <https://github.com/Grokzen/redis-py-cluster>`_ package (which in turn also is a subclass of ``Redis`` from the `redis <https://github.com/andymccurdy/redis-py>`_ package).
 
-    The constructor takes all the same arguments as the normal Redis client, and naturally it expodes all the same mehtods.
+    The constructor takes all the same arguments as the normal Redis client, and naturally it exposes all the same Redis command methods as well.
 
-    If you want to be explicit which one to instaniate, then you can use :class:`redgrease.Redis`  and :class:`redgrease.RedisCluster` for single and cluster mode respectively.
+    If you want to be explicit which class to instaniate, then you can use :class:`redgrease.Redis` and :class:`redgrease.RedisCluster` for single and cluster mode respectively.
 
 As a Gears object
 ~~~~~~~~~~~~~~~~~
 
-If you already have code with intantiated Redis client objects, and you don't want to create more connections, then you can instaniate just the ``redgrease.Gears`` object directly, using your existing Redis connection.
+If you already have code with intantiated Redis client objects, and you don't want to create more connections, then you can instaniate only the ``redgrease.Gears`` object directly, using your existing Redis connection.
 
 .. code-block::
 
@@ -72,10 +72,10 @@ This object is the same object that the above RedisGears client exposes through 
 RedisGears Commands
 -------------------
 
-The the commands introduced by the RedisGears module can be accessed through the ``Gears`` object. 
+The the commands introduced by the RedisGears Redis module can be invoked through the ``Gears`` object, instantiates as per above. 
 This section gives a run-down of the various commands and what they do, in the order of usefulnes to most people. 
 
-You can find all the methods and functions in the :ref:`API Reference <api_reference>`, and in this section, we look at the :class:`redgrease.Gears` class.
+You can find all the methods and functions in the :ref:`API Reference <api_reference>`, and in this section, we specifically look at the :class:`redgrease.Gears` class.
 
 Command Descriptions:
     - :ref:`client_gears_command_pyexecute`
@@ -107,21 +107,6 @@ This is the most iportant RedGrease command, as it is the command for executing 
 **RedisGears Command:**  `RG.PYEXECUTE <https://oss.redislabs.com/redisgears/1.0/commands.html#rgpyexecute>`_
 
 .. automethod:: redgrease.Gears.pyexecute
-
-.. warning::
-
-    It takes the following argument:
-
-
-    #. ``gear_function``, which actually is optional, is the function itself. It can be either:
-
-        #. A :ref:`GearFunction <gearfun>` object.
-        #. A path to a GearFunction script file.
-        #. A raw Gear Function string.
-
-        It is valid to provide no ``gear_function``, but naturally no code will be executed. This may be useful if you just want to ensure that some requirements are installed on your RedisGears instances, using the ``requirements`` argument, without executing any code.
-
-    #. ``unblocking``, which defaults to ``False``,
 
 
 .. _client_gears_command_dumpexecutions:
