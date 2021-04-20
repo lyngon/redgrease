@@ -27,6 +27,7 @@ version = "0.1"  # can this be dynamic somehow?
 
 
 # -- General configuration ---------------------------------------------------
+autoclass_content = "both"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

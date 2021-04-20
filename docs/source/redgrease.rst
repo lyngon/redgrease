@@ -11,13 +11,14 @@ redgrease package
    :undoc-members:
    :show-inheritance:
 
-redgrease.typing module
+redgrease.config module
 -----------------------
 
-.. automodule:: redgrease.typing
-   :members:
+.. automodule:: redgrease.config
+   :members: Config
    :undoc-members:
    :show-inheritance:
+   
 
 redgrease.utils module
 ----------------------
@@ -26,6 +27,16 @@ redgrease.utils module
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+redgrease.typing module
+-----------------------
+
+.. automodule:: redgrease.typing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 .. Modules
 .. ========

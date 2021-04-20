@@ -18,7 +18,7 @@ RedGrease Documentation
    client 
    executing
    runtime
-   readers
+   gearfunctions
    operations
    serverside_commands
    sugar
@@ -28,11 +28,11 @@ RedGrease Documentation
    help
 
 
-Indices and tables
-==================
+.. Indices and tables
+.. ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
 .. include :: footer.rst
