@@ -9,8 +9,8 @@ The RedGrease client / connection object gives access to the various commands de
 
 .. _client_gears_instantiation:
 
-Instatiation
-------------
+Instantiation
+-------------
 
 The RedGrease client can be instantiated in a few different ways.
 

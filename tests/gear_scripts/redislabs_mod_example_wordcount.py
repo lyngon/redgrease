@@ -1,3 +1,3 @@
 from redgrease import KeysReader
 
-KeysReader().values().flatmap(lambda x: x.split()).countby().run()
+KeysReader().values().flatmap(str.split).countby().run()
