@@ -11,78 +11,26 @@ r = redgrease.RedisGears()
 # The `command` decorator tunrs the function to a CommandReader,
 # registerered on the Redis Gears sever if using the `on` argument
 @redgrease.command(on=r, requirements=["requests"], replace=False)
-def cache_get(url, expiry=None, timeout=10):
+def cache_get(url):
     import requests
 
-    # Keys
-    value_key = f"cache:{{{url}}}:result"  #
-    status_key = f"cache:{{{url}}}:status"
+    # Check if the url is already in the cache,
+    # And if so, simply return the cached result.
+    if redgrease.cmd.exists(url):
+        return bytes(redgrease.cmd.get(url))
 
-    # Atomically check if cache miss, and the number of requestss, this inclusive
-    with redgrease.atomic():
-        cache_miss = not redgrease.cmd.hexists(value_key, "data")
-        requests_count = int(redgrease.cmd.hincrby(value_key, "requests_count", 1))
+    # Otherwise fetch the url.
+    response = requests.get(url)
 
-    redgrease.log(f"Cache request #{requests_count} for resource '{url}'")
+    # Return nothing if request fails
+    if response.status_code != 200:
+        return bytes()
 
-    # If there was a cache miss but not the first request for the resource
-    # Then it is likely being downloaded by another request:
-    # => Block until we get have a status
-    # If status is Ok, push the status back to unblock any other blocked requests.
-    if cache_miss and requests_count > 1:
-        redgrease.log(
-            f"Cache miss #{requests_count} - "
-            f"Waiting while other request downloads resource '{url}'."
-        )
-        status = redgrease.cmd.brpop(status_key, status_key, timeout)
-        if status == 200:
-            redgrease.cmd.lpush(status_key, status_key, timeout)
+    # If ok, set the cache data and return.
+    response_data = bytes(response.content)
+    redgrease.cmd.set(url, response_data)
 
-    # Get the current cached data, if any
-    response_data = redgrease.cmd.hget(value_key, "data")
-
-    # We don't blindly trust the status code.
-    # If the cached ressource data still does not exist in cache:
-    # => then get it frod the url, together with some additional meta-data.
-    if response_data is None:
-        redgrease.log(f"Cache miss #{requests_count} - Downloading resource '{url}'.")
-
-        response = requests.get(url)
-
-        status = response.status_code
-        cache_fields = {
-            "status_code": status,
-            "timestamp": datetime.datetime.utcnow().isoformat(),
-        }
-
-        # We update the data only if the status is ok
-        if response.status_code == 200:
-            response_data = response.content
-            cache_fields["data"] = response_data
-
-        redgrease.cmd.hset(
-            value_key,
-            mapping=cache_fields,
-        )
-
-        redgrease.log(
-            f"Cache update #{requests_count} - "
-            f"Request status for resource '{url}': {status}"
-        )
-
-        # Push staus to unblock any other blocked requests.
-        redgrease.cmd.lpush(status_key, status)
-
-    # Update the cache expiry, if set
-    if expiry:
-        redgrease.cmd.expire(status_key, expiry)
-        redgrease.cmd.expire(value_key, expiry)
-
-    # Whatever the status is, push back to unblock any other blocked requests.
-    redgrease.cmd.rpoplpush(status_key, status_key)
-
-    # Return the data as raw binary data
-    return bytes(response_data)
+    return response_data
 
 
 # Test caching on some images

@@ -97,13 +97,13 @@ redgrease.typing module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-.. redgrease.gears module
-.. ----------------------
+redgrease.gears module
+----------------------
 
-.. .. automodule:: redgrease.gears
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: redgrease.gears
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 .. redgrease.hysteresis module
 .. ---------------------------
