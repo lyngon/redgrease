@@ -23,8 +23,10 @@ It may help you create:
 
 ... all written in Python and running distributed ON your Redis nodes.
 
-The Gear functions may include and use third party dependecies like for example ``numpy``, ``requests``, ``SQLAlchemy``, ``gensim`` or pretty much any other Python package distribution you may need for your use-case.
+The Gear functions may include and use third party dependecies like for example ``numpy``, ``requests``, ``gensim`` or pretty much any other Python package distribution you may need for your use-case.
 
+
+If you are already familiar with Redis and RedisGears, then you can jump directly to the :ref:`intro_redgrease` overview or the :ref:`quickstart`, otherwise you can read on to get up to speed on these technologies.
 
 .. _intro_redis:
 
@@ -121,73 +123,31 @@ The RedGrease package provides a number of functionalities that facilitates writ
     Allowing for **all** Redis (v.6) commands to be executed in the serverside function, as if using a Redis 'client' class, instead of *explicitly* invoking the corresponding commmand string using ``execute()``. 
     It is basically the `redis <https://pypi.org/project/redis/>`_ client, but with ``execute_command()`` rewired to use the Gears-native ``execute()`` instead under the hood. 
 
-    .. code-block:: python
-        :emphasize-lines: 8, 11, 13
-
-        import redgrease
-        import redgrease.utils
-        import requests
-
-        # This function runs **on** the Redis server.
-        def download_image(record):
-            image_key = record.value["image"]
-            if redgrese.cmd.hexists(image_key, "image_data"): # <- hexists
-                # image already downloaded
-                return image_key
-            image_url = redgrease.cmd.hget(image_key, "url") # <- hget
-            response = requests.get(image_url)
-            redgrease.cmd.hset(  # <- hset
-                image_key, 
-                "image_data", 
-                byte(response.content)
-            )
-            return image_key
-
-        gear_fun = (
-            redgrease.GearsBuilder(redgrease.ReaderType.KeysReader, "annotation:*")
-            .map(redgrease.utils.record)
-            .foreach(download_image, requirements=["requests"])
-            .run()
-        )
+    .. literalinclude:: ../../examples/serverside_redis_commands.py
+        :start-after: # # Begin Example
+        :end-before: # # End Example
+        :emphasize-lines: 8, 12, 14
 
 #. First class :ref:`GearFunction objects <readers>`.
 
     Inspired by the "remote builders" of the official `redisgears-py <https://github.com/RedisGears/redisgears-py>`_ client, but with some differences, eg:
 
+    * Supports reuse of 'partial' Gear functions.
+
     * Can be created without a Redis connection.
 
-    * Supports reuse of 'partial' Gear functions.
+    * Requirements can be specified per step, instead of only at execution.
 
     * Can be executed in a few different convenient ways.
     
-    * Requirements can be specified per step, instead of only at execution.
+    
 
     |br|
 
-    .. code-block:: python
-
-        import redgrease
-        from redgrease.utils import as_is
-        
-        # Dummy processing of command argument
-        def process(x):
-            log(f"Processing argument '{x}'")
-            return len(str(x))
-
-        # GearFunction object
-        gear = CommandReader().flatmap(as_is).map(process, requirements=["numpy"]).register(trigger="launch")
-
-        # Redis client with Gears
-        rg = redgrease.RedisGears()
-
-        # Register the gear function on a cluster
-        gear.on(rg) 
-        # same as rg.gears.pyexecute(gear)
-
-        # Trigger the function
-        rg.gears.trigger("launch", "the", "missiles!")
-        # [8, 3, 6]
-
+    .. literalinclude:: ../../examples/first_class_gearfunction_objects.py
+        :start-after: # # Begin Example
+        :end-before: # # End Example
+        :emphasize-lines: 29, 31, 34, 43, 47, 50, 51, 53, 54
 
 #. :ref:`A Command Line Tool <cli>`.
 
@@ -203,26 +163,17 @@ The RedGrease package provides a number of functionalities that facilitates writ
         redgrease --server 10.0.2.21 --watch scripts/
 
 
-#. :ref:`A utils module <api_reference>`.
+#. A bunch of helper functions and methods for common boilerplate tasks. 
+    
+    * A :mod:`redgrease.utils` module full of utils such as parsers etc.
 
-    Full of useful functions. For example:
-
-    * A record ``record`` function  that can be used to transform the default `KeysReader` dict to an `Records` object with the appropriate attributes.
-
-    * Parsers for common Python datatypes, serialized in Redis values.
-
-    * Functional composition helper.
-
-    * ... and more ...
-
-        
-#. :ref:`Syntactic sugar <sugar>`.
-
-    For example:
+    * Various :ref:`Syntactic sugar <sugar>` and enum-like objects for common keywords etc.
 
     * A ``trigger`` :ref:`Function decorator <trigger_decorator>`, that makes creation and execution of ``CommandReader`` GearFunctions trivial, and providing a straight forward way of adding bespoke serverside Redis commands.
 
-    * Named constants for special string values used by Redis Gears.
+    * Reader-specific sugar operators, like `KeysReader.values` that automaticalls lifts out the values.
+
+    * And more...
 
 
 

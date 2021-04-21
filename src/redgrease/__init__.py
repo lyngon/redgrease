@@ -124,7 +124,7 @@ except ModuleNotFoundError:
     pass
 
 # Use either the real or mock (placeholder) implementations of the
-# Redis Gears Python environment top level builtin funvtions
+# Redis Gears Python environment top level builtin functions
 # Depending on if the module is loaded in a 'redisgears' environment
 # or not (e.g. dev or client)
 if "redisgears" in sys.modules:
@@ -139,7 +139,7 @@ if "redisgears" in sys.modules:
     from redisgears import atomicCtx as atomic
     from redisgears import executeCommand as execute
     from redisgears import getMyHashTag as hashtag
-    from redisgears import log as log
+#     from redisgears import log as log
 
 else:
     # Dev or Client environment
@@ -153,10 +153,9 @@ else:
         execute,
         gearsConfigGet,
         hashtag,
-        log,
     )
 
-from .runtime import hashtag3
+from .runtime import hashtag3, log
 
 __all__ += [
     "GB",
