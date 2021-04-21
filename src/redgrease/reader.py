@@ -389,7 +389,12 @@ class CommandReader(GearReader):
         return self.map(lambda x: x[1:max_count])
 
     def apply(
-        self, fun: Callable[..., redgrease.typing.OutputRecord]
+        self,
+        fun: Callable[..., redgrease.typing.OutputRecord],
+        # Other Redgrease args
+        requirements: Iterable[str] = None,
+        # Other Redis Gears args
+        **kwargs,
     ) -> redgrease.gears.PartialGearFunction[redgrease.typing.OutputRecord]:
         """Apply a function to the trigger arguments.
 
@@ -401,4 +406,6 @@ class CommandReader(GearReader):
             redgrease.gears.PartialGearFunction[redgrease.typing.OutputRecord]:
                 A new partial gear function generating the results of the function.
         """
-        return self.map(lambda args: fun(*args[1:]))
+        return self.map(
+            lambda args: fun(*args[1:]), requirements=requirements, **kwargs
+        )
