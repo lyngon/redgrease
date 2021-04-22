@@ -74,15 +74,16 @@ try:
 
     __all__ += ["Gears", "Redis"]
 
-    try:
-        # This will fail if redis-py-cluster package is not installed
-        from .cluster import RedisCluster, RedisGears
+    # try:
+    #     # This will fail if redis-py-cluster package is not installed
+    #     from .cluster import RedisCluster, RedisGears
 
-        __all__ += ["RedisCluster"]
-    except ModuleNotFoundError:
-        from .client import Redis as RedisGears
+    #     __all__ += ["RedisCluster"]
+    # except ModuleNotFoundError:
+    #     from .client import Redis as RedisGears
+    from .client import RedisCluster, RedisGears
 
-    __all__ += ["RedisGears"]
+    __all__ += ["RedisGears", "RedisCluster"]
 
 except ModuleNotFoundError:
     pass
