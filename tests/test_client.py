@@ -31,15 +31,31 @@ import time
 from typing import List
 
 import pytest
+import redis
 
 import redgrease
 import redgrease.client
 import redgrease.data
 from redgrease.utils import safe_str, str_if_bytes
 
-# Other things to test:
-# - Syntactinc sugar / enums
-# - cli / loader
+
+def test_create_gear(server_connection_params):
+    r = redis.Redis(**server_connection_params)
+
+    rg = redgrease.Gears(r)
+
+    r.set("Foo", 1)
+    r.set("Bar", 2)
+    r.set("Baz", 3)
+
+    res = rg.pyexecute("GB().run()")
+    assert res
+    assert isinstance(res, redgrease.data.ExecutionResult)
+    assert len(res) == 3
+
+    pystats = rg.pystats()
+    assert pystats
+    assert isinstance(pystats, redgrease.data.PyStats)
 
 
 @pytest.mark.parametrize("package", ["numpy"])

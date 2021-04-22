@@ -61,10 +61,6 @@ If you already have code with intantiated Redis client objects, and you don't wa
 This instaniates a Gears object, which only exposes the :ref:`RedisGears commands can be accessed <client_gears_commands>`, and not the normal Redis commands.
 This object is the same object that the above RedisGears client exposes through its ``gears`` property.
 
-.. warning::
-
-    There is currently a bug (`issue  #105 <https://github.com/lyngon/redgrease/issues/105>`_) with this approach, but it should hopefully shortly be fixed.
-
 
 
 .. _client_gears_commands:

@@ -49,7 +49,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 import ast
 import fnmatch
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Type, Union
 
 import redis
 
@@ -92,7 +92,7 @@ class Gears:
             Redis Gears Configuration 'client'
     """
 
-    RESPONSE_CALLBACKS: Dict[str, Callable] = {
+    _RESPONSE_CALLBACKS: Dict[str, Callable] = {
         "RG.ABORTEXECUTION": bool_ok,
         "RG.CONFIGGET": dict_of(
             CaseInsensitiveDict(redgrease.config.Config.ValueTypes)
@@ -113,6 +113,35 @@ class Gears:
         "RG.UNREGISTER": bool_ok,
     }
 
+    # NODES_FLAGS - (cluster only)
+    # States how target node is selected for cluster commands:
+    # - blocked : command is not allowed - Raises a RedisClusterException
+    # - random : excuted on one randomly selected node
+    # - all-masters : executed on all master node
+    # - all-nodes : executed on all nodes
+    # - slot-id : executed on the node defined by the second argument
+    _NODES_FLAGS = {
+        "RG.INFOCLUSTER": "random",
+        "RG.PYSTATS": "all-nodes",
+        "RG.PYDUMPREQS": "random",
+        "RG.REFRESHCLUSTER": "all-nodes",
+        "RG.DUMPEXECUTIONS": "random",
+        "RG.DUMPREGISTRATIONS": "random",
+    }
+
+    # RESULT_CALLBACKS - (cluster only)
+    # Not to be confused with redis.Redis.RESPONSE_CALLBACKS
+    # RESULT_CALLBACKS is special to rediscluster.RedisCluster.
+    # It decides how results of commands defined in `NODES_FLAGS` are aggregated into
+    # a final response, **after** redis.Redis.RESPONSE_CALLBACKS as been applied to
+    # each response individually.
+    _RESULT_CALLBACKS = {
+        "RG.INFOCLUSTER": lambda _, res: next(iter(res.values())),
+        "RG.PYSTATS": lambda _, res: res,
+        "RG.PYDUMPREQS": lambda _, res: next(iter(res.values())),
+        "RG.REFRESHCLUSTER": lambda _, res: all(res.values()),
+    }
+
     def __init__(self, redis: redis.Redis):
         """Instatiate a Gears client objeect
 
@@ -121,7 +150,22 @@ class Gears:
                 redis.Redis client object, used for the underlying communication with
                 the server.
         """
-        self.redis = redis
+        for command, callback in Gears._RESPONSE_CALLBACKS.items():
+            redis.set_response_callback(command, callback)
+
+        # Node Flags is only set on `rediscluster.RedisCluster`
+        node_flags: Dict = getattr(redis, "nodes_flags", dict())
+        if node_flags:
+            node_flags.update(Gears._NODES_FLAGS)
+            setattr(redis, "node_flags", node_flags)
+
+        # Result Callbacks is only set on `rediscluster.RedisCluster`
+        result_callbacks: Dict = getattr(redis, "result_callbacks", dict())
+        if result_callbacks:
+            result_callbacks.update(Gears._RESULT_CALLBACKS),
+            setattr(redis, "result_callbacks", result_callbacks)
+
+        self._redis = redis
         self.config = redgrease.config.Config(redis)
 
     def _ping(self) -> bool:
@@ -155,7 +199,7 @@ class Gears:
         if isinstance(id, redgrease.data.ExecutionInfo):
             id = id.executionId
 
-        return self.redis.execute_command("RG.ABORTEXECUTION", to_redis_type(id))
+        return self._redis.execute_command("RG.ABORTEXECUTION", to_redis_type(id))
 
     def dropexecution(self, id: ExecutionID) -> bool:
         """Remove the execution of a function from the executions list.
@@ -171,7 +215,7 @@ class Gears:
         """
         if isinstance(id, redgrease.data.ExecutionInfo):
             id = id.executionId
-        return self.redis.execute_command("RG.DROPEXECUTION", to_redis_type(id))
+        return self._redis.execute_command("RG.DROPEXECUTION", to_redis_type(id))
 
     def dumpexecutions(
         self,
@@ -200,7 +244,7 @@ class Gears:
                 A list of ExecutionInfo, with an entry per execution.
         """
         executions: List[redgrease.data.ExecutionInfo] = []
-        executions = self.redis.execute_command("RG.DUMPEXECUTIONS")
+        executions = self._redis.execute_command("RG.DUMPEXECUTIONS")
 
         if status or registered is not None:
             filtered_executions = []
@@ -264,7 +308,7 @@ class Gears:
                 A list of Registration, with one entry per registered function.
         """
         registrations: List[redgrease.data.Registration] = []
-        registrations = self.redis.execute_command("RG.DUMPREGISTRATIONS")
+        registrations = self._redis.execute_command("RG.DUMPREGISTRATIONS")
 
         if reader or desc or mode or key or stream or trigger:
             filtered_regsistrations = []
@@ -320,7 +364,7 @@ class Gears:
 
         loc = [] if locality is None else [safe_str(locality).upper()]
 
-        return self.redis.execute_command("RG.GETEXECUTION", to_redis_type(id), *loc)
+        return self._redis.execute_command("RG.GETEXECUTION", to_redis_type(id), *loc)
 
     def getresults(
         self,
@@ -345,7 +389,7 @@ class Gears:
         if isinstance(id, redgrease.data.ExecutionInfo):
             id = id.executionId
 
-        return self.redis.execute_command("RG.GETRESULTS", to_redis_type(id))
+        return self._redis.execute_command("RG.GETRESULTS", to_redis_type(id))
 
     def getresultsblocking(self, id: ExecutionID) -> redgrease.data.ExecutionResult:
         """Get the results and errors from the execution details of a function.
@@ -368,7 +412,7 @@ class Gears:
         if isinstance(id, redgrease.data.ExecutionInfo):
             id = id.executionId
 
-        return self.redis.execute_command("RG.GETRESULTSBLOCKING", to_redis_type(id))
+        return self._redis.execute_command("RG.GETRESULTSBLOCKING", to_redis_type(id))
 
     def infocluster(self) -> redgrease.data.ClusterInfo:
         """Gets information about the cluster and its shards.
@@ -377,7 +421,7 @@ class Gears:
             redgredase.data.ClusterInfo:
                 Cluster information or None if not in cluster mode.
         """
-        return self.redis.execute_command("RG.INFOCLUSTER")
+        return self._redis.execute_command("RG.INFOCLUSTER")
 
     def pyexecute(
         self,
@@ -485,7 +529,7 @@ class Gears:
             params += list(map(str, requirements))
 
         try:
-            command_response = self.redis.execute_command(
+            command_response = self._redis.execute_command(
                 "RG.PYEXECUTE",
                 function_string,
                 *params,
@@ -509,7 +553,7 @@ class Gears:
                 Python interpretere memory statistics, including total,
                 peak and current amount of allocated memory, in bytes.
         """
-        return self.redis.execute_command("RG.PYSTATS")
+        return self._redis.execute_command("RG.PYSTATS")
 
     def pydumpreqs(
         self, name: str = None, is_downloaded: bool = None, is_installed: bool = None
@@ -538,7 +582,7 @@ class Gears:
                 List of Python requirement information objects.
         """
         requirements: List[redgrease.data.PyRequirementInfo] = []
-        requirements = self.redis.execute_command("RG.PYDUMPREQS")
+        requirements = self._redis.execute_command("RG.PYDUMPREQS")
 
         if name or is_downloaded is not None or is_installed is not None:
             filtered_requirements = []
@@ -571,7 +615,7 @@ class Gears:
             redis.exceptions.ResponseError:
                 If not successful
         """
-        return self.redis.execute_command("RG.REFRESHCLUSTER")
+        return self._redis.execute_command("RG.REFRESHCLUSTER")
 
     def trigger(self, trigger_name: str, *args) -> List[Any]:
         """Trigger the execution of a registered 'CommandReader' function.
@@ -586,7 +630,7 @@ class Gears:
         Returns:6
             List: A list of the functions output records.
         """
-        return self.redis.execute_command("RG.TRIGGER", safe_str(trigger_name), *args)
+        return self._redis.execute_command("RG.TRIGGER", safe_str(trigger_name), *args)
 
     def unregister(self, id: RegistrationID) -> bool:
         """Removes the registration of a function
@@ -606,39 +650,65 @@ class Gears:
         if isinstance(id, redgrease.data.Registration):
             id = id.id
 
-        return self.redis.execute_command("RG.UNREGISTER", to_redis_type(id))
+        return self._redis.execute_command("RG.UNREGISTER", to_redis_type(id))
 
 
-class Redis(redis.Redis):
-    """Redis client class, with support for gears features.
+def gears(self):
+    """Gears client, exposing gears commands
 
-    Behaves exactly like the redis.Redis client, but is extended with a 'gears'
-    property fo executiong Gears commands.
-
-    Attributes:
-        gears (redgrease.client.Gears):
-            Gears command client.
+    Returns:
+        Gears:
+            Gears client
     """
+    if not self._gears:
+        self._gears = Gears(self)
 
-    RESPONSE_CALLBACKS = {
-        **redis.Redis.RESPONSE_CALLBACKS,
-        **Gears.RESPONSE_CALLBACKS,
-    }
+    return self._gears
 
-    def __init__(self, *args, **kwargs):
-        """Instantiate a redis client, with gears features"""
-        self._gears = None
-        super().__init__(*args, **kwargs)
 
-    @property
-    def gears(self) -> Gears:
-        """Gears client, exposing gears commands
+def gear_class(redish: Type[redis.Redis] = redis.Redis):
+    """Create a "RedisGears" class as a subclass some redis.Redis based class.
 
-        Returns:
-            Gears:
-                Gears client
-        """
-        if not self._gears:
-            self._gears = Gears(self)
+    The created class has a property `gears` which is a `redgrease.Gears` client using
+    the same connection as its parent.
+    """
+    return type(
+        "RedisGears",
+        (redish,),
+        {"_gears": None, "connection": None, "gears": property(gears)},
+    )
 
-        return self._gears
+
+Redis = gear_class(redis.Redis)
+
+try:
+    # If the `rediscluster` package is present, then
+    # A. Define `RedisCluster` as "Geared" version of `rediscluster.RedisCluster`.
+    # B. Define `RedisGears` as a function that:
+    #      - Tries to instantiate a `RedisCluster`
+    #      - using `Redis` as backup
+
+    import rediscluster
+
+    RedisCluster = gear_class(rediscluster.RedisCluster)
+
+    def RedisGears(*args, **kwargs):
+        try:
+            return RedisCluster(*args, **kwargs)
+
+        except (AttributeError, rediscluster.exceptions.RedisClusterException):
+            return redgrease.client.Redis(*args, **kwargs)
+
+
+except ModuleNotFoundError as mnf_err:
+
+    # If the `rediscluster` package is NOT present, then
+    # A. Define `RedisCluster` as a function that throws an exception.
+    # B. Define `RedisGears` as a function that, always use `Redis`.
+
+    ex = mnf_err
+
+    def RedisCluster(*args, **kwargs):
+        raise ex
+
+    RedisGears = Redis
