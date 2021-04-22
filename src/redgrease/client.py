@@ -653,36 +653,6 @@ class Gears:
         return self._redis.execute_command("RG.UNREGISTER", to_redis_type(id))
 
 
-# class Redis(redis.Redis):
-#     """Redis client class, with support for gears features.
-
-#     Behaves exactly like the redis.Redis client, but is extended with a 'gears'
-#     property fo executiong Gears commands.
-
-#     Attributes:
-#         gears (redgrease.client.Gears):
-#             Gears command client.
-#     """
-
-#     def __init__(self, *args, **kwargs):
-#         """Instantiate a redis client, with gears features"""
-#         self._gears = None
-#         super().__init__(*args, **kwargs)
-
-#     @property
-#     def gears(self) -> Gears:
-#         """Gears client, exposing gears commands
-
-#         Returns:
-#             Gears:
-#                 Gears client
-#         """
-#         if not self._gears:
-#             self._gears = Gears(self)
-
-#         return self._gears
-
-
 def gears(self):
     """Gears client, exposing gears commands
 
@@ -697,7 +667,11 @@ def gears(self):
 
 
 def gear_class(redish: Type[redis.Redis] = redis.Redis):
+    """Create a "RedisGears" class as a subclass some redis.Redis based class.
 
+    The created class has a property `gears` which is a `redgrease.Gears` client using
+    the same connection as its parent.
+    """
     return type(
         "RedisGears",
         (redish,),
@@ -708,6 +682,12 @@ def gear_class(redish: Type[redis.Redis] = redis.Redis):
 Redis = gear_class(redis.Redis)
 
 try:
+    # If the `rediscluster` package is present, then
+    # A. Define `RedisCluster` as "Geared" version of `rediscluster.RedisCluster`.
+    # B. Define `RedisGears` as a function that:
+    #      - Tries to instantiate a `RedisCluster`
+    #      - using `Redis` as backup
+
     import rediscluster
 
     RedisCluster = gear_class(rediscluster.RedisCluster)
@@ -721,6 +701,10 @@ try:
 
 
 except ModuleNotFoundError as mnf_err:
+
+    # If the `rediscluster` package is NOT present, then
+    # A. Define `RedisCluster` as a function that throws an exception.
+    # B. Define `RedisGears` as a function that, always use `Redis`.
 
     ex = mnf_err
 
