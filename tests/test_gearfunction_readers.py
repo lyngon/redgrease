@@ -118,13 +118,13 @@ def test_keysreader_records(rg: RedisGears):
     gear_fun = KeysReader().records().run()
     res = rg.gears.pyexecute(gear_fun)
 
-    assert len(res) == len(list(data))
+    assert len(res) == min(len(keys), len(values))
     for r in res:
         assert isinstance(r, redgrease.utils.Record)
         assert r.type == "string"
-        assert r.value in values
+        assert int(r.value) in values
         assert r.key in keys
-        assert r.type is None
+        assert not r.event
 
     assert res.errors == []
 
