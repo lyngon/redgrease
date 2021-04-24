@@ -49,6 +49,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 import ast
 import fnmatch
 import logging
+import warnings
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
 
 import redis
@@ -814,38 +815,80 @@ def RedisMods(
     socket_keepalive_options=None,
     connection_pool=None,
     unix_socket_path=None,
-    encoding="utf-8",
-    encoding_errors="strict",
+    encoding=None,
+    encoding_errors=None,
     charset=None,
     errors=None,
-    decode_responses=False,
-    retry_on_timeout=False,
-    ssl=False,
+    decode_responses=None,
+    retry_on_timeout=None,
+    ssl=None,
     ssl_keyfile=None,
     ssl_certfile=None,
-    ssl_cert_reqs="required",
+    ssl_cert_reqs=None,
     ssl_ca_certs=None,
-    ssl_check_hostname=False,
+    ssl_check_hostname=None,
     max_connections=None,
-    single_connection_client=False,
-    health_check_interval=0,
+    single_connection_client=None,
+    health_check_interval=None,
     client_name=None,
     username=None,
     # Redis Cluster
     startup_nodes=None,
-    max_connections_per_node=False,
-    init_slot_cache=True,
-    readonly_mode=False,
+    max_connections_per_node=None,
+    init_slot_cache=None,
+    readonly_mode=None,
     reinitialize_steps=None,
-    skip_full_coverage_check=False,
-    nodemanager_follow_cluster=False,
+    skip_full_coverage_check=None,
+    nodemanager_follow_cluster=None,
     connection_class=None,
-    read_from_replicas=False,
-    cluster_down_retry_attempts=3,
+    read_from_replicas=None,
+    cluster_down_retry_attempts=None,
     host_port_remap=None,
     # Catchall
     **kwargs,
 ) -> Redis:
+
+    default_args = {
+        "db": db,
+        "password": password,
+        "socket_timeout": socket_timeout,
+        "socket_connect_timeout": socket_connect_timeout,
+        "socket_keepalive": socket_keepalive,
+        "socket_keepalive_options": socket_keepalive_options,
+        "connection_pool": connection_pool,
+        "unix_socket_path": unix_socket_path,
+        "encoding": encoding,
+        "encoding_errors": encoding_errors,
+        "charset": charset,
+        "errors": errors,
+        "decode_responses": decode_responses,
+        "retry_on_timeout": retry_on_timeout,
+        "ssl": ssl,
+        "ssl_keyfile": ssl_keyfile,
+        "ssl_certfile": ssl_certfile,
+        "ssl_cert_reqs": ssl_cert_reqs,
+        "ssl_ca_certs": ssl_ca_certs,
+        "ssl_check_hostname": ssl_check_hostname,
+        "max_connections": max_connections,
+        "single_connection_client": single_connection_client,
+        "health_check_interval": health_check_interval,
+        "client_name": client_name,
+        "username": username,
+    }
+
+    cluster_args = {
+        "startup_nodes": startup_nodes,
+        "max_connections_per_node": max_connections_per_node,
+        "init_slot_cache": init_slot_cache,
+        "readonly_mode": readonly_mode,
+        "reinitialize_steps": reinitialize_steps,
+        "skip_full_coverage_check": skip_full_coverage_check,
+        "nodemanager_follow_cluster": nodemanager_follow_cluster,
+        "connection_class": connection_class,
+        "read_from_replicas": read_from_replicas,
+        "cluster_down_retry_attempts": cluster_down_retry_attempts,
+        "host_port_remap": host_port_remap,
+    }
 
     if host is None and startup_nodes is None:
         host = "localhost"
@@ -855,90 +898,36 @@ def RedisMods(
         return RedisCluster(
             host=host,
             port=port,
-            # RedisCluster Stuff
-            startup_nodes=startup_nodes,
-            max_connections_per_node=max_connections_per_node,
-            init_slot_cache=init_slot_cache,
-            readonly_mode=readonly_mode,
-            reinitialize_steps=reinitialize_steps,
-            skip_full_coverage_check=skip_full_coverage_check,
-            nodemanager_follow_cluster=nodemanager_follow_cluster,
-            connection_class=connection_class,
-            read_from_replicas=read_from_replicas,
-            cluster_down_retry_attempts=cluster_down_retry_attempts,
-            host_port_remap=host_port_remap,
-            # Redis stuff
-            db=db,
-            password=password,
-            socket_timeout=socket_timeout,
-            socket_connect_timeout=socket_connect_timeout,
-            socket_keepalive=socket_keepalive,
-            socket_keepalive_options=socket_keepalive_options,
-            connection_pool=connection_pool,
-            unix_socket_path=unix_socket_path,
-            encoding=encoding,
-            encoding_errors=encoding_errors,
-            charset=charset,
-            errors=errors,
-            decode_responses=decode_responses,
-            retry_on_timeout=retry_on_timeout,
-            ssl=ssl,
-            ssl_keyfile=ssl_keyfile,
-            ssl_certfile=ssl_certfile,
-            ssl_cert_reqs=ssl_cert_reqs,
-            ssl_ca_certs=ssl_ca_certs,
-            ssl_check_hostname=ssl_check_hostname,
-            max_connections=max_connections,
-            single_connection_client=single_connection_client,
-            health_check_interval=health_check_interval,
-            client_name=client_name,
-            username=username,
-            **kwargs,
+            **{
+                **{k: v for k, v in cluster_args.items() if v is not None},
+                **{k: v for k, v in default_args.items() if v is not None},
+                **kwargs,
+            },
         )
     except (
-        AttributeError,
         rediscluster.exceptions.RedisClusterException,
         ModuleNotFoundError,
     ):
-        print("ClusterCatch")
 
         if port is None:
             port = 6379
 
-        if db is None:
-            db = 0
-
         return Redis(
             host=host,
             port=port,
-            db=db,
-            password=password,
-            socket_timeout=socket_timeout,
-            socket_connect_timeout=socket_connect_timeout,
-            socket_keepalive=socket_keepalive,
-            socket_keepalive_options=socket_keepalive_options,
-            connection_pool=connection_pool,
-            unix_socket_path=unix_socket_path,
-            encoding=encoding,
-            encoding_errors=encoding_errors,
-            charset=charset,
-            errors=errors,
-            decode_responses=decode_responses,
-            retry_on_timeout=retry_on_timeout,
-            ssl=ssl,
-            ssl_keyfile=ssl_keyfile,
-            ssl_certfile=ssl_certfile,
-            ssl_cert_reqs=ssl_cert_reqs,
-            ssl_ca_certs=ssl_ca_certs,
-            ssl_check_hostname=ssl_check_hostname,
-            max_connections=max_connections,
-            single_connection_client=single_connection_client,
-            health_check_interval=health_check_interval,
-            client_name=client_name,
-            username=username,
-            **kwargs,
+            **{**{k: v for k, v in default_args.items() if v is not None}, **kwargs},
         )
 
 
 # Deprecated
-RedisGears = RedisMods
+def RedisGears(*args, **kwargs):
+    """Deprecated
+    Use RedisMods instead
+    """
+    warnings.warn(
+        """Instantiation using `RedisGears` will be deprecated.
+        Please use `RedisMods` instead.""",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return RedisMods(*args, **kwargs)
