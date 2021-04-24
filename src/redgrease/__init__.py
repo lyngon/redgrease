@@ -70,9 +70,9 @@ __all__ = [
 
 try:
     # This will fail if redis package is not installed
-    from .client import Gears, Redis, RedisCluster, RedisGears
+    from .client import Gears, Redis, RedisCluster, RedisGears, RedisMods
 
-    __all__ += ["Gears", "Redis", "RedisCluster", "RedisGears"]
+    __all__ += ["Gears", "Redis", "RedisCluster", "RedisGears", "RedisMods"]
 
 except ModuleNotFoundError:
     pass

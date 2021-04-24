@@ -49,7 +49,8 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 import ast
 import fnmatch
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Type, Union
+import warnings
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
 
 import redis
 
@@ -656,62 +657,280 @@ class Gears:
         return self._redis.execute_command("RG.UNREGISTER", to_redis_type(id))
 
 
-def gears(self):
-    """Gears client, exposing gears commands
+class RedisGearsModule:
+    def __init__(self, **kwargs) -> None:
+        self.connection = None
+        self._gears = None
 
-    Returns:
-        Gears:
-            Gears client
-    """
-    if not self._gears:
-        self._gears = Gears(self)
+    @property
+    def gears(self):
+        """Gears client, exposing gears commands
 
-    return self._gears
+        Returns:
+            Gears:
+                Gears client
+        """
+        if not self._gears:
+            self._gears = Gears(self)
 
-
-def gear_class(redish: Type[redis.Redis] = redis.Redis):
-    """Create a "RedisGears" class as a subclass some redis.Redis based class.
-
-    The created class has a property `gears` which is a `redgrease.Gears` client using
-    the same connection as its parent.
-    """
-    return type(
-        "RedisGears",
-        (redish,),
-        {"_gears": None, "connection": None, "gears": property(gears)},
-    )
+        return self._gears
 
 
-Redis = gear_class(redis.Redis)
+class RedisModules(RedisGearsModule):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+
+class Redis(redis.Redis, RedisModules):
+    def __init__(
+        self,
+        host="localhost",
+        port=6379,
+        db=0,
+        password=None,
+        socket_timeout=None,
+        socket_connect_timeout=None,
+        socket_keepalive=None,
+        socket_keepalive_options=None,
+        connection_pool=None,
+        unix_socket_path=None,
+        encoding="utf-8",
+        encoding_errors="strict",
+        charset=None,
+        errors=None,
+        decode_responses=False,
+        retry_on_timeout=False,
+        ssl=False,
+        ssl_keyfile=None,
+        ssl_certfile=None,
+        ssl_cert_reqs="required",
+        ssl_ca_certs=None,
+        ssl_check_hostname=False,
+        max_connections=None,
+        single_connection_client=False,
+        health_check_interval=0,
+        client_name=None,
+        username=None,
+        **kwargs,
+    ):
+        redis.Redis.__init__(
+            self,
+            host=host,
+            port=port,
+            db=db,
+            password=password,
+            socket_timeout=socket_timeout,
+            socket_connect_timeout=socket_connect_timeout,
+            socket_keepalive=socket_keepalive,
+            socket_keepalive_options=socket_keepalive_options,
+            connection_pool=connection_pool,
+            unix_socket_path=unix_socket_path,
+            encoding=encoding,
+            encoding_errors=encoding_errors,
+            charset=charset,
+            errors=errors,
+            decode_responses=decode_responses,
+            retry_on_timeout=retry_on_timeout,
+            ssl=ssl,
+            ssl_keyfile=ssl_keyfile,
+            ssl_certfile=ssl_certfile,
+            ssl_cert_reqs=ssl_cert_reqs,
+            ssl_ca_certs=ssl_ca_certs,
+            ssl_check_hostname=ssl_check_hostname,
+            max_connections=max_connections,
+            single_connection_client=single_connection_client,
+            health_check_interval=health_check_interval,
+            client_name=client_name,
+            username=username,
+            **kwargs,
+        )
+        RedisModules.__init__(self)
+
 
 try:
     # If the `rediscluster` package is present, then
-    # A. Define `RedisCluster` as "Geared" version of `rediscluster.RedisCluster`.
-    # B. Define `RedisGears` as a function that:
-    #      - Tries to instantiate a `RedisCluster`
-    #      - using `Redis` as backup
+    # define `RedisCluster` as `rediscluster.RedisCluster` with `RedisModules`
 
     import rediscluster
+    import rediscluster.exceptions
 
-    RedisCluster = gear_class(rediscluster.RedisCluster)
-
-    def RedisGears(*args, **kwargs):
-        try:
-            return RedisCluster(*args, **kwargs)
-
-        except (AttributeError, rediscluster.exceptions.RedisClusterException):
-            return redgrease.client.Redis(*args, **kwargs)
+    class RedisCluster(rediscluster.RedisCluster, RedisModules):
+        def __init__(
+            self,
+            host=None,
+            port=None,
+            startup_nodes=None,
+            max_connections=None,
+            max_connections_per_node=False,
+            init_slot_cache=True,
+            readonly_mode=False,
+            reinitialize_steps=None,
+            skip_full_coverage_check=False,
+            nodemanager_follow_cluster=False,
+            connection_class=None,
+            read_from_replicas=False,
+            cluster_down_retry_attempts=3,
+            host_port_remap=None,
+            **kwargs,
+        ):
+            self.connection = None
+            rediscluster.RedisCluster.__init__(
+                self,
+                host=host,
+                port=port,
+                startup_nodes=startup_nodes,
+                max_connections=max_connections,
+                max_connections_per_node=max_connections_per_node,
+                init_slot_cache=init_slot_cache,
+                readonly_mode=readonly_mode,
+                reinitialize_steps=reinitialize_steps,
+                skip_full_coverage_check=skip_full_coverage_check,
+                nodemanager_follow_cluster=nodemanager_follow_cluster,
+                connection_class=connection_class,
+                read_from_replicas=read_from_replicas,
+                cluster_down_retry_attempts=cluster_down_retry_attempts,
+                host_port_remap=host_port_remap,
+                **kwargs,
+            )
+            RedisModules.__init__(self)
 
 
 except ModuleNotFoundError as mnf_err:
 
     # If the `rediscluster` package is NOT present, then
-    # A. Define `RedisCluster` as a function that throws an exception.
-    # B. Define `RedisGears` as a function that, always use `Redis`.
-
+    # define `RedisCluster` as a class that throws a `ModuleNotFoundError`.
     ex = mnf_err
 
-    def RedisCluster(*args, **kwargs):
-        raise ex
+    class RedisCluster:  # type: ignore
+        def __init__(self, *args, **kwargs) -> None:
+            raise ex
 
-    RedisGears = Redis
+
+# Redis with Modules
+def RedisMods(
+    host=None,
+    port=None,
+    db=None,
+    password=None,
+    socket_timeout=None,
+    socket_connect_timeout=None,
+    socket_keepalive=None,
+    socket_keepalive_options=None,
+    connection_pool=None,
+    unix_socket_path=None,
+    encoding=None,
+    encoding_errors=None,
+    charset=None,
+    errors=None,
+    decode_responses=None,
+    retry_on_timeout=None,
+    ssl=None,
+    ssl_keyfile=None,
+    ssl_certfile=None,
+    ssl_cert_reqs=None,
+    ssl_ca_certs=None,
+    ssl_check_hostname=None,
+    max_connections=None,
+    single_connection_client=None,
+    health_check_interval=None,
+    client_name=None,
+    username=None,
+    # Redis Cluster
+    startup_nodes=None,
+    max_connections_per_node=None,
+    init_slot_cache=None,
+    readonly_mode=None,
+    reinitialize_steps=None,
+    skip_full_coverage_check=None,
+    nodemanager_follow_cluster=None,
+    connection_class=None,
+    read_from_replicas=None,
+    cluster_down_retry_attempts=None,
+    host_port_remap=None,
+    # Catchall
+    **kwargs,
+) -> Redis:
+
+    default_args = {
+        "db": db,
+        "password": password,
+        "socket_timeout": socket_timeout,
+        "socket_connect_timeout": socket_connect_timeout,
+        "socket_keepalive": socket_keepalive,
+        "socket_keepalive_options": socket_keepalive_options,
+        "connection_pool": connection_pool,
+        "unix_socket_path": unix_socket_path,
+        "encoding": encoding,
+        "encoding_errors": encoding_errors,
+        "charset": charset,
+        "errors": errors,
+        "decode_responses": decode_responses,
+        "retry_on_timeout": retry_on_timeout,
+        "ssl": ssl,
+        "ssl_keyfile": ssl_keyfile,
+        "ssl_certfile": ssl_certfile,
+        "ssl_cert_reqs": ssl_cert_reqs,
+        "ssl_ca_certs": ssl_ca_certs,
+        "ssl_check_hostname": ssl_check_hostname,
+        "max_connections": max_connections,
+        "single_connection_client": single_connection_client,
+        "health_check_interval": health_check_interval,
+        "client_name": client_name,
+        "username": username,
+    }
+
+    cluster_args = {
+        "startup_nodes": startup_nodes,
+        "max_connections_per_node": max_connections_per_node,
+        "init_slot_cache": init_slot_cache,
+        "readonly_mode": readonly_mode,
+        "reinitialize_steps": reinitialize_steps,
+        "skip_full_coverage_check": skip_full_coverage_check,
+        "nodemanager_follow_cluster": nodemanager_follow_cluster,
+        "connection_class": connection_class,
+        "read_from_replicas": read_from_replicas,
+        "cluster_down_retry_attempts": cluster_down_retry_attempts,
+        "host_port_remap": host_port_remap,
+    }
+
+    if host is None and startup_nodes is None:
+        host = "localhost"
+
+    try:
+
+        return RedisCluster(
+            host=host,
+            port=port,
+            **{
+                **{k: v for k, v in cluster_args.items() if v is not None},
+                **{k: v for k, v in default_args.items() if v is not None},
+                **kwargs,
+            },
+        )
+    except (
+        rediscluster.exceptions.RedisClusterException,
+        ModuleNotFoundError,
+    ):
+
+        if port is None:
+            port = 6379
+
+        return Redis(
+            host=host,
+            port=port,
+            **{**{k: v for k, v in default_args.items() if v is not None}, **kwargs},
+        )
+
+
+# Deprecated
+def RedisGears(*args, **kwargs):
+    """Deprecated
+    Use RedisMods instead
+    """
+    warnings.warn(
+        """Instantiation using `RedisGears` will be deprecated.
+        Please use `RedisMods` instead.""",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return RedisMods(*args, **kwargs)
