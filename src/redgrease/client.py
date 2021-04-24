@@ -803,7 +803,7 @@ except ModuleNotFoundError as mnf_err:
 
 
 # Redis with Modules
-def RedisMod(
+def RedisMods(
     host=None,
     port=None,
     db=None,
@@ -941,4 +941,4 @@ def RedisMod(
 
 
 # Deprecated
-RedisGears = RedisMod
+RedisGears = RedisMods
