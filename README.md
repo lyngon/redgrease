@@ -47,14 +47,6 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-## Register to RedisConf 2021 and catch the session on RedGrease
-<a href="https://bit.ly/3s3n8zj" >
-    <img width="50%" src="docs/images/RedisConf2021_Register.jpg" alt="Join RedisConf 2021"  />
-</a>
-
-Registrations are free!
-
-
 # RedGrease
 RedGrease is a Python package and set of tools to facilitate development against [Redis](https://redis.io/) in general and [Redis Gears](https://redislabs.com/modules/redis-gears/) in particular.
 
@@ -110,51 +102,67 @@ rg.gears.pyexecute(gear_script)  # <--
 2. Wrappers for the [runtime functions](https://redgrease.readthedocs.io) (e.g. `GearsBuilder`, `GB`, `atomic`, `execute`, `log` etc) that are automatically loaded into the server [runtime environment](https://oss.redislabs.com/redisgears/runtime.html). These placeholder versions provide **docstrings**, **auto completion** and **type hints** during development, and does not clash with the actual runtime, i.e does not require redgrease to be installed on the server.
 ![basic hints](docs/images/basic_usage_hints.jpg)
 
-3. [Servers-side Redis commands](https://redgrease.readthedocs.io), allowing for **all** Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of 'manually' invoking the `execute()`. It is basically the [redis](https://pypi.org/project/redis/) client, but with `execute_command()` rewired to use the Gears-native `execute()` instead under the hood. 
+3. [Server side Redis commands](https://redgrease.readthedocs.io), allowing for **all** Redis (v.6) commands to be executed on serverside as if using a Redis 'client' class, instead of 'manually' invoking the `execute()`. It is basically the [redis](https://pypi.org/project/redis/) client, but with `execute_command()` rewired to use the Gears-native `execute()` instead under the hood. 
 ```python
 import redgrease
-import redgrease.utils
-import requests
 
-def download_image(record):
-    image_key = record.value["image"]
-    if redgrese.cmd.hget(image_key, "image_data"): # <-
+def download_image(annotation):
+    img_id = annotation["image_id"]
+    img_key = f"image:{img_id}"
+    if redgrease.cmd.hexists(img_key, "image_data"):  # <- hexists
         # image already downloaded
-        return image_key
-    image_url = redgrease.cmd.hget(image_key,"url") # <-
-    image_data = requests.get(image_url)
-    redgrease.cmd.hset(image_key, "image_data", # <-
-     images_data)
-    return image_key
+        return img_key
+    redgrease.log(f"Downloadign image for annotation: {annotation}")
+    image_url = redgrease.cmd.hget(img_key, "url")  # <- hget
+    response = requests.get(image_url)
+    redgrease.cmd.hset(img_key, "image_data", bytes(response.content))  # <- hset
+    return img_key
 
-redgrease.GB(redgrease.ReaderType.KeysReader, "annotation:*").map(redgrease.utils.record).foreach(download_image).run()
+
+# Redis connection (with Gears)
+connection = redgrease.RedisGears()
+
+# Automatically download corresponding image, whenever an annotation is created.
+image_keys = (
+    redgrease.KeysReader()
+    .values(type="hash", event="hset")
+    .foreach(download_image, requirements=["requests"])
+    .register("annotation:*", on=connection)
+)
 ```
 
-4. First class [GearFunction objects](https://redgrease.readthedocs.io), inspired by the remote builders of the official [redisgears-py](https://github.com/RedisGears/redisgears-py) client, but with some differences.
+4. ['First class'](https://en.wikipedia.org/wiki/First-class_citizen) [GearFunction objects](https://redgrease.readthedocs.io), inspired by the remote builders of the official [redisgears-py](https://github.com/RedisGears/redisgears-py) client, but with some differences.
 ```python
-import redgrease
-from redgrease.utils import as_is
+records = redgrease.KeysReader().records(type="hash")  # <- fun 1 : hash-recods
 
-# Dummy processing of command argument
-def process(x):
-    log(f"Processing argument '{x}'")
-    return len(str(x))
+record_listener = ( # <- fun 2, "extents" fun 1
+    records.foreach(schedule)
+    .register(key_pattern, eventTypes=["hset"])
+)  
 
-# Gear Function object
-gear = CommandReader().flatmap(as_is).map(process).register(trigger="launch")
+count_by_status = (   # <- fun 3, also "extends" fun 1
+    records.countby(lambda r: r.value.get("status", "unknown"))
+    .map(lambda r: {r["key"]: r["value"]})
+    .aggregate({}, lambda a, r: dict(a, **r))
+    .run(key_pattern)
+)
 
-# Redis client with Gears
-rg = redgrease.RedisGears()
+process_records = (   # <- fun 4
+    redgrease.StreamReader()
+    .values()  # <- Sugar
+    .foreach(process, requirements=["numpy"])
+    .register("to_be_processed")
+)
 
-# Register the gear function on a cluster
-gear.on(rg) 
-# same as rg.gears.pyexecute(gear)
+# Instantiate client objects
+server = redgrease.RedisGears()
 
-# Trigger the function
-rg.gears.trigger("launch", "the", "missiles!")
-# [8, 3, 6]
+# Different ways of executing
+server.gears.pyexecute(record_listener)
+process_records.on(server)
+count = count_by_status.on(server)
 ```
-:warning: As with the official package, this require that the server runtime Python version matches the client runtime that defined the function. As of writing this is Only for Python 3.7.
+:warning: As with the official package, this require that the server runtime Python version matches the client runtime that defined the function. As of writing this is Only for Python 3.7. But don't worry, both "vanilla" and RedGrease flavoured Gear functions can still be excuted by file.
 
 5. [CLI tool](https://redgrease.readthedocs.io) running and or loading of Gears scripts onto a Redis Gears cluster. Particularls useful for "trigger-based" CommandReader Gears.
 It also provides a simple form of 'hot-reloading' of Redis Gears scripts, by continously monitoring directories containing Redis Gears scripts and automatically 'pyexecute' them on a Redis Gear instance if it detects modifications. 
@@ -188,7 +196,7 @@ relevant_usr_fields = {
 # # Partial Gear function
 # Extracting a dict for every 'active' user
 active_users = (
-    redgrease.KeysOnlyReader("user:*")
+    redgrease.KeysOnlyReader()
     .map(lambda key: redgrease.cmd.hmget(key, *relevant_usr_fields.keys()))
     .map(
         lambda udata: redgrease.utils.to_dict(
@@ -209,9 +217,9 @@ r = redgrease.RedisGears()
 
 # # Two ways of running:
 # With 'pyexecute' ...
-count = r.gears.pyexecute(active_user_count.run())
-# ... or with the 'on' metod 
-permissions = all_issued_permissions.run().on(r)
+count = r.gears.pyexecute(active_user_count.run("user:*"))
+# ... or using the 'on' method
+permissions = all_issued_permissions.run("user:*").on(r)
 
 # Result values are directly accessible
 print(f"Count: {count}")

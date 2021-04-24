@@ -165,7 +165,7 @@ class KeysReader(GearReader[redgrease.typing.Record]):
         return f.map(lambda record: record["key"])
 
     def records(
-        self, type=None, event=...
+        self, type=..., event=...
     ) -> redgrease.gears.PartialGearFunction[redgrease.utils.Record]:
         """Filter out and map the records to `redgrease.utils.Record` objects.
 

@@ -49,37 +49,29 @@ redgrease.typing module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-.. redgrease.client module
-.. -----------------------
+redgrease.client module
+-----------------------
 
-.. .. automodule:: redgrease.client
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: redgrease.client
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-.. redgrease.runtime_client module
-.. ------------------------
+redgrease.runtime_client module
+------------------------
 
-.. .. automodule:: redgrease.runtime_client
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: redgrease.runtime_client
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-.. redgrease.config module
-.. -----------------------
+redgrease.data module
+---------------------
 
-.. .. automodule:: redgrease.config
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
-
-.. redgrease.data module
-.. ---------------------
-
-.. .. automodule:: redgrease.data
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: redgrease.data
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 .. redgrease.formatting module
 .. ---------------------------
@@ -121,13 +113,13 @@ redgrease.gears module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-.. redgrease.reader module
-.. -----------------------
+redgrease.reader module
+-----------------------
 
-.. .. automodule:: redgrease.reader
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: redgrease.reader
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 .. redgrease.requirements module
 .. -----------------------------
@@ -137,21 +129,21 @@ redgrease.gears module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-.. redgrease.runtime module
-.. ------------------------
+redgrease.runtime module
+------------------------
 
-.. .. automodule:: redgrease.runtime
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: redgrease.runtime
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-.. redgrease.sugar module
-.. ----------------------
+redgrease.sugar module
+----------------------
 
-.. .. automodule:: redgrease.sugar
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: redgrease.sugar
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 
 

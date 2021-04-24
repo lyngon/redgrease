@@ -439,75 +439,78 @@ class Gears:
 
         Args:
             gear_function (Union[str, redgrease.gears.GearFunction], optional):
-                - A string containgg a clear-text serialized Gears Python function as
-                    per the official documentation.
-                    (https://oss.redislabs.com/redisgears/intro.html#the-simplest-example)
+                Function to execute. Either:
 
-                - A GearsBuilder or GearFunction object. Notes:
+                - A `Raw Function String`_ containing a clear-text serialized Gears Python function as per the `examples in the official documentation <https://oss.redislabs.com/redisgears/intro.html#the-simplest-example>`_.
+
+                - A `Script File Path`_.
+
+                - A `GearFunction Object`_, e.g. :class:`.GearsBuilder` or either of the :class:`.Reader` types.
+
+                .. note::
+
                     * Python version must match the Gear runtime.
-                    * If the function is not "closed" with a `run()` or `register()`
-                    operation, an `run()` operation without arguments will be assumed,
-                    and automatically added to the function to close it.
-                    * The default for `enforce_redgrease` is True.
 
-                - A file path to a gear script. This script can
+                    * If the function is not "closed" with a :meth:`run <.PartialGearFunction.run>` or :meth:`register <.PartialGearFunction.register>` operation, an ``run()`` operation without additional arguments will be assumed, and automatically added to the function to close it.
 
-                Defaults to "" (no function).
+                    * The default for ``enforce_redgrease`` is ``True``.
+
+                Defaults to ``""``, i.e. no function.
 
             unblocking (bool, optional):
-                Execute function without waiting for it to finish, before returnining.
-                Defaults to False. I.e. block until the function returns or fails.
+                Execute function without waiting for it to finish before returnining.
+
+                Defaults to ``False``. I.e. block until the function returns or fails.
 
             requirements (Iterable[Union[None, str, redgrease.requirements.Requirement]], optional):
                 List of 3rd party package requirements needed to execute the function
                 on the server.
-                Defaults to None.
+
+                Defaults to ``None``.
 
             enforce_redgrease (redgrease.requirements.PackageOption, optional):
-                Indicates if redgrease runtime package requirement should be added or not,
-                and potentially which version and/or extras or source.
-                It can take several optional types::
+                Indicates if redgrease runtime package requirement should be added or not, and potentially which version and/or extras or source.
 
-                    - None :  no enforcing. Requirements are passed through,
-                            with or without 'redgrease'.
+                It can take several optional types:
 
-                    - bool :
-                        True - enforces latest 'redgrease[runtime] ' package on PyPi,
-                        False - enforces that 'redgrease' is NOT in the requirements,
-                            any redgrease requirements will be removed from the function.
-                            Note that it will not force redgrease to be uninstalled.
+                    - ``None`` :  No enforcment. Requirements are passed through, with or without 'redgrease' runtime package.
 
-                    - str :
-                        a. Specific version. E.g. "1.2.3".
-                        b. Version qualifier. E.g. ">=1.0.0"
-                        c. Extras. E.g. "all" or "runtime".
-                            Will enforce the latest version on PyPi, with this/these extras
-                        d. Full requirement qualifier or source. E.g:
-                            "redgrease[all]>=1.2.3"
-                            "redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@main"
+                    - ``True`` : Enforces latest ``"redgrease[runtime]"`` package on PyPi,
 
-                    - Version : behaves just as string version (a.)
+                    - ``False`` : Enforces that *redgrease* is **not** in the requirements list, any *redgrease* requirements will be removed from the function's requirements. Note that it will **not** force *redgrease* to be uninstalled from the server runtime.
 
-                    - Requirement : behaves just as string version (d.)
+                    - Otherwise, the argument's string-representation is evaluated, and interpreted as either:
 
-                Defaults to False (for str function), True for GearFunction objects.
+                        a. A specific version. E.g. ``"1.2.3"``.
+
+                        b. A version qualifier. E.g. ``">=1.0.0"``.
+
+                        c. Extras. E.g. ``"all"`` or ``"runtime"``. Will enforce the latest version on PyPi, with this/these extras.
+
+                        d. Full requirement qualifier or source. E.g: ``"redgrease[all]>=1.2.3"`` or  ``"redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@main"``
+
+                Defaults to ``None`` when ``gear_function`` is a `Script File Path`_ or a `Raw Function String`_, but ``True`` when it is a `GearFunction Object`_.
 
         Returns:
             redgrease.data.ExecutionResult:
-                The value of the ExecutionResult will contain the result of the function, unless:
+
+                The returned :class:`ExecutionResult <redgrease.data.ExecutionResult>` has two properties: ``value`` and ``errors``, containing the result value and any potential errors, respectively.
+
+                The value contains the result of the function, unless:
 
                 - When used in 'unblocking' mode, the value is set to the execution ID
 
-                - If the function has no output (i.e. it is closed by `register()`
-                    or for some other reason is not closed by a `run()` action),
-                    the value is True (boolean).
+                - If the function has no output (i.e. it is closed by `register()` or for some other  reason is not closed by a `run()` action), the value is True (boolean).
 
-                Any results and errors generated by the function are accumulated in the results'
-                'errors' property, as a list.
+                Any errors generated by the function are accumulated in the ``errors`` property, as a list.
+
+                .. note::
+
+                    The :class:`ExecutionResult <redgrease.data.ExecutionResult>` object itself behaves *for the most part* like its contained ``value``, so for many simple operations, such as checking `True-ness`, result length, iterate results etc, it can be used directly. But the the safest was to get the actual result is by means of the ``value`` property.
 
         Raises:
             redis.exceptions.ResponseError:
-                If the funvction cannot be parsed.
+                If the function cannot be parsed.
         """  # noqa
         requirements = set(requirements if requirements else [])
 
