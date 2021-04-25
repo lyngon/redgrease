@@ -22,9 +22,9 @@ There are some subtleties and variations the three types that we'll go through i
     print(result.value)
     print(result.errors)
 
-    .. _exe_gear_function_file:
+    
 
-    .. _exe_gear_function_str:
+.. _exe_gear_function_str:
     
 Raw Function String
 -------------------
@@ -45,6 +45,7 @@ The most basic way of creating and executing Gear Functions is by passing a raw 
 
     You would rarely construct Gear functions this way, but it is fundamentally what happens under the hood for all the other methods of exetution, and corresponds directly to the underlying RedisGears protocol.
 
+.. _exe_gear_function_file:
 
 Script File Path
 ----------------
@@ -65,36 +66,21 @@ A more practical way of defining Gear Functions is by putting them in a separate
 These scripts may be plain vanilla RedisGears functions that only use the :ref:`built-in runtime functions <runtime>`, and does not import `redgrease` or use any of its features. 
 In this case the `redgrease` package does not need to be installed on the runtime.
 
-If the function is importing and using any RedGrease construct from the ``redgreas`` package, then when calling :meth:`redgrease.Gears.pyexecute` method, the ``enforce_redgrease`` must be set in order to ensure that the package is installed on the RedisGears runtime.
+If the function is importing and using any RedGrease construct from the ``redgrease`` package, then when calling :meth:`redgrease.Gears.pyexecute` method, the ``enforce_redgrease`` must be set in order to ensure that the package is installed on the RedisGears runtime.
 
 In most cases you would just set it to ``True`` to get the latest stable RedGrease runtime package, but you may specify a specific version or even redpository.
 
-A notable special case is when functions in the script are only importing RedGrease modules that do not require any 3rd party dependencies. 
-If this is the case then you may want to set `enforce_redgrease="redgrease"` (without the extras `"[runtime]"`), when calling :meth:`redgrease.Gears.pyexecute`, as this is a version of redgrease without any external dependencies. 
+A notable special case is when functions in the script are only importing RedGrease modules that do not require any 3rd party dependencies (see list in the :ref:`adv_extras` section). 
+If this is the case then you may want to set ``enforce_redgrease="redgrease"`` (without the extras `"[runtime]"`), when calling :meth:`redgrease.Gears.pyexecute`, as this is a version of redgrease without any external dependencies. 
+
+Another case is when you are only using explicitly imported :ref:`runtime` (e.g. ``from redgrease.runtime import GB, logs, execute``) , and nothing else, as you in this case do not need any version of RedGrease on your RedisGears server runtime. In this case you can actually set ``enforce_redgrease=False``.
+
+More details about the various runtime installation options, which modules and functions are impacted, as well as the respective 3rd party dependecies can be found in the :ref:`adv_extras` sectoin.
 
 .. Note::
 
     By default all Gear functions run in a shared runtime environment, and as a consequence all requirements / dependencies from differnt Gear functions are all installed in the same Python enviornment.
 
-
-The "clean" RedGrease modules, whithout dependencies are:
-
-- :mod:`redgrease.runtime` - Wrapped versions of the built-in runtime functions, but with docstrings and type hints.
-
-- :mod:`redgrease.reader` - GearFunction constructors for the various Reader types.
-
-- :mod:`redgrease.func` - Function decorator for creating ``CommandReader`` functions.
-
-- :mod:`redgrease.utils` - A bunch of helper functions.
-
-- :mod:`redgrease.sugar` - Some trivial sugar for magic strings and such.
-
-- :mod:`redgrease.typing` - A bunch of type helpers, typically not needed to be imported in application code.
-
-- :mod:`redgrease.gears` - The core internals of RedGrease, rarely needed to be imported in application code.
-
-- :mod:`redgreas.hysteresis` - A helper module, specifically for the RedGrease CLI. Not intended to be imported in application code.
-    
 
 .. _exe_gear_function_obj:
 
