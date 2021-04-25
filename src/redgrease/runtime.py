@@ -89,6 +89,19 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
             )
         )
 
+    @property
+    def gearfunction(self):
+        """The "open" GearFunction object at this step in the pipeline.
+
+        This GearFunction object can be extender upon, independently from the
+        GearsBuilder.
+
+        Returns:
+            redgrease.gears.PartialGearFunction:
+                The current GearFunction object.
+        """
+        return self._function
+
     def run(
         self,
         arg: str = None,  # TODO: This can also be a Python generator
@@ -474,11 +487,9 @@ def hashtag3() -> str:
     For example, if `hashtag()` generates "06S", then `hashtag3' gives "{06S}".
 
     This is useful for creating slot-specific keys using f-strings,
-    inside gear functions, as the braces are already escaped. Example:
+    inside gear functions, as the braces are already escaped. Example::
 
-    .. code-block:: python
-
-        redgrease.cmd.set(f"{hastag}",  some_value)
+        redgrease.cmd.set(f"{hashtag3()}",  some_value)
 
     Returns:
         str:

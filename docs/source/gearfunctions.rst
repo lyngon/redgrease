@@ -2,13 +2,13 @@
 
 .. _gearfun:
 
-GearFunctions
-=============
+GearFunction
+============
 
 .. _gearfun_readers:
 
-Readers
--------
+Reader
+------
 
 .. include :: wip.rst
 
