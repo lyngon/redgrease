@@ -33,7 +33,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 import sys
 
 from .func import command, trigger
-from .gears import ClosedGearFunction, GearFunction, PartialGearFunction
+from .gears import ClosedGearFunction, GearFunction, OpenGearFunction
 from .reader import (
     CommandReader,
     GearReader,
@@ -50,7 +50,7 @@ __all__ = [
     "trigger",
     "ClosedGearFunction",
     "GearFunction",
-    "PartialGearFunction",
+    "OpenGearFunction",
     "FailurePolicy",
     "KeyType",
     "LogLevel",

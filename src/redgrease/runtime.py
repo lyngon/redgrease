@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-class GearsBuilder(redgrease.gears.PartialGearFunction):
+class GearsBuilder(redgrease.gears.OpenGearFunction):
     """The RedisGears :ref:`GearsBuilder` class is imported to the runtime's
     environment by default, and this class is a RedgGrease wrapper of it.
 
@@ -47,8 +47,8 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
 
         GearsBuilder is mutable with respect to the operations.
 
-        The :class:`.GearsBuilder` is a subclass of :class:`.gears.PartialGearFunction`,
-        but unlike other PartialGearFunctions, the GearsBuilder mutates an internal
+        The :class:`.GearsBuilder` is a subclass of :class:`.gears.OpenGearFunction`,
+        but unlike other OpenGearFunctions, the GearsBuilder mutates an internal
         GearFunction instead of creating a new one for each operation.
         This behaviour is deliberate, in order to be consistent with the original
         GearsBuilder.
@@ -92,8 +92,8 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
         """
         requirements = kwargs.pop("requirements", None)
         reader_op = redgrease.gears.Reader(reader, defaultArg, desc, *args, **kwargs)
-        self._function: redgrease.gears.PartialGearFunction = (
-            redgrease.gears.PartialGearFunction(
+        self._function: redgrease.gears.OpenGearFunction = (
+            redgrease.gears.OpenGearFunction(
                 operation=reader_op,
                 requirements=requirements,
             )
@@ -107,7 +107,7 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
         GearFunctions, independently from the GearsBuilder.
 
         Returns:
-            redgrease.gears.PartialGearFunction:
+            redgrease.gears.OpenGearFunction:
                 The current GearFunction object.
         """
         return self._function
@@ -865,8 +865,8 @@ class GearsBuilder(redgrease.gears.PartialGearFunction):
                 Additional parameters to the map operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with an avg operation as last step.
+            OpenGearFunction:
+                A new "open" gear function with an avg operation as last step.
                 GearsBuilder - The same GearBuilder, but with updated function.
 
                 Note that for GearBuilder this method does **not** return a new

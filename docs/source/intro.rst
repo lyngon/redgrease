@@ -132,7 +132,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     Inspired by the "remote builders" of the official `redisgears-py <https://github.com/RedisGears/redisgears-py>`_ client, but with some differences, eg:
 
-    * Supports reuse of 'partial' Gear functions.
+    * Supports reuse of 'open' (incomplete) Gear functions.
 
     * Can be created without a Redis connection.
 

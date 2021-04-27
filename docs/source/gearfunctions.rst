@@ -48,17 +48,17 @@ The output of the final operation is then either, returned to the caller if it w
 
 .. _gearfun_open:
 
-PartialGearFunction 
+OpenGearFunction 
 ~~~~~~~~~~~~~~~~~~~
 
-You would never instatiate a :class:`.gears.PartialGearFunction` yourself, but all "open" :ref:`GearFuctions <gearfun>` that has not yet been "closed" with the :ref:`op_action_run` or :ref:`op_action_register` :ref:`op_action`, inherits from this class. 
+You would never instatiate a :class:`.gears.OpenGearFunction` yourself, but all "open" :ref:`GearFuctions <gearfun>` that has not yet been "closed" with the :ref:`op_action_run` or :ref:`op_action_register` :ref:`op_action`, inherits from this class. 
 
 It is this class that under the hood is responsible for "attaching" :ref:`opertations` and :ref:`Actions <op_action>` and creating new GearFuctions.
 
 This includes both the :class:`.runtime.GearsBuilder` as well as the :ref:`gearfun_readers`:
 
 
-.. autoclass:: redgrease.gears.PartialGearFunction()
+.. autoclass:: redgrease.gears.OpenGearFunction()
     :members:
     :member-order: bysource
 

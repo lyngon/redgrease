@@ -89,8 +89,8 @@ class Operation:
         ``NotImplementedException`` if called directly on the `Operation` superclass.
 
         Args:
-            function (Union[Type, PartialGearFunction]):
-                The partial gear function to append this operation to.
+            function (Union[Type, OpenGearFunction]):
+                The "open" gear function to append this operation to.
 
                 If, and only if, the operation is a reader function (always and only
                 the first operation in any Gear function), then the `function`
@@ -113,19 +113,19 @@ class Nop(Operation):
     This Operation does nothing.
     """
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
         """Returns the function, unmodified.
 
         Args:
-            function (Union[Type, PartialGearFunction]):
-                The partial gear function to append this operation to.
+            function (Union[Type, OpenGearFunction]):
+                The "open" gear function to append this operation to.
 
                 If, and only if, the operation is a reader function (always and only
                 the first operation in any Gear function), then the `function`
                 argument must instead be a GearsBuilder class/type.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function unmodified.
         """
         return function
@@ -184,7 +184,7 @@ class Reader(Operation):
         self.defaultArg = defaultArg
         self.desc = desc
 
-    def add_to(self, builder: Type) -> "PartialGearFunction":
+    def add_to(self, builder: Type) -> "OpenGearFunction":
         """Create a new gear function based on this reader information.
 
         Args:
@@ -193,8 +193,8 @@ class Reader(Operation):
                 Gear function.
 
         Returns:
-            PartialGearFunction:
-                Returns a minimal partial gear function, consisting only of the
+            OpenGearFunction:
+                Returns a minimal "open" gear function, consisting only of the
                 reader.
         """
         return builder(self.reader, self.defaultArg, self.desc, **self.kwargs)
@@ -261,12 +261,12 @@ class Run(Operation):
         self.convertToStr = convertToStr
         self.collect = collect
 
-    def add_to(self, function: "PartialGearFunction") -> "ClosedGearFunction":
+    def add_to(self, function: "OpenGearFunction") -> "ClosedGearFunction":
         """Closes a Gear function with the Run action.
 
         Args:
-            function (PartialGearFunction):
-                The partial Gear function to close with the run action.
+            function (OpenGearFunction):
+                The "open" Gear function to close with the run action.
 
         Returns:
             ClosedGearFunction:
@@ -363,12 +363,12 @@ class Register(Operation):
         self.mode = mode
         self.onRegistered = onRegistered
 
-    def add_to(self, function: "PartialGearFunction") -> "ClosedGearFunction":
+    def add_to(self, function: "OpenGearFunction") -> "ClosedGearFunction":
         """Closes a Gear function with the Register action.
 
         Args:
-            function (PartialGearFunction):
-                The partial Gear function to close with the register action.
+            function (OpenGearFunction):
+                The "open" Gear function to close with the register action.
 
         Returns:
             ClosedGearFunction:
@@ -409,15 +409,15 @@ class Map(Operation):
         super().__init__(**kwargs)
         self.op = op
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.map(self.op, **self.kwargs)
@@ -450,15 +450,15 @@ class FlatMap(Operation):
         super().__init__(**kwargs)
         self.op = op
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.flatmap(self.op, **self.kwargs)
@@ -490,15 +490,15 @@ class ForEach(Operation):
         super().__init__(**kwargs)
         self.op = op
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.foreach(self.op, **self.kwargs)
@@ -532,15 +532,15 @@ class Filter(Operation):
         super().__init__(**kwargs)
         self.op = op
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.filter(self.op, **self.kwargs)
@@ -575,15 +575,15 @@ class Accumulate(Operation):
         super().__init__(**kwargs)
         self.op = op
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.accumulate(self.op, **self.kwargs)
@@ -628,15 +628,15 @@ class LocalGroupBy(Operation):
         self.extractor = extractor
         self.reducer = reducer
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.localgroupby(self.extractor, self.reducer, **self.kwargs)
@@ -671,15 +671,15 @@ class Limit(Operation):
         self.length = length
         self.start = start
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.limit(self.length, self.start, **self.kwargs)
@@ -694,15 +694,15 @@ class Collect(Operation):
         """Instantiate a Collect operation."""
         super().__init__(**kwargs)
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.collect(**self.kwargs)
@@ -738,15 +738,15 @@ class Repartition(Operation):
         super().__init__(**kwargs)
         self.extractor = extractor
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.repartition(self.extractor, **self.kwargs)
@@ -821,15 +821,15 @@ class Aggregate(Operation):
         self.seqOp = seqOp
         self.combOp = combOp
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.aggregate(self.zero, self.seqOp, self.combOp, **self.kwargs)
@@ -914,15 +914,15 @@ class AggregateBy(Operation):
         self.seqOp = seqOp
         self.combOp = combOp
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.aggregateby(
@@ -978,15 +978,15 @@ class GroupBy(Operation):
         self.extractor = extractor
         self.reducer = reducer
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.groupby(self.extractor, self.reducer, **self.kwargs)
@@ -1050,15 +1050,15 @@ class BatchGroupBy(Operation):
         self.extractor = extractor
         self.reducer = reducer
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.batchgroupby(self.extractor, self.reducer, **self.kwargs)
@@ -1097,15 +1097,15 @@ class Sort(Operation):
         super().__init__(**kwargs)
         self.reverse = reverse
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.sort(self.reverse, **self.kwargs)
@@ -1127,15 +1127,15 @@ class Distinct(Operation):
         """Instantiate a Distinct operation."""
         super().__init__(**kwargs)
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.distinct(**self.kwargs)
@@ -1154,15 +1154,15 @@ class Count(Operation):
         """Instantiate a Cound operation."""
         super().__init__(**kwargs)
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.count(**self.kwargs)
@@ -1194,15 +1194,15 @@ class CountBy(Operation):
         super().__init__(**kwargs)
         self.extractor = extractor
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.countby(self.extractor, **self.kwargs)
@@ -1237,15 +1237,15 @@ class Avg(Operation):
         super().__init__(**kwargs)
         self.extractor = extractor
 
-    def add_to(self, function: "PartialGearFunction") -> "PartialGearFunction":
-        """Adds the operation to a partial Gear function.
+    def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
+        """Adds the operation to an "open" Gear function.
 
         Args:
-            function (PartialGearFunction):
-                The partial gear function to add the operation to.
+            function (OpenGearFunction):
+                The "open" gear function to add the operation to.
 
         Returns:
-            PartialGearFunction:
+            OpenGearFunction:
                 The function with the operation added to the end.
         """
         return function.avg(self.extractor, **self.kwargs)
@@ -1257,7 +1257,7 @@ class Avg(Operation):
 
 
 class GearFunction(Generic[T]):
-    """Abstract base class for both partial and closed Gear functions.
+    """Abstract base class for both "open" and closed Gear functions.
     The base `GearFunction` class is not intended to be instantiated by API users.
 
     A GearFunction is a chain of consecutive Operations.
@@ -1266,7 +1266,7 @@ class GearFunction(Generic[T]):
         operation (Operation):
             The last opertation in the functions chain of operations.
 
-        input_function (PartialGearFunction):
+        input_function (OpenGearFunction):
             The function (chain of operations) that provides the input records to the
             `operation`. Two different GearFunctions can share the same `input_function`
 
@@ -1278,7 +1278,7 @@ class GearFunction(Generic[T]):
     def __init__(
         self,
         operation: Operation,
-        input_function: "PartialGearFunction" = None,
+        input_function: "OpenGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
         """Instaniate a GearFunction
@@ -1287,7 +1287,7 @@ class GearFunction(Generic[T]):
             operation (Operation):
                 The last opertation in the functions chain of operations.
 
-            input_function (PartialGearFunction, optional):
+            input_function (OpenGearFunction, optional):
                 The function (chain of operations) that provides the input records to
                 the `operation`.
                 Defaults to ``None``.
@@ -1366,7 +1366,7 @@ class ClosedGearFunction(GearFunction[T]):
     def __init__(
         self,
         operation: Operation,
-        input_function: "PartialGearFunction" = None,
+        input_function: "OpenGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
         """"""
@@ -1441,11 +1441,11 @@ class ClosedGearFunction(GearFunction[T]):
             )
 
 
-class PartialGearFunction(GearFunction[optype.InputRecord]):
+class OpenGearFunction(GearFunction[optype.InputRecord]):
     """An open Gear function is a Gear function that is not yet "closed" with a
     :ref:`op_action_run` action or a :ref:`op_action_register` action.
 
-    Open Gear functions can be used to create new partial gear functions by
+    Open Gear functions can be used to create new "open" gear functions by
     applying :ref:`operations`, or it can create a closed Gear function by applying
     either the :ref:`op_action_run` action or a :ref:`op_action_register` action.
     """
@@ -1453,7 +1453,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
     def __init__(
         self,
         operation: Operation,
-        input_function: "PartialGearFunction" = None,
+        input_function: "OpenGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
         """"""
@@ -1772,7 +1772,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[optype.OutputRecord]":
+    ) -> "OpenGearFunction[optype.OutputRecord]":
         """Instance-local :ref:`op_map` operation that performs a one-to-one (1:1) mapping of
         records.
 
@@ -1790,11 +1790,11 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_map` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_map` operation as last step.
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_map` operation as last step.
         """
         op = redgrease.utils.passfun(op)
-        return PartialGearFunction(
+        return OpenGearFunction(
             Map(op=op, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -1807,7 +1807,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[Iterable[optype.OutputRecord]]":
+    ) -> "OpenGearFunction[Iterable[optype.OutputRecord]]":
         """Instance-local :ref:`op_flatmap` operation that performs one-to-many (1:N) mapping
         of records.
 
@@ -1827,12 +1827,12 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_flatmap` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_flatmap` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_flatmap` operation as last
                 step.
         """
         op = redgrease.utils.passfun(op)
-        return PartialGearFunction(
+        return OpenGearFunction(
             FlatMap(op=op, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -1845,7 +1845,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[optype.InputRecord]":
         """Instance-local :ref:`op_foreach` operation performs one-to-the-same (1=1) mapping.
 
         Args:
@@ -1862,12 +1862,12 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_foreach` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_foreach` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_foreach` operation as last
                 step.
         """
         op = redgrease.utils.passfun(op)
-        return PartialGearFunction(
+        return OpenGearFunction(
             ForEach(op=op, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -1880,7 +1880,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[optype.InputRecord]":
         """Instance-local :ref:`op_filter` operation performs one-to-zero-or-one (1:bool)
         filtering of records.
 
@@ -1901,12 +1901,12 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_filter` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_filter` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_filter` operation as last
                 step.
         """
         op = redgrease.utils.passfun(op)
-        return PartialGearFunction(
+        return OpenGearFunction(
             Filter(op=op, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -1919,7 +1919,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[T]":
+    ) -> "OpenGearFunction[T]":
         """Instance-local :ref:`op_accumulate` operation performs many-to-one mapping (N:1) of
         records.
 
@@ -1943,13 +1943,13 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_accumulate` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with :ref:`op_accumulate` operation as last
+            OpenGearFunction:
+                A new "open" gear function with :ref:`op_accumulate` operation as last
                 step.
         """
 
         op = redgrease.utils.passfun(op, default=_default_accumulator)
-        return PartialGearFunction(
+        return OpenGearFunction(
             Accumulate(op=op, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -1963,7 +1963,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[Dict[optype.Key, T]]":
+    ) -> "OpenGearFunction[Dict[optype.Key, T]]":
         """Instance-local :ref:`op_localgroupby` operation performs many-to-less mapping (N:M)
         of records.
 
@@ -1993,13 +1993,13 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_localgroupby` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_localgroupby` operation as
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_localgroupby` operation as
                 last step.
         """
         extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
         reducer = redgrease.utils.passfun(reducer, default=_default_reducer)
-        return PartialGearFunction(
+        return OpenGearFunction(
             LocalGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -2011,7 +2011,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         start: int = 0,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[optype.InputRecord]":
         """Instance-local :ref:`op_limit` operation limits the number of records.
 
         Args:
@@ -2030,16 +2030,16 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_limit`  operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_limit`  operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_limit`  operation as last
                 step.
         """
-        return PartialGearFunction(
+        return OpenGearFunction(
             Limit(length=length, start=start, **kwargs),
             input_function=self,
         )
 
-    def collect(self, **kwargs) -> "PartialGearFunction[optype.InputRecord]":
+    def collect(self, **kwargs) -> "OpenGearFunction[optype.InputRecord]":
         """Cluster-global :ref:`op_collect` operation collects the result records.
 
         Args:
@@ -2047,11 +2047,11 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_collect` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_collect` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_collect` operation as last
                 step.
         """
-        return PartialGearFunction(
+        return OpenGearFunction(
             Collect(**kwargs),
             input_function=self,
         )
@@ -2063,7 +2063,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[optype.InputRecord]":
         """Cluster-global :ref:`op_repartition` operation repartitions the records by
         shuffling
         them between shards.
@@ -2086,11 +2086,11 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_repartition` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_repartition` operation as
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_repartition` operation as
                 last step.
         """
-        return PartialGearFunction(
+        return OpenGearFunction(
             Repartition(extractor=extractor, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -2105,7 +2105,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[T]":
+    ) -> "OpenGearFunction[T]":
         """Distributed :ref:`op_aggregate` operation perform an aggregation on local
         data then a global aggregation on the local aggregations.
 
@@ -2145,8 +2145,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the ref:`op_aggregate` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a ref:`op_aggregate` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a ref:`op_aggregate` operation as last
                 step.
         """
 
@@ -2166,7 +2166,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         seqOp = redgrease.utils.passfun(seqOp)
         combOp = redgrease.utils.passfun(combOp, default=seqOp)
 
-        return PartialGearFunction(
+        return OpenGearFunction(
             Aggregate(zero=_zero, seqOp=seqOp, combOp=combOp, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -2182,7 +2182,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[Dict[optype.Key, T]]":
+    ) -> "OpenGearFunction[Dict[optype.Key, T]]":
         """Distributed :ref:`op_aggregateby` operation, behaves like aggregate, but
         separated on each key, extracted using the extractor.
 
@@ -2228,8 +2228,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_aggregateby` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_aggregateby` operation as
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_aggregateby` operation as
                 last step.
         """
 
@@ -2239,7 +2239,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         seqOp = redgrease.utils.passfun(seqOp, _default_reducer)
         combOp = redgrease.utils.passfun(combOp, seqOp)
 
-        return PartialGearFunction(
+        return OpenGearFunction(
             AggregateBy(
                 extractor=extractor, zero=_zero, seqOp=seqOp, combOp=combOp, **kwargs
             ),
@@ -2255,7 +2255,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[Dict[optype.Key, T]]":
+    ) -> "OpenGearFunction[Dict[optype.Key, T]]":
         """Cluster-local :ref:`op_groupby` operation performing a many-to-less (N:M)
         grouping of records.
 
@@ -2284,14 +2284,14 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_groupby` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_groupby` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_groupby` operation as last
                 step.
         """
         extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
         reducer = redgrease.utils.passfun(reducer, default=_default_reducer)
 
-        return PartialGearFunction(
+        return OpenGearFunction(
             GroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -2305,7 +2305,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[Dict[optype.Key, T]]":
+    ) -> "OpenGearFunction[Dict[optype.Key, T]]":
         """Cluster-local :ref:`op_groupby` operation, performing a many-to-less (N:M)
         grouping of records.
 
@@ -2333,13 +2333,13 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_groupby` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_groupby` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_groupby` operation as last
                 step.
         """
         extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
         reducer = redgrease.utils.passfun(reducer, default=_default_batch_reducer)
-        return PartialGearFunction(
+        return OpenGearFunction(
             BatchGroupBy(extractor=extractor, reducer=reducer, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -2352,7 +2352,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[optype.InputRecord]":
         """:ref:`op_sort` the records
 
         Args:
@@ -2368,17 +2368,17 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_sort` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_sort` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_sort` operation as last
                 step.
         """
-        return PartialGearFunction(
+        return OpenGearFunction(
             Sort(reverse=reverse, **kwargs),
             input_function=self,
             requirements=requirements,
         )
 
-    def distinct(self, **kwargs) -> "PartialGearFunction[optype.InputRecord]":
+    def distinct(self, **kwargs) -> "OpenGearFunction[optype.InputRecord]":
         """Keep only the :ref:`op_distinct` values in the data.
 
         Args:
@@ -2386,16 +2386,16 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_distinct` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_distinct` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_distinct` operation as last
                 step.
         """
-        return PartialGearFunction(
+        return OpenGearFunction(
             Distinct(**kwargs),
             input_function=self,
         )
 
-    def count(self, **kwargs) -> "PartialGearFunction[int]":
+    def count(self, **kwargs) -> "OpenGearFunction[int]":
         """:ref:`op_count` the number of records in the execution.
 
         Args:
@@ -2403,11 +2403,11 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_count` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_count` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_count` operation as last
                 step.
         """
-        return PartialGearFunction(
+        return OpenGearFunction(
             Count(**kwargs),
             input_function=self,
         )
@@ -2419,7 +2419,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[Dict[Hashable, int]]":
+    ) -> "OpenGearFunction[Dict[Hashable, int]]":
         """Distributed :ref:`op_countby` operation countinig the records grouped by key.
 
         Args:
@@ -2438,12 +2438,12 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_countby` operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with a :ref:`op_countby` operation as last
+            OpenGearFunction:
+                A new "open" gear function with a :ref:`op_countby` operation as last
                 step.
         """
 
-        return PartialGearFunction(
+        return OpenGearFunction(
             CountBy(extractor=extractor, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -2458,7 +2458,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "PartialGearFunction[float]":
+    ) -> "OpenGearFunction[float]":
         """Distributed :ref:`op_avg` operation, calculating arithmetic average
         of the records.
 
@@ -2478,15 +2478,12 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Additional parameters to the :ref:`op_avg`  operation.
 
         Returns:
-            PartialGearFunction:
-                A new partial gear function with an :ref:`op_avg`  operation as last
+            OpenGearFunction:
+                A new "open" gear function with an :ref:`op_avg`  operation as last
                 step.
         """
-        return PartialGearFunction(
+        return OpenGearFunction(
             Avg(extractor=extractor, **kwargs),
             input_function=self,
             requirements=requirements,
         )
-
-
-OpenGearFunction = PartialGearFunction
