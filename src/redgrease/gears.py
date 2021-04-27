@@ -177,7 +177,7 @@ class Reader(Operation):
 
             desc (Optional[str], optional):
                 Function description.
-                Defaults to None.
+                Defaults to ``None``.
         """
         super().__init__(**kwargs)
         self.reader = reader
@@ -245,7 +245,7 @@ class Run(Operation):
                     - A key name for the StreamReader reader.
                     - A Python generator for the PythonReader reader.
 
-                Defaults to None.
+                Defaults to ``None``.
 
             convertToStr (bool, optional):
                 When `True`, adds a map operation to the flow's end that stringifies
@@ -353,7 +353,7 @@ class Register(Operation):
                 registration.
                 It is a good place to initialize non-serializable objects such as
                 network connections.
-                Defaults to None.
+                Defaults to ``None``.
 
         """
         super().__init__(**kwargs)
@@ -1290,12 +1290,12 @@ class GearFunction(Generic[T]):
             input_function (PartialGearFunction, optional):
                 The function (chain of operations) that provides the input records to
                 the `operation`.
-                Defaults to None.
+                Defaults to ``None``.
 
             requirements (Optional[Iterable[str]], optional):
                 A set of requirements / dependencies (Python packages) that the
                 operation requires in order to execute.
-                Defaults to None.
+                Defaults to ``None``.
         """
 
         self.operation = operation
@@ -1356,12 +1356,23 @@ class GearFunction(Generic[T]):
 
 
 class ClosedGearFunction(GearFunction[T]):
-    """Closed Gear functions are GearsFunctions that have been 'closed' with a `run`
-    action or a `register` action.
+    """Closed Gear functions are GearsFunctions that have been "closed" with a
+    :ref:`op_action_run` action or a :ref:`op_action_register` action.
 
-    Closed Gear functions cannot add more Operations, but can be executed in a
+    Closed Gear functions cannot add more :ref:`operations`, but can be executed in a
     Redis Gears cluster.
     """
+
+    def __init__(
+        self,
+        operation: Operation,
+        input_function: "PartialGearFunction",
+        requirements: Optional[Iterable[str]] = None,
+    ) -> None:
+        """"""
+        super().__init__(
+            operation, input_function=input_function, requirements=requirements
+        )
 
     def on(
         self,
@@ -1384,7 +1395,7 @@ class ClosedGearFunction(GearFunction[T]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
         Returns:
             redgrease.data.ExecutionResult:
@@ -1431,13 +1442,24 @@ class ClosedGearFunction(GearFunction[T]):
 
 
 class PartialGearFunction(GearFunction[optype.InputRecord]):
-    """A partial Gear function is a Gear function that is not yet 'closed' with a `run`
-    action or a `register` action.
+    """An open Gear function is a Gear function that is not yet "closed" with a
+    :ref:`op_action_run` action or a :ref:`op_action_register` action.
 
-    Partial Gear functions can be used to create new partial gear functions by
-    applying operations, or it can create a closed Gear function by applying either
-    the `run` or `register` action.
+    Open Gear functions can be used to create new partial gear functions by
+    applying :ref:`operations`, or it can create a closed Gear function by applying
+    either the :ref:`op_action_run` action or a :ref:`op_action_register` action.
     """
+
+    def __init__(
+        self,
+        operation: Operation,
+        input_function: "PartialGearFunction",
+        requirements: Optional[Iterable[str]] = None,
+    ) -> None:
+        """"""
+        super().__init__(
+            operation, input_function=input_function, requirements=requirements
+        )
 
     def run(
         self,
@@ -1452,32 +1474,36 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         **kwargs,
         # TODO: Add all the Reader specific args here
     ) -> ClosedGearFunction["optype.InputRecord"]:
-        """Create a closed batch function..
+        """Create a "closed" function to be :ref:`op_action_run` as in "batch-mode".
 
         Batch functions are executed once and exits once the data is
         exhausted by its reader.
+
         Args:
             arg (str, optional):
                 An optional argument that's passed to the reader as its defaultArg.
-                It means the following::
-                    - A glob-like pattern for the KeysReader and KeysOnlyReader readers.
-                    - A key name for the StreamReader reader.
-                    - A Python generator for the PythonReader reader.
+                It means the following:
 
-                Defaults to None.
+                - A glob-like pattern for the KeysReader and KeysOnlyReader readers.
+
+                - A key name for the StreamReader reader.
+
+                - A Python generator for the PythonReader reader.
+
+                Defaults to ``None``.
 
             convertToStr (bool, optional):
-                When `True` adds a map operation to the flow's end that stringifies
+                When ``True``, adds a map operation to the flow's end that stringifies
                 records.
-                Defaults to False.
+                Defaults to ``False``.
 
             collect (bool, optional):
-                When `True` adds a collect operation to flow's end.
-                Defaults to False.
+                When ``True`` adds a collect operation to flow's end.
+                Defaults to ``False``.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             on (redis.Redis):
                 Immedeately execute the function on this Redis Gear server / cluster.
@@ -1535,7 +1561,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         **kwargs,
         # TODO: Add all the Reader specific args here
     ) -> ClosedGearFunction["optype.InputRecord"]:
-        """Create a closed event function.
+        """Create a "closed" function to be :ref:`op_action_register` 'ed as an
+        event-triggered function.
 
         Event functions are executed each time an event arrives.
         Each time it is executed, the function operates on the event's
@@ -1545,61 +1572,74 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
             prefix (str, optional):
                 Key prefix pattern to match on.
                 Not relevant for 'CommandReader' readers (see 'trigger').
-                Defaults to '*'.
+                Defaults to ``"*"``.
 
             convertToStr (bool, optional):
-                When `True` adds a map  operation to the flow's end that stringifies
+                When ``True`` adds a map  operation to the flow's end that stringifies
                 records.
-                Defaults to True.
+                Defaults to ``True``.
 
             collect (bool, optional):
                 When True adds a collect operation to flow's end.
-                Defaults to False.
+                Defaults to ``False``.
 
             mode (str, optional):
                 The execution mode of the function.
-                Can be one of::
+                Can be one of:
 
-                    - 'async': Execution will be asynchronous across the entire
-                        cluster.
-                    - 'async_local': Execution will be asynchronous and restricted
-                        to the handling shard.
-                    - 'sync': Execution will be synchronous and local.
-                Defaults to 'async'.
+                - ``"async"``:
+
+                    Execution will be asynchronous across the entire cluster.
+
+                - ``"async_local"``:
+
+                    Execution will be asynchronous and restricted to the handling shard.
+
+                - ``"sync"``:
+
+                    Execution will be synchronous and local.
+
+                Defaults to ``"async"``.
 
             onRegistered (Callback, optional):
                 A function that's called on each shard upon function registration.
                 It is a good place to initialize non-serializable objects such as
                 network connections.
-                Defaults to None.
+                Defaults to ``None``.
 
             eventTypes (Iterable[str], optional):
                 For KeysReader only.
                 A whitelist of event types that trigger execution when the KeysReader
-                are used. The list may contain one or more::
+                are used. The list may contain one or more:
 
                     - Any Redis or module command
+
                     - Any Redis event
 
-                Defaults to None.
+                Defaults to ``None``.
 
             keyTypes (Iterable[str], optional):
                 For KeysReader and KeysOnlyReader only.
                 A whitelist of key types that trigger execution when using the
                 KeysReader or KeysOnlyReader readers.
-                The list may contain one or more from the following::
+                The list may contain one or more from the following:
 
-                    - Redis core types: 'string', 'hash', 'list', 'set', 'zset'
-                        or 'stream'
-                    - Redis module types: 'module'
+                - Redis core types:
 
-                Defaults to None.
+                    ``"string"``, ``"hash"``, ``"list"``, ``"set"``, ``"zset"`` or
+                    ``"stream"``
+
+                - Redis module types:
+
+                    ``"module"``
+
+                Defaults to ``None``.
 
             readValue (bool, optional):
                 For KeysReader only.
-                When `False` the value will not be read, so the 'type' and 'value'
-                of the record will be set to None.
-                Defaults to True.
+                When ``False`` the value will not be read, so the 'type' and 'value'
+                of the record will be set to ``None``.
+                Defaults to ``True``.
 
             batch (int, optional):
                 For StreamReader only.
@@ -1615,15 +1655,23 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
             onFailedPolcy (str, optional):
                 For StreamReader only.
                 The policy for handling execution failures.
-                May be one of::
+                May be one of:
 
-                    - 'continue': Ignores a failure and continues to the next execution.
-                        This is the default policy.
-                    - 'abort': Stops further executions.
-                    - 'retry': Retries the execution after an interval specified with
-                        onFailedRetryInterval (default is one second).
+                - ``"continue"``:
 
-                Defaults to 'continue'.
+                    Ignores a failure and continues to the next execution.
+                    This is the default policy.
+
+                - ``"abort"``:
+
+                    Stops further executions.
+
+                - ``"retry"``:
+
+                    Retries the execution after an interval specified with
+                    onFailedRetryInterval (default is one second).
+
+                Defaults to ``"continue"``.
 
             onFailedRetryInterval (int, optional):
                 For StreamReader only.
@@ -1633,8 +1681,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             trimStream (bool, optional):
                 For StreamReader only.
-                When True the stream will be trimmed after execution
-                Defaults to True.
+                When ``True`` the stream will be trimmed after execution
+                Defaults to ``True``.
 
             trigger (str):
                 For 'CommandReader' only, and mandatory.
@@ -1642,7 +1690,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             on (redis.Redis):
                 Immedeately execute the function on this Redis Gear server / cluster.
@@ -1725,7 +1773,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[optype.OutputRecord]":
-        """Instance-local Map operation that performs a one-to-one (1:1) mapping of
+        """Instance-local :ref:`op_map` operation that performs a one-to-one (1:1) mapping of
         records.
 
         Args:
@@ -1736,18 +1784,14 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the Map operation.
+                Additional parameters to the :ref:`op_map` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a Map operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_map` operation as last step.
         """
         op = redgrease.utils.passfun(op)
         return PartialGearFunction(
@@ -1764,7 +1808,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Iterable[optype.OutputRecord]]":
-        """Instance-local FlatMap operation that performs one-to-many (1:N) mapping
+        """Instance-local :ref:`op_flatmap` operation that performs one-to-many (1:N) mapping
         of records.
 
         Args:
@@ -1777,18 +1821,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the FlatMap operation.
+                Additional parameters to the :ref:`op_flatmap` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a FlatMap operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_flatmap` operation as last
+                step.
         """
         op = redgrease.utils.passfun(op)
         return PartialGearFunction(
@@ -1805,7 +1846,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
-        """Instance-local ForEach operation performs one-to-the-same (1=1) mapping.
+        """Instance-local :ref:`op_foreach` operation performs one-to-the-same (1=1) mapping.
 
         Args:
             op (redgrease.typing.Processor):
@@ -1815,18 +1856,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the ForEach operation.
+                Additional parameters to the :ref:`op_foreach` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a ForEach operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_foreach` operation as last
+                step.
         """
         op = redgrease.utils.passfun(op)
         return PartialGearFunction(
@@ -1843,32 +1881,29 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
-        """Instance-local Filter operation performs one-to-zero-or-one (1:bool)
+        """Instance-local :ref:`op_filter` operation performs one-to-zero-or-one (1:bool)
         filtering of records.
 
         Args:
             op (redgrease.typing.Filterer, optional):
                 Function to apply on the input records, to decide which ones to keep.
                 The function must take one argument as input (input record) and
-                return a bool. The input records evaluated to `True` will be kept as
+                return a bool. The input records evaluated to ``True`` will be kept as
                 output records.
                 Defaults to the 'identity-function', i.e. records are filtered based on
                 their own truiness or falsiness.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the Filter operation.
+                Additional parameters to the :ref:`op_filter` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a FIlter operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_filter` operation as last
+                step.
         """
         op = redgrease.utils.passfun(op)
         return PartialGearFunction(
@@ -1885,7 +1920,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[T]":
-        """Instance-local Accumulate operation performs many-to-one mapping (N:1) of
+        """Instance-local :ref:`op_accumulate` operation performs many-to-one mapping (N:1) of
         records.
 
         Args:
@@ -1902,18 +1937,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the Accumulate operation.
+                Additional parameters to the :ref:`op_accumulate` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with Accumulate operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with :ref:`op_accumulate` operation as last
+                step.
         """
 
         op = redgrease.utils.passfun(op, default=_default_accumulator)
@@ -1932,7 +1964,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[optype.Key, T]]":
-        """Instance-local LocalGroupBy operation performs many-to-less mapping (N:M)
+        """Instance-local :ref:`op_localgroupby` operation performs many-to-less mapping (N:M)
         of records.
 
         Args:
@@ -1955,18 +1987,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the LocalGroupBy operation.
+                Additional parameters to the :ref:`op_localgroupby` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a LocalGroupBy operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_localgroupby` operation as
+                last step.
         """
         extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
         reducer = redgrease.utils.passfun(reducer, default=_default_reducer)
@@ -1983,7 +2012,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
-        """Instance-local Limit operation limits the number of records.
+        """Instance-local :ref:`op_limit` operation limits the number of records.
 
         Args:
             length (int):
@@ -1995,18 +2024,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the Limit operation.
+                Additional parameters to the :ref:`op_limit`  operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a Limit operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_limit`  operation as last
+                step.
         """
         return PartialGearFunction(
             Limit(length=length, start=start, **kwargs),
@@ -2014,19 +2040,16 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         )
 
     def collect(self, **kwargs) -> "PartialGearFunction[optype.InputRecord]":
-        """Cluster-global Collect operation collects the result records.
+        """Cluster-global :ref:`op_collect` operation collects the result records.
 
         Args:
             **kwargs:
-                Additional parameters to the Collect operation.
+                Additional parameters to the :ref:`op_collect` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a Collect operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_collect` operation as last
+                step.
         """
         return PartialGearFunction(
             Collect(**kwargs),
@@ -2041,7 +2064,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
-        """Cluster-global Repartition operation repartitions the records by shuffling
+        """Cluster-global :ref:`op_repartition` operation repartitions the records by
+        shuffling
         them between shards.
 
         Args:
@@ -2056,18 +2080,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the Repartition operation.
+                Additional parameters to the :ref:`op_repartition` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a Repartition operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_repartition` operation as
+                last step.
         """
         return PartialGearFunction(
             Repartition(extractor=extractor, **kwargs),
@@ -2085,7 +2106,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[T]":
-        """Perform aggregation on all the execution data.
+        """Distributed :ref:`op_aggregate` operation perform an aggregation on local
+        data then a global aggregation on the local aggregations.
 
         Args:
             zero (Any, optional):
@@ -2117,18 +2139,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the Aggregate operation.
+                Additional parameters to the ref:`op_aggregate` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a Aggregate operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a ref:`op_aggregate` operation as last
+                step.
         """
 
         _zero = zero if zero is not None else []
@@ -2164,7 +2183,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[optype.Key, T]]":
-        """Like aggregate, but on each key, the key is extracted using the extractor.
+        """Distributed :ref:`op_aggregateby` operation, behaves like aggregate, but
+        separated on each key, extracted using the extractor.
 
         Args:
             extractor (redgrease.typing.Extractor, optional):
@@ -2202,18 +2222,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the AggregateBy operation.
+                Additional parameters to the :ref:`op_aggregateby` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a AggregateBy operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_aggregateby` operation as
+                last step.
         """
 
         _zero = zero if zero is not None else []
@@ -2239,7 +2256,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[optype.Key, T]]":
-        """Perform a many-to-less (N:M) grouping of records.
+        """Cluster-local :ref:`op_groupby` operation performing a many-to-less (N:M)
+        grouping of records.
 
         Args:
             extractor (redgrease.typing.Extractor, optional):
@@ -2260,18 +2278,15 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the GroupBy operation.
+                Additional parameters to the :ref:`op_groupby` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a GroupBy operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_groupby` operation as last
+                step.
         """
         extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
         reducer = redgrease.utils.passfun(reducer, default=_default_reducer)
@@ -2291,7 +2306,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[optype.Key, T]]":
-        """Many-to-less (N:M) grouping of records.
+        """Cluster-local :ref:`op_groupby` operation, performing a many-to-less (N:M)
+        grouping of records.
 
             Note: Using this operation may cause a substantial increase in memory usage
                 during runtime. Consider using the GroupBy
@@ -2314,15 +2330,12 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 Default is the length (`len`) of the input.
 
             **kwargs:
-                Additional parameters to the BatchGroupBy operation.
+                Additional parameters to the :ref:`op_groupby` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a BatchGroupBy operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_groupby` operation as last
+                step.
         """
         extractor = redgrease.utils.passfun(extractor, default=_default_extractor)
         reducer = redgrease.utils.passfun(reducer, default=_default_batch_reducer)
@@ -2340,27 +2353,24 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[optype.InputRecord]":
-        """Sort the records
+        """:ref:`op_sort` the records
 
         Args:
             reverse (bool, optional):
                 Sort in descending order (higer to lower).
-                Defaults to True.
+                Defaults to ``True``.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the Sort operation.
+                Additional parameters to the :ref:`op_sort` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a Sort operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_sort` operation as last
+                step.
         """
         return PartialGearFunction(
             Sort(reverse=reverse, **kwargs),
@@ -2369,19 +2379,16 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         )
 
     def distinct(self, **kwargs) -> "PartialGearFunction[optype.InputRecord]":
-        """Keep only the distinct values in the data.
+        """Keep only the :ref:`op_distinct` values in the data.
 
         Args:
             **kwargs:
-                Additional parameters to the Distinct operation.
+                Additional parameters to the :ref:`op_distinct` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a Distinct operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_distinct` operation as last
+                step.
         """
         return PartialGearFunction(
             Distinct(**kwargs),
@@ -2389,19 +2396,16 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         )
 
     def count(self, **kwargs) -> "PartialGearFunction[int]":
-        """Count the number of records in the execution.
+        """:ref:`op_count` the number of records in the execution.
 
         Args:
             **kwargs:
-                Additional parameters to the Count operation.
+                Additional parameters to the :ref:`op_count` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a Count operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_count` operation as last
+                step.
         """
         return PartialGearFunction(
             Count(**kwargs),
@@ -2416,7 +2420,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[Dict[Hashable, int]]":
-        """Counts the records grouped by key.
+        """Distributed :ref:`op_countby` operation countinig the records grouped by key.
 
         Args:
             extractor (redgrease.typing.Extractor):
@@ -2424,23 +2428,21 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
-                Defaults to 'lambda x: str(x)'.
+                Defaults to ``lambda x: str(x)``.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the CountBy operation.
+                Additional parameters to the :ref:`op_countby` operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with a CountBy operation as last step.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with a :ref:`op_countby` operation as last
+                step.
         """
+
         return PartialGearFunction(
             CountBy(extractor=extractor, **kwargs),
             input_function=self,
@@ -2457,7 +2459,8 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "PartialGearFunction[float]":
-        """Calculating arithmetic average of the records.
+        """Distributed :ref:`op_avg` operation, calculating arithmetic average
+        of the records.
 
         Args:
             extractor (redgrease.typing.Extractor):
@@ -2465,26 +2468,25 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
-                Defaults to 'lambda x: float(x)'.
+                Defaults to ``lambda x: float(x)``.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
-                Defaults to None.
+                Defaults to ``None``.
 
             **kwargs:
-                Additional parameters to the map operation.
+                Additional parameters to the :ref:`op_avg`  operation.
 
         Returns:
             PartialGearFunction:
-                A new partial gear function with an avg operation as last step.
-                GearsBuilder - The same GearBuilder, but with updated function.
-
-                Note that for GearBuilder this method does **not** return a new
-                GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                A new partial gear function with an :ref:`op_avg`  operation as last
+                step.
         """
         return PartialGearFunction(
             Avg(extractor=extractor, **kwargs),
             input_function=self,
             requirements=requirements,
         )
+
+
+OpenGearFunction = PartialGearFunction

@@ -97,4 +97,22 @@ CountBy
 Avg
 ---
 
+.. _op_action:
+
+Actions
+=======
+
+.. _op_action_run:
+
+Run 
+---
+
+.. _op_action_register:
+
+Register
+--------
+
+
+
+
 .. include :: footer.rst

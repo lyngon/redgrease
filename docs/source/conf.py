@@ -6,6 +6,8 @@
 
 # -- Path setup --------------------------------------------------------------
 
+import configparser
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -13,6 +15,13 @@
 import os
 import sys
 from typing import List
+
+from packaging.version import Version
+
+config_file = "../../setup.cfg"
+config = configparser.ConfigParser()
+config.read(config_file)
+current_version = Version(config.get("metadata", "version", fallback="0.0.0"))
 
 sys.path.insert(0, os.path.abspath("../../src/"))
 
@@ -23,7 +32,7 @@ on_rtd = os.environ.get("READTHEDOCS") == "True"
 project = "redgrease"
 copyright = "2021, Lyngon Pte. Ltd."
 author = "Anders Åström"
-version = "0.1"  # can this be dynamic somehow?
+version = str(current_version)
 
 
 # -- General configuration ---------------------------------------------------
@@ -79,7 +88,3 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
 ml_css_files = []  # type: List[str]
-
-
-# def setup(app):
-#     app.add_stylesheet("custom.css")

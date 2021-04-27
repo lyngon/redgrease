@@ -6,19 +6,21 @@
 Builtin Runtime Functions
 =========================
 
-The RedisGears Python server runtime automatically expose a number of functions into the scope of any Gear functions it is executing.
+The RedisGears Python server runtime automagically expose a number of functions into the scope of any Gear functions being executed.
 These "builtin" runtime functions can be used in Gear Functions without importing any module or package:
 
-   - :ref:`runtime_gearsbuilder`
    - :ref:`runtime_execute`
    - :ref:`runtime_atomic`
    - :ref:`runtime_configGet`
    - :ref:`runtime_gearsConfigGet`
    - :ref:`runtime_hashtag`
    - :ref:`runtime_log`
-..   - :ref:`runtime_gearsFuture`
+   - :ref:`runtime_gearsbuilder`
 
-RedGrease also expose, wrapped versions of these very same functions that, for the most part, behave exactly like the originals, but require you to import them, either from the top level ``redgrease`` package, or from the ``redgrease.runtime`` module.
+.. note::
+   With the exception of the :ref:`runtime_gearsbuilder` neithe these functions **cannot** be used in normal application code outside Gear functions running in the RedisGears server runtime.
+
+RedGrease expose its own wrapped versions of these RedisGears runtime functions which, for the most part, behave exactly like the originals, but require you to import them, either from the top level :mod:`redgrease` package, or from the :mod:`redgrease.runtime` module.
 
 But if these are the same, why would you bother with them?
 
@@ -28,9 +30,9 @@ This alone can help greatly in developing gears faster (e.g. through auto-comple
 
 .. note::
 
-   If you are **only** using  hese wrapped runtime functions in your Gear Functions, and **no other** RedGrease features, then you actually don't need RedGrease to be installed on the RedisGears server runtime. Explicitly setting ``enforce_redgrease`` argument to ``False`` when executing a function script with to :meth:`.Gears.pyexecute`,  will not add any redgrease requirement to the function and simply ignore any explicit runtime imports.
+   If you are **only** using these wrapped runtime functions in your Gear Functions, and **no other** RedGrease features, then you actually don't need RedGrease to be installed on the RedisGears server runtime. Explicitly setting ``enforce_redgrease`` argument to ``False`` when executing a function script with to :meth:`.Gears.pyexecute`,  will not add any redgrease requirement to the function and simply ignore any explicit runtime imports.
 
-   The section, :ref:`adv_extras` , goes deeper into the detals of the various RedGrease extras options, and their imlications.
+   The section, :ref:`adv_extras`, goes deeper into the detals of the various RedGrease extras options, and their limitations.
 
 Another reason to use the functions from RedGrease :mod:`runtime`, is that it contains some slightly enhanced variants of the defaults, like for example, the :ref:`runtime_log`, or have alternative versions, like :ref:`runtime_hashtag3`. 
 
@@ -55,48 +57,6 @@ The RedGrease runtime functions can be imported in a few ways:
 It is possible to load all symbols, using ``*``, although it's generally not a recomended practice, particularly not for the top level ``redgrease`` package.
 
 
-
-.. _runtime_gearsbuilder:
-
-GearsBuilder
-------------
-
-The :class:`.runtime.GearsBuilder` (as well as its short-form alias ``GB``), behaves exactly like the default version, with a couple of exceptions:
-
-#. It has a property  ``gearfunction`` which gives access to the constructed :ref:`gearfun` object at that that point in the builder pipeline.
-
-#. Any additional arguments passed to its constructor, will be passed as defaults to the :meth:`run() <redgrease.gears.PartialGearsFunction.run>` or  :meth:`register() <redgrease.gears.PartialGearsFunction.register>` action that terminates the build.
-
-.. note::
-
-   As withe The :class:`GearsBuilder` objects are mutable with respect to the :ref:`operations`, whereas :ref:`gearfun` objects are immutable and returns a new function when an operation is applied. 
-
-   This means that::
-
-      fun = GearsBuilder()
-      fun.map(...)
-      fun.aggreagateby(...)
-
-   Creates one single function equivalent to::
-
-      fun = KeysReader().map(...).aggreagateby(...)
-
-   Whereas::
-
-      sad = KeysReader()
-      sad.map(...)
-      sad.aggreagateby(...)
-
-   Creates three functions; One named ``sad`` that is just the :ref:`gearfun_reader_keysreader`, one which is ``sad`` with a :ref:`op_map` and one which is ``sad`` with a :ref:`op_aggregateby`. The latter two functions are also not bound to any varibles in this example.
-
-
-``GearsReader`` API Reference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: redgrease.runtime.GearsBuilder
-
-
-
 .. _runtime_execute:
 
 execute
@@ -104,7 +64,7 @@ execute
 
 RedGrease's version of :func:`.runtime.execute` behaves just like the default.
 
-This function executes an arbitrary Redis command.
+This function executes an arbitrary Redis command insire Gear functions. 
 
 .. note::
 
@@ -206,7 +166,7 @@ Example::
 ``configGet`` API Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: redgrease.runtime.configGet
+.. autofunction:: redgrease.runtime.configGet
 
 
 
@@ -230,7 +190,7 @@ Example::
 ``gearsConfigGet`` API Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: redgrease.runtime.gearsConfigGet
+.. autofunction:: redgrease.runtime.gearsConfigGet
 
 
 
@@ -246,7 +206,7 @@ This function returns a hashtag that maps to the lowest hash slot served by the 
 ``hashtag`` API Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: redgrease.runtime.hashtag
+.. autofunction:: redgrease.runtime.hashtag
 
 
 
@@ -261,7 +221,7 @@ It is a slightly modified version of version of :func:`.runtime.hashtag` but add
 ``hashtag3`` API Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: redgrease.runtime.hashtag3
+.. autofunction:: redgrease.runtime.hashtag3
 
 
 
@@ -286,9 +246,54 @@ Example::
 ``log`` API Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: redgrease.runtime.log
+.. autofunction:: redgrease.runtime.log
+
+
+.. _runtime_gearsbuilder:
+
+GearsBuilder
+------------
+
+The :class:`.runtime.GearsBuilder` (as well as its short-form alias ``GB``), behaves exactly like the default RedisGears version, with a couple of exceptions:
+
+#. It has a property  ``gearfunction`` which gives access to the constructed :ref:`gearfun` object at that that point in the builder pipeline.
+
+#. Any additional arguments passed to its constructor, will be passed as defaults to the :meth:`run() <redgrease.gears.PartialGearFunction.run>` or  :meth:`register() <redgrease.gears.PartialGearFunction.register>` action that terminates the build.
+
+.. note::
+
+   The :class:`.runtime.GearsBuilder` objects are mutable with respect to the :ref:`operations`, whereas :ref:`gearfun` objects are immutable and returns a new function when an operation is applied. 
+
+   This means that::
+
+      fun = GearsBuilder()
+      fun.map(...)
+      fun.aggreagateby(...)
+
+   Creates one single function equivalent to::
+
+      fun = KeysReader().map(...).aggreagateby(...)
+
+   Whereas::
+
+      sad = KeysReader()
+      sad.map(...)
+      sad.aggreagateby(...)
+
+   Creates three functions; One named ``sad`` that is just the :ref:`gearfun_reader_keysreader`, one which is ``sad`` with a :ref:`op_map` and one which is ``sad`` with a :ref:`op_aggregateby`. The latter two functions are also not bound to any varibles in this example.
+
+:class:`.GearsBuilder` API Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: redgrease.runtime.GearsBuilder
+   :members:
+   :undoc-members:
+   :inherited-members:
+   :member-order: bysource
+
 
 
 Now we are finally ready to start building some Gear Functions.
+
 
 .. include :: footer.rst
