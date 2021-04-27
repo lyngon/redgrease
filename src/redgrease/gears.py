@@ -1366,7 +1366,7 @@ class ClosedGearFunction(GearFunction[T]):
     def __init__(
         self,
         operation: Operation,
-        input_function: "PartialGearFunction",
+        input_function: "PartialGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
         """"""
@@ -1453,7 +1453,7 @@ class PartialGearFunction(GearFunction[optype.InputRecord]):
     def __init__(
         self,
         operation: Operation,
-        input_function: "PartialGearFunction",
+        input_function: "PartialGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
         """"""
