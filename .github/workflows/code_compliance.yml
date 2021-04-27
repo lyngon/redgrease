@@ -34,7 +34,7 @@ jobs:
       run: flake8 ./src/ --count --show-source --statistics
       
     - name: Validate Black code-style
-      run: black ./src/ --check
+      run: black ./src/ --diff
   
     - name: Check for type errors
       run: mypy ./src/
