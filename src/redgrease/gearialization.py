@@ -147,7 +147,7 @@ def get_function_string(
         ctx["requirements"] = gear_function.requirements
         ctx["enforce_redgrease"] = True
 
-        if isinstance(gear_function, redgrease.gears.PartialGearFunction):
+        if isinstance(gear_function, redgrease.gears.OpenGearFunction):
             # If the function isn't closed with either 'run' or 'register'
             # we assume it is meant to be closed with a 'run'
             gear_function = gear_function.run()

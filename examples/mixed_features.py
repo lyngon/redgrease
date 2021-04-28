@@ -6,7 +6,7 @@ relevant_usr_fields = {
     "permissions": redgrease.utils.list_parser(str),
 }
 
-# Partial Gear function, w. default run param:
+# Open Gear function, w. default run param:
 active_users = (
     redgrease.KeysOnlyReader("user:*")
     .map(lambda key: redgrease.cmd.hmget(key, *relevant_usr_fields.keys()))
@@ -17,7 +17,7 @@ active_users = (
     )
     .filter(lambda usr: usr["active"])
 )
-# Partial Gear function re-use:
+# Open Gear function re-use:
 active_user_count = active_users.count()
 
 all_issued_permissions = active_users.flatmap(lambda usr: usr["permissions"]).distinct()

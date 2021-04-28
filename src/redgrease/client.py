@@ -451,7 +451,7 @@ class Gears:
 
                     * Python version must match the Gear runtime.
 
-                    * If the function is not "closed" with a :meth:`run <.PartialGearFunction.run>` or :meth:`register <.PartialGearFunction.register>` operation, an ``run()`` operation without additional arguments will be assumed, and automatically added to the function to close it.
+                    * If the function is not "closed" with a :meth:`run <.OpenGearFunction.run>` or :meth:`register <.OpenGearFunction.register>` operation, an ``run()`` operation without additional arguments will be assumed, and automatically added to the function to close it.
 
                     * The default for ``enforce_redgrease`` is ``True``.
 

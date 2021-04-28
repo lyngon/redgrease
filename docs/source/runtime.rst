@@ -258,7 +258,7 @@ The :class:`.runtime.GearsBuilder` (as well as its short-form alias ``GB``), beh
 
 #. It has a property  ``gearfunction`` which gives access to the constructed :ref:`gearfun` object at that that point in the builder pipeline.
 
-#. Any additional arguments passed to its constructor, will be passed as defaults to the :meth:`run() <redgrease.gears.PartialGearFunction.run>` or  :meth:`register() <redgrease.gears.PartialGearFunction.register>` action that terminates the build.
+#. Any additional arguments passed to its constructor, will be passed as defaults to the :meth:`run() <redgrease.gears.OpenGearFunction.run>` or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action that terminates the build.
 
 .. note::
 

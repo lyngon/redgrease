@@ -115,16 +115,13 @@ As an example let's assume, that we have instanitated a Gear client and created 
 
 In this example ``get_keys_by_type`` is our simple "open" Gear function, which groups all the keys by their type ("string", "hash", "stream" etc) , and within each group collects the keys in a set. 
     
-We call it "open" because it has not been "closed" by a :meth:`run() <redgrease.gears.PartialGearFunction.run>` or  :meth:`register() <redgrease.gears.PartialGearFunction.register>` action.
-The output from the last operation, here :meth:`countby() <redgrease.gears.PartialGearFunction.countby>`, can therefore be used as input for a subsequent operations, if we'd like. The chain of operations of the function is "open-ended", if you will.
+We call it "open" because it has not been "closed" by a :meth:`run() <redgrease.gears.OpenGearFunction.run>` or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action.
+The output from the last operation, here :meth:`countby() <redgrease.gears.OpenGearFunction.countby>`, can therefore be used as input for a subsequent operations, if we'd like. The chain of operations of the function is "open-ended", if you will.
 
-Once an "open" function is terminated with either a :meth:`run() <redgrease.gears.PartialGearFunction.run>`  or  :meth:`register() <redgrease.gears.PartialGearFunction.register>` action, it is considered "closed", and it can be executed, but not further extended.
+Once an "open" function is terminated with either a :meth:`run() <redgrease.gears.OpenGearFunction.run>`  or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action, it is considered "closed", and it can be executed, but not further extended.
 
-.. note::
-    
-    This "open/closed" terminology should not be confused with "`partial functions <https://en.wikipedia.org/wiki/Partial_function>`_" in mathematics, nor "`partial application <https://en.wikipedia.org/wiki/Partial_application>`_" in computer science, which are completely different concepts. 
-    
-    The terminology is also not explicitly used by RedisLabs in their `RedisGears Function Documentation <https://oss.redislabs.com/redisgears/1.0/functions.html>`_, but it was the most intuitive terminology I could think of to describe how their design of GearsBuilder actually behaves. 
+The :ref:`gearfun` section, goes into more details of these concepts and the different classes of GearFuctions.
+
 
 RedGrease allows for open Gear functions, such as ``key_counter`` to be used as a starting point for other Gear functions, so lets create two "closed" functions from it:
 
@@ -137,7 +134,7 @@ These two new functions, ``get_keys_by_type_dict`` and ``get_commones_type``, bo
 The former function collates the results in a dictionary.
 The latter finds the key-type that is most common in the keyspace.
 
-Note that both functions end with the :meth:`run() <redgrease.gears.PartialGearFunction.run>` action, which indicates that the functions will run as an on-demand batch-job, but also that it is 'closed' and cannot be exteded further. 
+Note that both functions end with the :meth:`run() <redgrease.gears.OpenGearFunction.run>` action, which indicates that the functions will run as an on-demand batch-job, but also that it is 'closed' and cannot be exteded further. 
 
 Let's excute thes functions in some different ways.
 
@@ -161,7 +158,7 @@ The result might look something like:
     :end-before: """
 
 
-If you pass an "open" gear function, like our initial ``get_keys_by_type``,  to :meth:`.Gears.pyexecute`, it will still try its best to execute it, by assuming that you meant to close it with an empty :meth:`run() <redgrease.gears.PartialGearFunction.run>` action in the end:
+If you pass an "open" gear function, like our initial ``get_keys_by_type``,  to :meth:`.Gears.pyexecute`, it will still try its best to execute it, by assuming that you meant to close it with an empty :meth:`run() <redgrease.gears.OpenGearFunction.run>` action in the end:
 
 .. literalinclude:: ../../examples/exe_example.py
     :start-after: # # Method 3
@@ -187,7 +184,7 @@ Another short-form way of running a closed GearFunction is to call its its :meth
     :end-before: # #
     :emphasize-lines: 4
 
-This approach only works with "closed" functions, but works regardless if the function has been closed with the :meth:`run() <redgrease.gears.PartialGearFunction.run>` or :meth:`register() <redgrease.gears.PartialGearFunction.register>` action.
+This approach only works with "closed" functions, but works regardless if the function has been closed with the :meth:`run() <redgrease.gears.OpenGearFunction.run>` or :meth:`register() <redgrease.gears.OpenGearFunction.register>` action.
 
 The result for our specific function might look something like:
 
@@ -201,10 +198,10 @@ The API specification is as follows:
 
 .. _exe_gear_function_obj_on_closing:
 
-Execute directly in :meth:`run() <.PartialGearFunction.run>` or :meth:`register() <.PartialGearFunction.register>`
+Execute directly in :meth:`run() <.OpenGearFunction.run>` or :meth:`register() <.OpenGearFunction.register>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An even more succinct way of executing GearFunction objects is to specify the target connection directly in the action that closes the function. I.e the :meth:`run() <redgrease.gears.PartialGearFunction.run>`  or  :meth:`register() <redgrease.gears.PartialGearFunction.register>` action.
+An even more succinct way of executing GearFunction objects is to specify the target connection directly in the action that closes the function. I.e the :meth:`run() <redgrease.gears.OpenGearFunction.run>`  or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action.
 
 RedGrease has extended these methods with a couple additonal arguments, which are not in the standard RedisGears API:
 
@@ -217,7 +214,7 @@ RedGrease has extended these methods with a couple additonal arguments, which ar
     :end-before: # #
     :emphasize-lines: 4
 
-This approach only works with "closed" functions, but works regardless if the function has been closed with the :meth:`run() <redgrease.gears.PartialGearFunction.run>`  or  :meth:`register() <redgrease.gears.PartialGearFunction.register>` action.
+This approach only works with "closed" functions, but works regardless if the function has been closed with the :meth:`run() <redgrease.gears.OpenGearFunction.run>`  or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action.
 
 The result for our specific function should be identical to when we ran the function using :ref:`pyexecute <exe_gear_function_obj_pyexcute>`:
 

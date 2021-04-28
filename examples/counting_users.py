@@ -9,7 +9,7 @@ relevant_usr_fields = {
     "permissions": redgrease.utils.list_parser(str),
 }
 
-# # Partial Gear function
+# # Open Gear function
 # Extracting a dict for every 'active' user
 active_users = (
     redgrease.KeysOnlyReader()
@@ -21,7 +21,7 @@ active_users = (
     )
     .filter(lambda usr: usr["active"])
 )
-# # Partial Gear function re-use
+# # Open Gear function re-use
 # Count the number of active users
 active_user_count = active_users.count()
 
