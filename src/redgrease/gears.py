@@ -141,12 +141,13 @@ class Reader(Operation):
     Attributes:
         reader (str):
             The type of reader (https://oss.redislabs.com/redisgears/readers.html)
-                - 'KeysReader'
-                - 'KeysOnlyReader'
-                - 'StreamReader'
-                - 'PythonReader'
-                - 'ShardsIDReader'
-                - 'CommandReader'
+
+                - ``"KeysReader"``
+                - ``"KeysOnlyReader"``
+                - ``"StreamReader"``
+                - ``"PythonReader"``
+                - ``"ShardsIDReader"``
+                - ``"CommandReader"``
 
         defaultArg (str):
             Argument that the reader may need. These are usually a key's name, prefix,
@@ -250,11 +251,11 @@ class Run(Operation):
             convertToStr (bool, optional):
                 When `True`, adds a map operation to the flow's end that stringifies
                 records.
-                Defaults to True.
+                Defaults to ``True``.
 
             collect (bool, optional):
                 When `True`, adds a collect operation to flow's end.
-                Defaults to True.
+                Defaults to ``True``.
         """
         super().__init__(**kwargs)
         self.arg = arg
@@ -270,7 +271,7 @@ class Run(Operation):
 
         Returns:
             ClosedGearFunction:
-                A closed Gear batch function that is ready to run on a Gears cluster.
+                A closed Gear batch function that is ready to run in RedisGears.
         """
         import cloudpickle
 
@@ -327,26 +328,31 @@ class Register(Operation):
                 Defaults to '*'.
 
             convertToStr (bool, optional):
-                When `True` adds a map operation to the flow's end that stringifies
+                When ``True`` adds a map operation to the flow's end that stringifies
                 records.
-                Defaults to True.
+                Defaults to ``True``.
 
             collect (bool, optional):
-                When True adds a collect operation to flow's end.
-                Defaults to False.
+                When ``True`` adds a collect operation to flow's end.
+                Defaults to ``False``.
 
             mode (str, optional):
                 The execution mode of the function.
                 Can be one of::
 
-                - 'async' : Execution will be asynchronous across the entire cluster.
+                - ``"async"``:
 
-                - 'async_local' : Execution will be asynchronous and restricted to
-                    the handling shard.
+                    Execution will be asynchronous across the entire cluster.
 
-                - 'sync' : Execution will be synchronous and local
+                - ``"async_local"``:
 
-                Defaults to `redgrease.TriggerMode.Async` ("async")
+                    Execution will be asynchronous and restricted to the handling shard.
+
+                - ``"sync"``:
+
+                    Execution will be synchronous and local
+
+                Defaults to `redgrease.TriggerMode.Async` (``"async"``)
 
             onRegistered (Callback, optional):
                 A function callback that's called on each shard upon function
@@ -372,8 +378,8 @@ class Register(Operation):
 
         Returns:
             ClosedGearFunction:
-                A closed Gear event function that is ready to be regisetered on a
-                Gears cluster.
+                A closed "event-mode" Gear function that is ready to be regisetered on a
+                RedisGears system.
         """
         import cloudpickle
 
@@ -526,7 +532,7 @@ class Filter(Operation):
             op (redgrease.typing.Filterer):
                 Function to apply on the input records, to decide which ones to keep.
                 The function must take one argument as input (input record) and
-                return a bool. The input records evaluated to `True` will be kept as
+                return a bool. The input records evaluated to ``True`` will be kept as
                 output records.
         """
         super().__init__(**kwargs)
@@ -1083,7 +1089,8 @@ class Sort(Operation):
 
     Attributes:
         reverse (bool):
-            Defines if the sorting orded is descending (`True`) or ascendinng (`False`).
+            Defines if the sorting orded is descending (``True``) or ascendinng
+            (``False``).
     """
 
     def __init__(self, reverse: bool = True, **kwargs) -> None:
@@ -1092,7 +1099,7 @@ class Sort(Operation):
         Args:
             reverse (bool, optional):
                 Sort in descending order (higer to lower).
-                Defaults to True.
+                Defaults to ``True``.
         """
         super().__init__(**kwargs)
         self.reverse = reverse
@@ -1311,8 +1318,9 @@ class GearFunction(Generic[T]):
 
         Returns:
             str:
-                Either 'KeysReader', 'KeysOnlyReader', 'StreamReader', 'PythonReader',
-                    'ShardsIDReader', 'CommandReader' or None (If no reader is defined).
+                Either ``"KeysReader"``, ``"KeysOnlyReader"``, ``"StreamReader"``,
+                ``"PythonReader"``, ``"ShardsIDReader"``, ``"CommandReader"`` or
+                ``None`` (If no reader is defined).
         """
         if isinstance(self.operation, Reader):
             return self.operation.reader
@@ -1329,7 +1337,7 @@ class GearFunction(Generic[T]):
 
         Returns:
             bool:
-                `True` if the function supports batch mode, `False` if not.
+                ``True`` if the function supports batch mode, ``False`` if not.
         """
         return self.reader in [
             sugar.ReaderType.KeysReader,
@@ -1346,7 +1354,7 @@ class GearFunction(Generic[T]):
 
         Returns:
             bool:
-                `True` if the function supports event mode, `False` if not.
+                ``True`` if the function supports event mode, ``False`` if not.
         """
         return self.reader in [
             sugar.ReaderType.KeysReader,
@@ -1359,8 +1367,8 @@ class ClosedGearFunction(GearFunction[T]):
     """Closed Gear functions are GearsFunctions that have been "closed" with a
     :ref:`op_action_run` action or a :ref:`op_action_register` action.
 
-    Closed Gear functions cannot add more :ref:`operations`, but can be executed in a
-    Redis Gears cluster.
+    Closed Gear functions cannot add more :ref:`operations`, but can be executed in
+    RedisGears.
     """
 
     def __init__(
@@ -1382,7 +1390,7 @@ class ClosedGearFunction(GearFunction[T]):
         replace: bool = None,
         **kwargs,
     ):
-        """Execute the function on a Redis Gear server / cluster.
+        """Execute the function on a RedisGears.
         This is equivalent to passing the function to `Gears.pyexecute`
 
         Args:
@@ -1391,7 +1399,7 @@ class ClosedGearFunction(GearFunction[T]):
 
             unblocking (bool, optional):
                 Execute function unblocking, i.e. asyncronous.
-                Defaults to False.
+                Defaults to ``False``.
 
             requirements (Iterable[str], optional):
                 Additional requirements / dedpendency Python packages.
@@ -1419,9 +1427,9 @@ class ClosedGearFunction(GearFunction[T]):
 
             # If we get an error because the trigger already is registered,
             # then we check the 'replace' argument for what to do:
-            # - `replace is None` : Re-raise the error
-            # - `replace is False` : Ignore the error
-            # - `replace is True` : Unregister the previous and re-register the new
+            # - `replace is ``None``` : Re-raise the error
+            # - `replace is ``False``` : Ignore the error
+            # - `replace is ``True``` : Unregister the previous and re-register the new
             if replace is None or "trigger" not in self.operation.kwargs:
                 raise
 
@@ -1506,7 +1514,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
                 Defaults to ``None``.
 
             on (redis.Redis):
-                Immedeately execute the function on this Redis Gear server / cluster.
+                Immedeately execute the function on this RedisGears system.
 
             **kwargs:
                 Additional parameters to the run operation.
@@ -1580,7 +1588,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
                 Defaults to ``True``.
 
             collect (bool, optional):
-                When True adds a collect operation to flow's end.
+                When ``True`` adds a collect operation to flow's end.
                 Defaults to ``False``.
 
             mode (str, optional):
@@ -1693,7 +1701,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
                 Defaults to ``None``.
 
             on (redis.Redis):
-                Immedeately execute the function on this Redis Gear server / cluster.
+                Immedeately execute the function on this RedisGears system.
 
             **kwargs:
                 Additional parameters to the register operation.

@@ -120,11 +120,8 @@ The output from the last operation, here :meth:`countby() <redgrease.gears.OpenG
 
 Once an "open" function is terminated with either a :meth:`run() <redgrease.gears.OpenGearFunction.run>`  or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action, it is considered "closed", and it can be executed, but not further extended.
 
-.. note::
-    
-    This "open/closed" terminology should not be confused with "`partial functions <https://en.wikipedia.org/wiki/Partial_function>`_" in mathematics, nor "`partial application <https://en.wikipedia.org/wiki/Partial_application>`_" in computer science, which are completely different concepts. 
-    
-    The terminology is also not explicitly used by RedisLabs in their `RedisGears Function Documentation <https://oss.redislabs.com/redisgears/1.0/functions.html>`_, but it was the most intuitive terminology I could think of to describe how their design of GearsBuilder actually behaves. 
+The :ref:`gearfun` section, goes into more details of these concepts and the different classes of GearFuctions.
+
 
 RedGrease allows for open Gear functions, such as ``key_counter`` to be used as a starting point for other Gear functions, so lets create two "closed" functions from it:
 
