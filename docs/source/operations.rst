@@ -111,6 +111,10 @@ AggregateBy
 GroupBy 
 -------
 
+.. autoclass:: redgrease.gears.GroupBy
+
+
+
 .. _op_batchgroupby:
 
 BatchGroupBy
