@@ -49,7 +49,8 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 import ast
 import fnmatch
 import logging
-import warnings
+
+# import warnings
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
 
 import redis
@@ -927,10 +928,10 @@ def RedisGears(*args, **kwargs):
     """Deprecated
     Use RedisMods instead
     """
-    warnings.warn(
-        """Instantiation using `RedisGears` will be deprecated.
-        Please use `RedisMods` instead.""",
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    # warnings.warn(
+    #     """Instantiation using `RedisGears` will be deprecated.
+    #     Please use `RedisMods` instead.""",
+    #     DeprecationWarning,
+    #     stacklevel=2,
+    # )
     return RedisMods(*args, **kwargs)

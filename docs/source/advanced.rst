@@ -5,7 +5,7 @@
 Advanced Concepts
 =================
 
-.. include :: wip.rst
+This section discuss some more advanced topics, considerations an usage patterns.
 
 .. _adv_extras:
 
