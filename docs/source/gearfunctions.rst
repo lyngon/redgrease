@@ -67,7 +67,6 @@ This includes both the :class:`.runtime.GearsBuilder` as well as the :ref:`gearf
 
 .. autoclass:: redgrease.gears.OpenGearFunction()
     :members:
-    :member-order: bysource
 
 
 .. _gearfun_closed:
@@ -78,7 +77,6 @@ ClosedGearFunction
 .. autoclass:: redgrease.gears.ClosedGearFunction()
     :members:
     :undoc-members:
-    :member-order: bysource
 
 
 .. _gearfun_builder:
@@ -107,7 +105,7 @@ KeysReader
 .. autoclass:: redgrease.reader.KeysReader
     :members:
     :undoc-members:
-    :member-order: bysource
+
 
 
 .. _gearfun_reader_keysonlyreader:
@@ -118,7 +116,6 @@ KeysOnlyReader
 .. autoclass:: redgrease.reader.KeysOnlyReader
     :members:
     :undoc-members:
-    :member-order: bysource
 
 
 
@@ -130,7 +127,6 @@ StreamReader
 .. autoclass:: redgrease.reader.StreamReader
     :members:
     :undoc-members:
-    :member-order: bysource
 
 
 
@@ -142,7 +138,6 @@ PythonReader
 .. autoclass:: redgrease.reader.PythonReader
     :members:
     :undoc-members:
-    :member-order: bysource
 
 
 
@@ -154,7 +149,6 @@ ShardsIDReader
 .. autoclass:: redgrease.reader.ShardsIDReader
     :members:
     :undoc-members:
-    :member-order: bysource
 
 
 
@@ -166,8 +160,8 @@ CommandReader
 .. autoclass:: redgrease.reader.CommandReader
     :members:
     :undoc-members:
-    :member-order: bysource
 
+    
 
 .. include :: footer.rst
 

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# from __future__ import annotations
+
 """
 Type variables, Type aliases and Protocol Types.
 """
@@ -27,25 +29,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 """
 
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
-
-if TYPE_CHECKING:
-    try:
-        from typing import Protocol
-    except ImportError:
-        from typing_extensions import Protocol  # type: ignore
-else:
-    Protocol = Tuple  # Hack 2000
+from typing import Any, Callable, Dict, Iterable, Type, TypeVar, Union
 
 # Type aliases for type hints
 

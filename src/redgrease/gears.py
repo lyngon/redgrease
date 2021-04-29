@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
 """
 GearsFunction and Operation definintions
 """
@@ -30,8 +32,21 @@ import operator
 from typing import Any, Dict, Generic, Hashable, Iterable, Optional, Type, TypeVar
 
 import redgrease.sugar as sugar
-import redgrease.typing as optype
 import redgrease.utils
+from redgrease.typing import (
+    Accumulator,
+    BatchReducer,
+    Callback,
+    Expander,
+    Extractor,
+    Filterer,
+    InputRecord,
+    Key,
+    Mapper,
+    OutputRecord,
+    Processor,
+    Reducer,
+)
 
 T = TypeVar("T")
 
@@ -316,7 +331,7 @@ class Register(Operation):
         convertToStr: bool = True,
         collect: bool = True,
         mode: str = sugar.TriggerMode.Async,
-        onRegistered: "optype.Callback" = None,
+        onRegistered: Callback = None,
         **kwargs,
     ) -> None:
         """Instantiate a Register action
@@ -393,21 +408,26 @@ class Register(Operation):
         )
 
 
+################################################################################
+#                                 Operations                                   #
+################################################################################
+
+
 class Map(Operation):
     """The local Map operation performs the one-to-one (1:1) mapping of records.
 
     It requires one mapper function.
 
     Attributes:
-        op (redgrease.typing.Mapper):
+        op (:data:`redgrease.typing.Mapper`):
             The mapper function to map on all input records.
     """
 
-    def __init__(self, op: "optype.Mapper", **kwargs) -> None:
+    def __init__(self, op: Mapper, **kwargs) -> None:
         """Instaniate a Map operation.
 
         Args:
-            op (redgrease.typing.Mapper):
+            op (:data:`redgrease.typing.Mapper`):
                 Function to map on the input records.
                 The function must take one argument as input (input record) and
                 return something as an output (output record).
@@ -440,15 +460,15 @@ class FlatMap(Operation):
     each element in the sequence is turned into a separate output record.
 
     Attributes:
-        op (redgrease.typing.Mapper):
+        op (:data:`redgrease.typing.Expander`):
             The mapper function to map on all input records.
     """
 
-    def __init__(self, op: "optype.Expander", **kwargs) -> None:
+    def __init__(self, op: Expander, **kwargs) -> None:
         """Instaniate a FlatMap operation.
 
         Args:
-            op (redgrease.typing.Expander):
+            op (:data:`redgrease.typing.Expander`):
                 Function to map on the input records.
                 The function must take one argument as input (input record) and
                 return an iterable as an output (output records).
@@ -480,15 +500,15 @@ class ForEach(Operation):
     is discarded.
 
     Args:
-        op (redgrease.typing.Processor):
+        op (:data:`redgrease.typing.Processor`):
             Function to run on the input records.
     """
 
-    def __init__(self, op: "optype.Processor", **kwargs) -> None:
+    def __init__(self, op: Processor, **kwargs) -> None:
         """Instaniate a ForEach operation.
 
         Args:
-            op (redgrease.typing.Processor):
+            op (:data:`redgrease.typing.Processor`):
                 Function to run on each of the input records.
                 The function must take one argument as input (input record) and
                 should not return anything.
@@ -520,16 +540,16 @@ class Filter(Operation):
     will be output.
 
     Args:
-        op (redgrease.typing.Filterer):
+        op (:data:`redgrease.typing.Filterer`):
             Predicate function to run on the input records.
 
     """
 
-    def __init__(self, op: "optype.Filterer", **kwargs) -> None:
+    def __init__(self, op: Filterer, **kwargs) -> None:
         """Instaniate a Filter operation.
 
         Args:
-            op (redgrease.typing.Filterer):
+            op (:data:`redgrease.typing.Filterer`):
                 Function to apply on the input records, to decide which ones to keep.
                 The function must take one argument as input (input record) and
                 return a bool. The input records evaluated to ``True`` will be kept as
@@ -561,15 +581,15 @@ class Accumulate(Operation):
     accumulator's value.
 
     Args:
-        op (redgrease.typing.Accumulator):
+        op (:data:`redgrease.typing.Accumulator`):
             Accumulation function to run on the input records.
     """
 
-    def __init__(self, op: "optype.Accumulator", **kwargs) -> None:
+    def __init__(self, op: Accumulator, **kwargs) -> None:
         """Instaniate an Accumulate operation.
 
         Args:
-            op (redgrease.typing.Accumulator):
+            op (:data:`redgrease.typing.Accumulator`):
                 Function to to apply on the input records.
                 The function must take two arguments as input:
                     - the input record, and
@@ -603,26 +623,29 @@ class LocalGroupBy(Operation):
     The output records consist of the grouping key and its respective reduce value.
 
     Attributes:
-        extractor (redgrease.typing.Extractor):
+        extractor (:data:`redgrease.typing.Extractor`):
             Function that extracts the key to group by from input records.
 
-        reducer (redgrease.typing.Reducer):
+        reducer (:data:`redgrease.typing.Reducer`):
             Function that reduces the records in each group to an output record.
     """
 
     def __init__(
-        self, extractor: "optype.Extractor", reducer: "optype.Reducer", **kwargs
+        self,
+        extractor: Extractor,
+        reducer: Reducer,
+        **kwargs,
     ) -> None:
         """Instantiate a LocalGroupBy operator.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
 
-            reducer (redgrease.typing.Reducer):
+            reducer (:data:`redgrease.typing.Reducer`):
                 Function to apply on the records of each group, to reduce to a single
                 value (per group).
                 The function must take (a) a key, (b) an input record and (c) a
@@ -728,11 +751,11 @@ class Repartition(Operation):
                 A function deciding the destination shard of an input record.
     """
 
-    def __init__(self, extractor: "optype.Extractor", **kwargs) -> None:
+    def __init__(self, extractor: Extractor, **kwargs) -> None:
         """Instantiate a Repartition opertation
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function that takes a record and calculates a key that is used to
                 determine the hash slot, and consequently the shard, that the record
                 should migrate to to.
@@ -781,10 +804,10 @@ class Aggregate(Operation):
         zero (Any):
             The initial / zero value for the accumulator variable.
 
-        seqOp (redgrease.typing.Accumulator):
+        seqOp (:data:`redgrease.typing.Accumulator`):
             A local accumulator function, applied locally on each shard.
 
-        combOp (redgrease.typing.Accumulator):
+        combOp (:data:`redgrease.typing.Accumulator`):
             A global accumulator function, applied on the results of the local
             accumulations.
     """
@@ -792,8 +815,8 @@ class Aggregate(Operation):
     def __init__(
         self,
         zero: Any,
-        seqOp: "optype.Accumulator",
-        combOp: "optype.Accumulator",
+        seqOp: Accumulator,
+        combOp: Accumulator,
         **kwargs,
     ) -> None:
         """Instantiates an Aggregate operation.
@@ -802,7 +825,7 @@ class Aggregate(Operation):
             zero (Any):
                 The initial / zero value of the accumulator variable.
 
-            seqOp (redgrease.typing.Accumulator):
+            seqOp (:data:`redgrease.typing.Accumulator`):
                 A function to be applied on each of the input records, locally per
                 shard.
                 It must take two parameters:
@@ -812,7 +835,7 @@ class Aggregate(Operation):
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
 
-            combOp (redgrease.typing.Accumulator):
+            combOp (:data:`redgrease.typing.Accumulator`):
                 A function to be applied on each of the aggregated results of the local
                 aggregation (i.e. the output of `seqOp`).
                 It must take two parameters:
@@ -860,32 +883,32 @@ class AggregateBy(Operation):
     grouping key and its respective reducer's value.
 
     Attributes:
-        extractor (redgrease.typing.Extractor):
+        extractor (:data:`redgrease.typing.Extractor`):
             Function that extracts the key to group by from input records.
 
         zero (Any):
             The initial / zero value for the accumulator variable.
 
-        seqOp (redgrease.typing.Accumulator):
+        seqOp (:data:`redgrease.typing.Accumulator`):
             A local accumulator function, applied locally on each shard.
 
-        combOp (redgrease.typing.Accumulator):
+        combOp (:data:`redgrease.typing.Accumulator`):
             A global accumulator function, applied on the results of the local
             accumulations.
     """
 
     def __init__(
         self,
-        extractor: "optype.Extractor",
+        extractor: Extractor,
         zero: Any,
-        seqOp: "optype.Reducer",
-        combOp: "optype.Reducer",
+        seqOp: Reducer,
+        combOp: Reducer,
         **kwargs,
     ) -> None:
         """Instantiate an AggregateBy operation.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
@@ -894,7 +917,7 @@ class AggregateBy(Operation):
             zero (Any):
                 The initial / zero value of the accumulator variable.
 
-            seqOp (redgrease.typing.Accumulator):
+            seqOp (:data:`redgrease.typing.Accumulator`):
                 A function to be applied on each of the input records, locally per
                 shard and group.
                 It must take two parameters:
@@ -904,7 +927,7 @@ class AggregateBy(Operation):
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
 
-            combOp (redgrease.typing.Accumulator):
+            combOp (:data:`redgrease.typing.Accumulator`):
                 A function to be applied on each of the aggregated results of the local
                 aggregation (i.e. the output of `seqOp`).
                 It must take two parameters:
@@ -953,26 +976,29 @@ class GroupBy(Operation):
     value.
 
     Attributes:
-        extractor (redgrease.typing.Extractor):
+        extractor (:data:`redgrease.typing.Extractor`):
             Function that extracts the key to group by from input records.
 
-        reducer (redgrease.typing.Reducer):
+        reducer (:data:`redgrease.typing.Reducer`):
             Function that reduces the records of each group to a value
     """
 
     def __init__(
-        self, extractor: "optype.Extractor", reducer: "optype.Reducer", **kwargs
+        self,
+        extractor: Extractor,
+        reducer: Reducer,
+        **kwargs,
     ) -> None:
         """Instantiate a GroupBy operation.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
 
-            reducer (redgrease.typing.Reducer):
+            reducer (:data:`redgrease.typing.Reducer`):
                 Function to apply on the records of each group, to reduce to a single
                 value (per group).
                 The function must take (a) a key, (b) an input record and (c) a
@@ -1025,26 +1051,29 @@ class BatchGroupBy(Operation):
         runtime.
 
     Attributes:
-        extractor (redgrease.typing.Extractor):
+        extractor (:data:`redgrease.typing.Extractor`):
             Function that extracts the key to group by from input records.
 
-        reducer (redgrease.typing.Reducer):
+        reducer (:data:`redgrease.typing.Reducer`):
             Function that reduces the records of each group to a value
     """
 
     def __init__(
-        self, extractor: "optype.Extractor", reducer: "optype.BatchReducer", **kwargs
+        self,
+        extractor: Extractor,
+        reducer: BatchReducer,
+        **kwargs,
     ) -> None:
         """Instantiate a BatchGroupBy operation.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
 
-            reducer (redgrease.typing.Reducer):
+            reducer (:data:`redgrease.typing.Reducer`):
                 Function to apply on the records of each group, to reduce to a single
                 value (per group).
                 The function must take (a) a key, (b) an input record and (c) a
@@ -1184,15 +1213,15 @@ class CountBy(Operation):
     global summing accumulators.
 
     Attributes:
-        extractor (redgrease.typing.Extractor):
+        extractor (:data:`redgrease.typing.Extractor`):
             Function that extracts the key to group by from input records.
     """
 
-    def __init__(self, extractor: "optype.Extractor", **kwargs) -> None:
+    def __init__(self, extractor: Extractor, **kwargs) -> None:
         """Instaniate a CountBy operation.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
@@ -1227,15 +1256,15 @@ class Avg(Operation):
         2. A local map operation calculates the average from the global tupl
 
     Attributes:
-        extractor (redgrease.typing.Extractor):
+        extractor (:data:`redgrease.typing.Extractor`):
             Function that extracts the key to group by from input records.
     """
 
-    def __init__(self, extractor: "optype.Extractor", **kwargs) -> None:
+    def __init__(self, extractor: Extractor, **kwargs) -> None:
         """Instantiate an Avg operation.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
@@ -1377,7 +1406,7 @@ class ClosedGearFunction(GearFunction[T]):
         input_function: "OpenGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
-        """"""
+        """ """
         super().__init__(
             operation, input_function=input_function, requirements=requirements
         )
@@ -1449,7 +1478,7 @@ class ClosedGearFunction(GearFunction[T]):
             )
 
 
-class OpenGearFunction(GearFunction[optype.InputRecord]):
+class OpenGearFunction(GearFunction[InputRecord]):
     """An open Gear function is a Gear function that is not yet "closed" with a
     :ref:`op_action_run` action or a :ref:`op_action_register` action.
 
@@ -1464,7 +1493,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         input_function: "OpenGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
-        """"""
+        """ """
         super().__init__(
             operation, input_function=input_function, requirements=requirements
         )
@@ -1481,7 +1510,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
         # TODO: Add all the Reader specific args here
-    ) -> ClosedGearFunction["optype.InputRecord"]:
+    ) -> ClosedGearFunction[InputRecord]:
         """Create a "closed" function to be :ref:`op_action_run` as in "batch-mode".
 
         Batch functions are executed once and exits once the data is
@@ -1531,7 +1560,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         if not self.supports_batch_mode:
             raise TypeError(f"Batch mode (run) is not supporterd for '{self.reader}'")
 
-        gear_fun: ClosedGearFunction = ClosedGearFunction["optype.InputRecord"](
+        gear_fun: ClosedGearFunction = ClosedGearFunction[InputRecord](
             Run(arg=arg, convertToStr=convertToStr, collect=collect, **kwargs),
             input_function=self,
             requirements=requirements,
@@ -1552,7 +1581,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         collect: bool = True,
         # Helpers, all must be None
         mode: str = None,
-        onRegistered: "optype.Callback" = None,
+        onRegistered: Callback = None,
         eventTypes: Iterable[str] = None,
         keyTypes: Iterable[str] = None,
         readValue: bool = None,
@@ -1568,7 +1597,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         # Other Redis Gears args
         **kwargs,
         # TODO: Add all the Reader specific args here
-    ) -> ClosedGearFunction["optype.InputRecord"]:
+    ) -> ClosedGearFunction[InputRecord]:
         """Create a "closed" function to be :ref:`op_action_register` 'ed as an
         event-triggered function.
 
@@ -1754,7 +1783,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
         replace = kwargs.pop("replace", None)
 
-        gear_fun = ClosedGearFunction["optype.InputRecord"](
+        gear_fun = ClosedGearFunction[InputRecord](
             Register(
                 prefix=prefix,
                 convertToStr=convertToStr,
@@ -1775,17 +1804,20 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def map(
         self,
-        op: "optype.Mapper[optype.InputRecord, optype.OutputRecord]",
+        op: Mapper[
+            InputRecord,
+            OutputRecord,
+        ],
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[optype.OutputRecord]":
+    ) -> "OpenGearFunction[OutputRecord]":
         """Instance-local :ref:`op_map` operation that performs a one-to-one (1:1) mapping of
         records.
 
         Args:
-            op (redgrease.typing.Mapper):
+            op (:data:`redgrease.typing.Mapper`):
                 Function to map on the input records.
                 The function must take one argument as input (input record) and
                 return something as an output (output record).
@@ -1810,17 +1842,17 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def flatmap(
         self,
-        op: "optype.Expander[optype.InputRecord, optype.OutputRecord]" = None,
+        op: Expander[InputRecord, OutputRecord] = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[Iterable[optype.OutputRecord]]":
+    ) -> "OpenGearFunction[Iterable[OutputRecord]]":
         """Instance-local :ref:`op_flatmap` operation that performs one-to-many (1:N) mapping
         of records.
 
         Args:
-            op (redgrease.typing.Expander, optional):
+            op (:data:`redgrease.typing.Expander`, optional):
                 Function to map on the input records.
                 The function must take one argument as input (input record) and
                 return an iterable as an output (output records).
@@ -1848,16 +1880,16 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def foreach(
         self,
-        op: "optype.Processor[optype.InputRecord]",
+        op: Processor[InputRecord],
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[InputRecord]":
         """Instance-local :ref:`op_foreach` operation performs one-to-the-same (1=1) mapping.
 
         Args:
-            op (redgrease.typing.Processor):
+            op (:data:`redgrease.typing.Processor`):
                 Function to run on each of the input records.
                 The function must take one argument as input (input record) and
                 should not return anything.
@@ -1883,17 +1915,17 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def filter(
         self,
-        op: "optype.Filterer[optype.InputRecord]" = None,
+        op: Filterer[InputRecord] = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[InputRecord]":
         """Instance-local :ref:`op_filter` operation performs one-to-zero-or-one (1:bool)
         filtering of records.
 
         Args:
-            op (redgrease.typing.Filterer, optional):
+            op (:data:`redgrease.typing.Filterer`, optional):
                 Function to apply on the input records, to decide which ones to keep.
                 The function must take one argument as input (input record) and
                 return a bool. The input records evaluated to ``True`` will be kept as
@@ -1922,7 +1954,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def accumulate(
         self,
-        op: "optype.Accumulator[T, optype.InputRecord]" = None,
+        op: Accumulator[T, InputRecord] = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -1932,7 +1964,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         records.
 
         Args:
-            op (redgrease.typing.Accumulator, optional):
+            op (:data:`redgrease.typing.Accumulator`, optional):
                 Function to to apply on the input records.
                 The function must take two arguments as input:
                     - An accumulator value, and
@@ -1965,25 +1997,25 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def localgroupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
-        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
+        extractor: Extractor[InputRecord, Key] = None,
+        reducer: Reducer[Key, T, InputRecord] = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[Dict[optype.Key, T]]":
+    ) -> "OpenGearFunction[Dict[Key, T]]":
         """Instance-local :ref:`op_localgroupby` operation performs many-to-less mapping (N:M)
         of records.
 
         Args:
-            extractor (redgrease.typing.Extractor, optional):
+            extractor (:data:`redgrease.typing.Extractor`, optional):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
                 Defaults to the hash of the input.
 
-            reducer (redgrease.typing.Reducer, optional):
+            reducer (:data:`redgrease.typing.Reducer`, optional):
                 Function to apply on the records of each group, to reduce to a single
                 value (per group).
                 The function must take (a) a key, (b) an input record and (c) a
@@ -2019,7 +2051,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         start: int = 0,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[InputRecord]":
         """Instance-local :ref:`op_limit` operation limits the number of records.
 
         Args:
@@ -2047,7 +2079,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
             input_function=self,
         )
 
-    def collect(self, **kwargs) -> "OpenGearFunction[optype.InputRecord]":
+    def collect(self, **kwargs) -> "OpenGearFunction[InputRecord]":
         """Cluster-global :ref:`op_collect` operation collects the result records.
 
         Args:
@@ -2066,18 +2098,18 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def repartition(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, Hashable]",
+        extractor: Extractor[InputRecord, Hashable],
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[InputRecord]":
         """Cluster-global :ref:`op_repartition` operation repartitions the records by
         shuffling
         them between shards.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`Extractor`):
                 Function that takes a record and calculates a key that is used to
                 determine the hash slot, and consequently the shard, that the record
                 should migrate to to.
@@ -2107,8 +2139,8 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
     def aggregate(
         self,
         zero: T = None,
-        seqOp: "optype.Accumulator[T, optype.InputRecord]" = None,
-        combOp: "optype.Accumulator[T, T]" = None,
+        seqOp: Accumulator[T, InputRecord] = None,
+        combOp: Accumulator[T, T] = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -2122,7 +2154,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
                 The initial / zero value of the accumulator variable.
                 Defaults to an empty list.
 
-            seqOp (redgrease.typing.Accumulator, optional):
+            seqOp (:data:`redgrease.typing.Accumulator`, optional):
                 A function to be applied on each of the input records, locally per
                 shard.
                 It must take two parameters:
@@ -2134,7 +2166,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
                 Defaults to addition, if 'zero' is a number and to a list accumulator
                 if 'zero' is a list.
 
-            combOp (redgrease.typing.Accumulator, optional):
+            combOp (:data:`redgrease.typing.Accumulator`, optional):
                 A function to be applied on each of the aggregated results of the local
                 aggregation (i.e. the output of `seqOp`).
                 It must take two parameters:
@@ -2182,20 +2214,20 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def aggregateby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
+        extractor: Extractor[InputRecord, Key] = None,
         zero: T = None,
-        seqOp: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
-        combOp: "optype.Reducer[optype.Key, T, T]" = None,
+        seqOp: Reducer[Key, T, InputRecord] = None,
+        combOp: Reducer[Key, T, T] = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[Dict[optype.Key, T]]":
+    ) -> "OpenGearFunction[Dict[Key, T]]":
         """Distributed :ref:`op_aggregateby` operation, behaves like aggregate, but
         separated on each key, extracted using the extractor.
 
         Args:
-            extractor (redgrease.typing.Extractor, optional):
+            extractor (:data:`redgrease.typing.Extractor`, optional):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
@@ -2206,7 +2238,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
                 The initial / zero value of the accumulator variable.
                 Defaults to an empty list.
 
-            seqOp (redgrease.typing.Accumulator, optional):
+            seqOp (:data:`redgrease.typing.Accumulator`, optional):
                 A function to be applied on each of the input records, locally per
                 shard and group.
                 It must take two parameters:
@@ -2217,7 +2249,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
                 The function must return the accumulator's updated value.
                 Defaults to a list reducer.
 
-            combOp (redgrease.typing.Accumulator):
+            combOp (:data:`redgrease.typing.Accumulator`):
                 A function to be applied on each of the aggregated results of the local
                 aggregation (i.e. the output of `seqOp`).
                 It must take two parameters:
@@ -2257,25 +2289,25 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def groupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
-        reducer: "optype.Reducer[optype.Key, T, optype.InputRecord]" = None,
+        extractor: Extractor[InputRecord, Key] = None,
+        reducer: Reducer[Key, T, InputRecord] = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[Dict[optype.Key, T]]":
+    ) -> "OpenGearFunction[Dict[Key, T]]":
         """Cluster-local :ref:`op_groupby` operation performing a many-to-less (N:M)
         grouping of records.
 
         Args:
-            extractor (redgrease.typing.Extractor, optional):
+            extractor (:data:`redgrease.typing.Extractor`, optional):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
                 Defaults to the hash of the input.
 
-            reducer (redgrease.typing.Reducer, optional):
+            reducer (:data:`redgrease.typing.Reducer`, optional):
                 Function to apply on the records of each group, to reduce to a single
                 value (per group).
                 The function must take (a) a key, (b) an input record and (c) a
@@ -2307,13 +2339,13 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def batchgroupby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, optype.Key]" = None,
-        reducer: "optype.BatchReducer[optype.Key, T, optype.InputRecord]" = None,
+        extractor: Extractor[InputRecord, Key] = None,
+        reducer: BatchReducer[Key, T, InputRecord] = None,
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[Dict[optype.Key, T]]":
+    ) -> "OpenGearFunction[Dict[Key, T]]":
         """Cluster-local :ref:`op_groupby` operation, performing a many-to-less (N:M)
         grouping of records.
 
@@ -2321,14 +2353,14 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
                 during runtime. Consider using the GroupBy
 
         Args:
-            extractor (redgrease.typing.Extractor, optional):
+            extractor (:data:`redgrease.typing.Extractor`, optional):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The groups are defined by the value of the key.
                 Defaults to the hash of the input.
 
-            reducer (redgrease.typing.Reducer):
+            reducer (:data:`redgrease.typing.Reducer`):
                 Function to apply on the records of each group, to reduce to a single
                 value (per group).
                 The function must take (a) a key, (b) an input record and (c) a
@@ -2360,7 +2392,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> "OpenGearFunction[optype.InputRecord]":
+    ) -> "OpenGearFunction[InputRecord]":
         """:ref:`op_sort` the records
 
         Args:
@@ -2386,7 +2418,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
             requirements=requirements,
         )
 
-    def distinct(self, **kwargs) -> "OpenGearFunction[optype.InputRecord]":
+    def distinct(self, **kwargs) -> "OpenGearFunction[InputRecord]":
         """Keep only the :ref:`op_distinct` values in the data.
 
         Args:
@@ -2422,7 +2454,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def countby(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, Hashable]" = lambda x: str(x),
+        extractor: Extractor[InputRecord, Hashable] = lambda x: str(x),
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
@@ -2431,7 +2463,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         """Distributed :ref:`op_countby` operation countinig the records grouped by key.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).
@@ -2459,7 +2491,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
 
     def avg(
         self,
-        extractor: "optype.Extractor[optype.InputRecord, float]" = lambda x: float(
+        extractor: Extractor[InputRecord, float] = lambda x: float(
             x if isinstance(x, (int, float, str)) else str(x)
         ),
         # Other Redgrease args
@@ -2471,7 +2503,7 @@ class OpenGearFunction(GearFunction[optype.InputRecord]):
         of the records.
 
         Args:
-            extractor (redgrease.typing.Extractor):
+            extractor (:data:`redgrease.typing.Extractor`):
                 Function to apply on the input records, to extact the grouping key.
                 The function must take one argument as input (input record) and
                 return a string (key).

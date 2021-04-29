@@ -66,7 +66,7 @@ def command(
             Same as for the `register` operation.
             Defaults to redgrease.sugar.TriggerMode.Async.
 
-        onRegistered (Callback, optional):
+        onRegistered (:data:`redgrease.typing.Callback`, optional):
             A function callback thats called on each shard upon function registration.
             It is a good place to initialize non-serializable objects such as
             network connections.

@@ -37,6 +37,22 @@ version = str(current_version)
 
 # -- General configuration ---------------------------------------------------
 autoclass_content = "both"
+autodoc_member_order = "bysource"
+
+autodoc_type_aliases = {
+    "Accumulator": "redgrease.typing.Accumulator",
+    "BatchReducer": "redgrease.typing.BatchReducer",
+    "Callback": "redgrease.typing.Callback",
+    "Expander": "redgrease.typing.Expander",
+    "Extractor": "redgrease.typing.Extractor",
+    "Filterer": "redgrease.typing.Filterer",
+    "InputRecord": "redgrease.typing.InputRecord",
+    "Key": "redgrease.typing.Key",
+    "Mapper": "redgrease.typing.Mapper",
+    "OutputRecord": "redgrease.typing.OutputRecord",
+    "Processor": "redgrease.typing.Processor",
+    "Reducer": "redgrease.typing.Reducer",
+}
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -44,9 +60,10 @@ autoclass_content = "both"
 extensions: List[str] = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    # "sphinx_autodoc_typehints",
     "sphinx.ext.viewcode",
     "sphinx_tabs.tabs",
-    #    "sphinxcontrib.osexample",
+    # "sphinxcontrib.osexample",
 ]
 # ["recommonmark"]
 

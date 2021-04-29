@@ -289,7 +289,6 @@ The :class:`.runtime.GearsBuilder` (as well as its short-form alias ``GB``), beh
    :members:
    :undoc-members:
    :inherited-members:
-   :member-order: bysource
 
 
 
