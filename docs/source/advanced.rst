@@ -5,7 +5,7 @@
 Advanced Concepts
 =================
 
-.. include :: wip.rst
+This section discuss some more advanced topics, considerations an usage patterns.
 
 .. _adv_extras:
 
@@ -33,6 +33,9 @@ For the server you may want to consider these different options:
     Most notably this will prevent you from using the :ref:`red_commands`.
 
     To enforce this option, ensure that any calls to :meth:`.Gears.pyexecute` explicitly set the ``enforce_redgrease`` argument to ``"redgrease"`` (without extras). Version qualifiers are supported (e.g. ``"redgrease>0.3"``).
+
+
+.. _adv_no_redgrease:
 
 - Nothing
 
@@ -136,10 +139,28 @@ The "clean" RedGrease modules, that can be used without extra dependencies are:
 Python 3.6 and 3.8+ 
 -------------------
 
-.. _adv_pure:
+Dynamically created :ref:`gearfun` objects can only be exectuted if the client Python version match (major and minor version) the Python version of the RedisGaers runtime. At the moment of writing, RedisGears version 1.0.6, is relying on Python 3.7. 
 
-Pure Gear Scripts
------------------
+RedGrease does however support using any Python version after Python 3.6 inclusive, for all other functionalities. 
+
+You are still able to constuct an run Gear functions using the RedGrease :ref:`gearfun` objects, but only if executed using :ref:`exe_gear_function_file`.
+
+This means that you need to:
+
+#. Put your Gear Function code in a separate file from your application code.
+#. Ensure that the Gear Function script, only use Python 3.7 constucts.
+#. Excute the function by passing the script file path to :meth:`redgrease.client.Gears.pyexecute`.
+
+.. _adv_legacay:
+
+Legacy Gear Scripts
+-------------------
+
+You do not have to change any of your existing legacy scripts to start using RedGrease.
+
+RedGrease support running "vanilla" RedisGears Gear functions, i.e. without any RedGrease features, by execution using :ref:`exe_gear_function_file`.
+
+If you however need to modify any of your legacy scripts, it may be a good idea to add ``from redgrease import execute, atomic, configGet, gearsConfigGet, hashtag, log, GearsBuilder, GB`` to the import section of your script so that you get the benefits of autocompletion and write-time type checking (assuming your IDE supports it).
 
 
 .. include :: footer.rst

@@ -1,7 +1,7 @@
 .. _quick_example_command:
 
 Cache Get Command
----------------
+-----------------
 
 As a final example of this quickstart tutorial, let's look at how we can build caching into Redis as a new command, with the help of Redis Gears and RedGrease.
 
@@ -182,7 +182,11 @@ And you should indeed see that the expected log messages appear:
 
 The last piece of code is jut to clean up the database by unregistering the ``cache_get`` Gear function, cancel and drom any ongoing Gear function executions and flush the key-space.
 
-.. literalinclude:: ../../examples/cache_get_command_faulty_faulty.py
+.. literalinclude:: ../../examples/cache_get_command_faulty.py
     :start-after: Clean the database
     :caption: Clean up the database: 
     :lineno-match:
+
+.. |br| raw:: html
+
+    <br />

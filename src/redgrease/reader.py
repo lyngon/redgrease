@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# from __future__ import annotations
+
 """
 Sugar classes for the various Gears Reader types.
 """
@@ -31,11 +33,11 @@ from typing import Callable, Dict, Iterable, Optional
 
 import redgrease.gears
 import redgrease.sugar
-import redgrease.typing
 import redgrease.utils
+from redgrease.typing import OutputRecord, Record
 
 
-class GearReader(redgrease.gears.OpenGearFunction[redgrease.typing.OutputRecord]):
+class GearReader(redgrease.gears.OpenGearFunction[OutputRecord]):
     """Base class for the Reader sugar classes.
 
     Extends `redgrease.runtime.GearsBuilder' with arguments for collecting
@@ -82,7 +84,7 @@ class GearReader(redgrease.gears.OpenGearFunction[redgrease.typing.OutputRecord]
         super().__init__(operation=reader_op, requirements=requirements)
 
 
-class KeysReader(GearReader[redgrease.typing.Record]):
+class KeysReader(GearReader[Record]):
     """KeysReader is a convenience class for GearsBuilder("KeysReader", ...)"""
 
     def __init__(
@@ -229,7 +231,7 @@ class KeysOnlyReader(GearReader[str]):
         self.default_key_pattern = default_key_pattern
 
 
-class StreamReader(GearReader[redgrease.typing.Record]):
+class StreamReader(GearReader[Record]):
     """StreamReader is a convenience class for GearsBuilder("StreamReader", ...)"""
 
     def __init__(
@@ -390,20 +392,20 @@ class CommandReader(GearReader):
 
     def apply(
         self,
-        fun: Callable[..., redgrease.typing.OutputRecord],
+        fun: Callable[..., OutputRecord],
         # Other Redgrease args
         requirements: Iterable[str] = None,
         # Other Redis Gears args
         **kwargs,
-    ) -> redgrease.gears.OpenGearFunction[redgrease.typing.OutputRecord]:
+    ) -> redgrease.gears.OpenGearFunction[OutputRecord]:
         """Apply a function to the trigger arguments.
 
         Args:
-            fun (Callable[..., redgrease.typing.OutputRecord]):
+            fun (Callable[..., :data:`redgrease.typing.OutputRecord`]):
                 The function to call with the trigger arguments.
 
         Returns:
-            redgrease.gears.OpenGearFunction[redgrease.typing.OutputRecord]:
+            redgrease.gears.OpenGearFunction[:data:`redgrease.typing.OutputRecord`]:
                 A new "open" gear function generating the results of the function.
         """
         return self.map(

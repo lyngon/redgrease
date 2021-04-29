@@ -1,6 +1,8 @@
 # Requirements for building the Documentation
-readthedocs-sphinx-search==0.1.0
-sphinx==3.5.3
-sphinx-rtd-theme==0.5.1
-Pygments==2.8.1
-sphinx-tabs==2.1.0
+readthedocs-sphinx-search  # ==0.1.0
+sphinx  # ==4.0.0b1  # 3.5.3
+sphinx-rtd-theme  # ==0.5.1
+Pygments  # ==2.8.1
+sphinx-tabs  # ==2.1.0
+sphinx-autodoc-napoleon-typehints  # ==2.1.6
+# sphinx-autodoc-typehints==1.12.0

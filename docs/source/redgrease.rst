@@ -29,13 +29,13 @@ redgrease.utils module
    :show-inheritance:
 
 
-redgrease.typing module
------------------------
+.. redgrease.typing module
+.. -----------------------
 
-.. automodule:: redgrease.typing
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: redgrease.typing
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
 
 
 .. Modules
