@@ -29,7 +29,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 """
 
 
-from typing import Any, Callable, Dict, Iterable, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Hashable, Iterable, Type, TypeVar, Union
 
 # Type aliases for type hints
 
@@ -41,7 +41,7 @@ InputRecord = TypeVar("InputRecord", contravariant=True)
 OutputRecord = TypeVar("OutputRecord", covariant=True)
 """Type variable for the output value of a GearFunction step / operation."""
 
-Key = TypeVar("Key", contravariant=True)
+Key = TypeVar("Key", bound=Hashable, contravariant=True)
 """Type variable for a Keys
 used in extractor functions in GroupBy operations and similar.
 """
@@ -68,103 +68,204 @@ Record = Dict
 """The type of a record from KeysReader and others."""
 
 
-Callback = Callable[[InputRecord], Any]
-""""Type for General Callbacks.
+Registrator = Callable[[], None]
+""""Type definition for Registrator functions.
 
-    An function of Callback type can be called with a single argument:
+    I.e. callback functions that may be called on each shard upon function registration.
+    Such functions provide a good place to initialize non-serializable objects such as
+    network connections.
 
-        - A record, of type InputRecord
-
-        The function a value, of any type.
+    An function of Registrator type shoud take no arguments, nor return any value.
 """
 
-Extractor = Callable[[InputRecord], OutputRecord]
-"""Type for Extractor functions.
+Extractor = Callable[[InputRecord], Key]
+"""Type definition for Extractor functions.
 
-    An function of Extractor type can be called with a single argument:
+    Extractor functions are used in the following :ref:`operations`:
 
-        - A record, of type InputRecord
+    - :ref:`op_localgroupby`
+    - :ref:`op_repartition`
+    - :ref:`op_aggregateby`
+    - :ref:`op_groupby`
+    - :ref:`op_batchgroupby`
+    - :ref:`op_countby`
+    - :ref:`op_avg`
 
-    The function a value, of type OutputRecord.
+
+    Extractor functions extracts or calculates the value that should be used as
+    (grouping) key, from an input record of the operation.
+
+    :Parameters: (InputRecord) - A single input-record, of the same type as the
+    operations' input type.
+
+    :Returns: A any 'Hashable' value.
+
+    :Return type: Key
+
+    Example - Count users per supervisor::
+
+        # Function of "Extractor" type
+        # Extracts the "supervisor" for a user,
+        # If the user has no supervisor, then the user is considered its own supervisor.
+        def supervisor(user)
+            return user.get("supervisor", user["id"])
+
+        KeysReader("user:*").values().countby(supervisor).run()
+
 """
 
 
 Mapper = Callable[[InputRecord], OutputRecord]
-"""Type for Mapper functions.
+"""Type definition for Mapper functions.
 
-    An function of Mapper type can be called with a single argument:
+    Mapper functions are used in the following :ref:`operations`:
 
-        - A record, of type InputRecord
+    - :ref:`op_map`
 
-    The function returns a value, of type OutputRecord.
+    Mapper functions transforms a value from the operations input to some new value.
+
+    :Parameters: (InputRecord) - A single input-record, of the same type as the
+    operations' input type.
+
+    :Returns: A any value.
+
+    :Return type: OutputRecord
 """
 
 
 Expander = Callable[[InputRecord], Iterable[OutputRecord]]
-"""Type for Expander functions.
+"""Type definition forExpander functions.
 
-    An function of Expander type can be called with a single argument:
+    Expander functions are used in the following :ref:`operations`:
 
-        - A record, of type InputRecord
+    - :ref:`op_flatmap`
 
-        The function returns an **Iterable** of any type, OutputRecord.
+    Expander functions transforms a value from the operations input into several new
+    values.
+
+    :Parameters: (InputRecord) - A single input-record, of the same type as the
+    operations' input type.
+
+    :Returns: An iterable sequence of values, for example a list, each of which becomes
+        an input to the next operation.
+
+    :Return type: Iterable[OuntputRecord]
 """
 
 
 Processor = Callable[[InputRecord], None]
-"""Type for Processor functions.
+"""Type definition forProcessor functions.
 
-    An function of Processor type can be called with a single argument:
+    Processor functions are used in the following :ref:`operations`:
 
-        - A record, of type InputRecord
+    - :ref:`op_foreach`
 
-    The function does not return anything.
+    Processor functions performs some side effect using a value from the operations
+    input.
+
+    :Parameters: (InputRecord) - A single input-record, of the same type as the
+    operations' input type.
+
+    :Returns: Nothing.
+
+    :Return type: None
 """
 
 
 Filterer = Callable[[InputRecord], bool]
-"""Type for Filterer functions.
+"""Type definition forFilterer functions.
 
-    An function of Filterer type can be called with a single argument:
+    Filterer functions are used in the following :ref:`operations`:
 
-        - A record, of type InputRecord
+    - :ref:`op_filter`
 
-    The function returns a bool.
+    Filter functions evaluates a value from the operations input to either ``True``
+    or ``False``.
+
+    :Parameters: (InputRecord) - A single input-record, of the same type as the
+    opertations' input type.
+
+    :Returns: ither ``True`` or ``False``.
+
+    :Return type: bool
 """
 
 
 Accumulator = Callable[[T, InputRecord], T]
-"""Type for Accumulator functions.
+"""Type definition forAccumulator functions.
 
-    An function of Accumulator type can be called with two arguments:
+    Accumulator functions are used in the following :ref:`operations`:
 
-        - An accumulator value, of type T
-        - A record, of type InputRecord
+    - :ref:`op_accumulate`
+    - :ref:`op_aggregate`
 
-    The function returns a value of the same type as the accumulator value, T.
+    Accumulator functions takes a variable that's also called an accumulator, as well
+    as an input record. It aggregates inputs into the accumulator variable, which
+    stores the  state between the function's invocations.
+    The function must return the accumulator's updated value after each call.
+
+    :Parameters:
+
+    * ( T ) - An accumulator value.
+
+    * (InputRecord) - A single input-record, of the same type as the operations' input
+    type.
+
+    :Returns: The updated accumulator value.
+
+    :Return type: T
 """
 
 
 Reducer = Callable[[Key, T, InputRecord], T]
-"""Type for Reducer functions.
+"""Type definition forReducer functions.
 
-    An function of Reducer type can be called with three arguments:
+    Reducer functions are used in the following :ref:`operations`:
 
-        - A key value, of type Key
-        - An accumulator value, of type T
-        - A record, of type InputRecord
+    - :ref:`op_localgroupby`
+    - :ref:`op_aggregateby`
+    - :ref:`op_groupby`
 
-    The function returns a value of the same type as the accumulator value, T.
+
+    Reducer functions receives a key, a variable that's called an accumulator and an an
+    input. It performs similarly to the :data:`redgrease.typing.Accumulator callback`,
+    with the difference being that it maintains an accumulator per reduced key.
+
+    :Parameters:
+
+    * (Key) - A key value for the group.
+
+    * ( T ) - An accumulator value.
+
+    * (InputRecord) - A single input-record, of the same type as the operations' input
+    type.
+
+    :Returns: The updated accumulator value.
+
+    :Return type: T
 """
 
 
 BatchReducer = Callable[[Key, Iterable[InputRecord]], OutputRecord]
-"""Type for BatchReducer functions.
+"""Type definition forBatchReducer functions.
 
-    An function of BatchReducer type can be called with two arguments:
+    BatchReducer functions are used in the following :ref:`operations`:
 
-        - A key value, of type Key
-        - An Iterable collection of records, of type InputRecord
+    - :ref:`op_batchgroupby`
 
-    The function returns a value, T, reduced from the iterable.
+    BatchReducer functions receives a key and a list of input records. It performs
+    similarly to the :data:`redgrease.typing.Reducer callback`, with the difference
+    being that it is input with a list of records instead of a single one.
+    It is expected to return an accumulator value for these records
+
+    :Parameters:
+
+    * (Key) - A key value for the group.
+
+    * (Iterable[InputRecord]) - A collection of input-record, of the same type as the
+    operations' input type.
+
+    :Returns: A reduced output value.
+
+    :Return type: OutputRecord
 """

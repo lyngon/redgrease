@@ -31,7 +31,7 @@ from typing import Callable
 import redgrease.reader
 import redgrease.sugar
 from redgrease.gears import ClosedGearFunction
-from redgrease.typing import Callback
+from redgrease.typing import Registrator
 
 
 def command(
@@ -39,7 +39,7 @@ def command(
     prefix: str = "*",
     collect: bool = True,
     mode: str = redgrease.sugar.TriggerMode.Async,
-    onRegistered: Callback = None,
+    onRegistered: Registrator = None,
     **kargs,
 ) -> Callable[[Callable], ClosedGearFunction]:
     """Decorator for creation of CommandReader + Tigger GearFunctions
@@ -66,7 +66,7 @@ def command(
             Same as for the `register` operation.
             Defaults to redgrease.sugar.TriggerMode.Async.
 
-        onRegistered (:data:`redgrease.typing.Callback`, optional):
+        onRegistered (:data:`redgrease.typing.Registrator`, optional):
             A function callback thats called on each shard upon function registration.
             It is a good place to initialize non-serializable objects such as
             network connections.

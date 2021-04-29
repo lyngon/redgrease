@@ -42,7 +42,7 @@ autodoc_member_order = "bysource"
 autodoc_type_aliases = {
     "Accumulator": "redgrease.typing.Accumulator",
     "BatchReducer": "redgrease.typing.BatchReducer",
-    "Callback": "redgrease.typing.Callback",
+    "Registrator": "redgrease.typing.Registrator",
     "Expander": "redgrease.typing.Expander",
     "Extractor": "redgrease.typing.Extractor",
     "Filterer": "redgrease.typing.Filterer",

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import annotations
+# from __future__ import annotations
 
 """
 Sugar classes for the various Gears Reader types.

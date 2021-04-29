@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import annotations
+# from __future__ import annotations
 
 """
 Redgrease's (overloaded) variants of the symbols loaded per default into the top level
@@ -28,25 +28,25 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from typing import TYPE_CHECKING, Hashable, Iterable, TypeVar
+from typing import Hashable, Iterable, TypeVar
 
 import redgrease.gears
 
-if TYPE_CHECKING:
-    from redgrease.typing import (
-        Accumulator,
-        BatchReducer,
-        Callback,
-        Expander,
-        Extractor,
-        Filterer,
-        InputRecord,
-        Key,
-        Mapper,
-        OutputRecord,
-        Processor,
-        Reducer,
-    )
+# if TYPE_CHECKING:
+from redgrease.typing import (
+    Accumulator,
+    BatchReducer,
+    Expander,
+    Extractor,
+    Filterer,
+    InputRecord,
+    Key,
+    Mapper,
+    OutputRecord,
+    Processor,
+    Reducer,
+    Registrator,
+)
 
 T = TypeVar("T")
 
@@ -156,7 +156,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
         collect: bool = True,
         # Helpers, all must be None
         mode: str = None,
-        onRegistered: Callback = None,
+        onRegistered: Registrator = None,
         eventTypes: Iterable[str] = None,
         keyTypes: Iterable[str] = None,
         readValue: bool = None,

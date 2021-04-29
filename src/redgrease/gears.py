@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import annotations
+# from __future__ import annotations
 
 """
 GearsFunction and Operation definintions
@@ -36,7 +36,6 @@ import redgrease.utils
 from redgrease.typing import (
     Accumulator,
     BatchReducer,
-    Callback,
     Expander,
     Extractor,
     Filterer,
@@ -46,6 +45,7 @@ from redgrease.typing import (
     OutputRecord,
     Processor,
     Reducer,
+    Registrator,
 )
 
 T = TypeVar("T")
@@ -331,7 +331,7 @@ class Register(Operation):
         convertToStr: bool = True,
         collect: bool = True,
         mode: str = sugar.TriggerMode.Async,
-        onRegistered: Callback = None,
+        onRegistered: Registrator = None,
         **kwargs,
     ) -> None:
         """Instantiate a Register action
@@ -369,7 +369,7 @@ class Register(Operation):
 
                 Defaults to `redgrease.TriggerMode.Async` (``"async"``)
 
-            onRegistered (Callback, optional):
+            onRegistered (Registrator, optional):
                 A function callback that's called on each shard upon function
                 registration.
                 It is a good place to initialize non-serializable objects such as
@@ -1581,7 +1581,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
         collect: bool = True,
         # Helpers, all must be None
         mode: str = None,
-        onRegistered: Callback = None,
+        onRegistered: Registrator = None,
         eventTypes: Iterable[str] = None,
         keyTypes: Iterable[str] = None,
         readValue: bool = None,
@@ -1638,7 +1638,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
 
                 Defaults to ``"async"``.
 
-            onRegistered (Callback, optional):
+            onRegistered (Registrator, optional):
                 A function that's called on each shard upon function registration.
                 It is a good place to initialize non-serializable objects such as
                 network connections.

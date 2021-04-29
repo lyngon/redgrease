@@ -202,10 +202,11 @@ Operation Callback Types
 
 This section runs through the various type signatures that the function callbacks used in the :ref:`operations` must follow.
 
-Callback
---------
+Registrator
+-----------
 
-.. autodata:: redgrease.typing.Callback
+.. autodata:: redgrease.typing.Registrator
+
 
 
 Extractor
