@@ -3,21 +3,21 @@
 API Reference
 =================
 
-redgrease package
-----------------------
+.. redgrease package
+.. ----------------------
 
-.. automodule:: redgrease
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: redgrease
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
 
-redgrease.config module
------------------------
+.. redgrease.config module
+.. -----------------------
 
-.. automodule:: redgrease.config
-   :members: Config
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: redgrease.config
+..    :members: Config
+..    :undoc-members:
+..    :show-inheritance:
    
 
 redgrease.utils module
@@ -49,21 +49,21 @@ redgrease.utils module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-redgrease.client module
------------------------
+.. redgrease.client module
+.. -----------------------
 
-.. automodule:: redgrease.client
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: redgrease.client
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
 
-redgrease.runtime_client module
-------------------------
+.. redgrease.runtime_client module
+.. ------------------------
 
-.. automodule:: redgrease.runtime_client
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: redgrease.runtime_client
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
 
 redgrease.data module
 ---------------------
@@ -89,13 +89,13 @@ redgrease.data module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-redgrease.gears module
-----------------------
+.. redgrease.gears module
+.. ----------------------
 
-.. automodule:: redgrease.gears
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: redgrease.gears
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
 
 .. redgrease.hysteresis module
 .. ---------------------------
@@ -113,13 +113,13 @@ redgrease.gears module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-redgrease.reader module
------------------------
+.. redgrease.reader module
+.. -----------------------
 
-.. automodule:: redgrease.reader
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: redgrease.reader
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
 
 .. redgrease.requirements module
 .. -----------------------------
@@ -129,13 +129,13 @@ redgrease.reader module
 ..    :undoc-members:
 ..    :show-inheritance:
 
-redgrease.runtime module
-------------------------
+.. redgrease.runtime module
+.. ------------------------
 
-.. automodule:: redgrease.runtime
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: redgrease.runtime
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
 
 redgrease.sugar module
 ----------------------

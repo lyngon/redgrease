@@ -7,18 +7,39 @@ Qickstart Guide
 
 This section aims to get you started within a few couple of minutes, while still explaining what is going on, so that someone with only limited experience with Python can follow along.
 
-**TL;DR**
+**Setup TL;DR**
 
-.. code-block:: console
+.. tabs::
 
-    docker run --name redis_gears --rm -d -p 127.0.0.1:6379:6379 redislabs/redisgears:1.0.6
+    .. tab:: POSIX (Linux, BSD, OSX, etc)
 
-    python3.7 -m venv .venv
-    source .venv/bin/activate
+        .. code-block:: console
 
-    pip install redgrease[all]
+            docker run --name redis_gears --rm -d -p 127.0.0.1:6379:6379 redislabs/redisgears:1.0.6
 
-:ref:`Jump straight to the first code examples <quick_examples>`.
+            virtualenv -p python3.7 .venv
+            source .venv/bin/activate
+
+            pip install redgrease[all]
+
+    .. tab:: The Windows
+
+        .. code-block:: console
+
+            docker run --name redis_gears --rm -d -p 127.0.0.1:6379:6379 redislabs/redisgears:1.0.6
+
+            virtualenv -p python3.7 .venv
+            \venv\Scripts\activate.bat
+
+            pip install redgrease[all]
+
+
+        .. note::
+
+            This is not tested. If anyone is using this OS, please let me know if this works or not. :)
+
+
+If this was obvious to you, you can :ref:`jump straight to the first code examples <quick_examples>`.
     
 
 .. _quick_running_gears_server:
@@ -121,13 +142,14 @@ For the client application environment, it is strongly recommended that you set 
 
     If the versions mismatch, Gear function execution is limited to :ref:`execution by string <exe_gear_function_str>` or :ref:`execution of script files <exe_gear_function_file>`
 
-With Python 3.7 installed on your system:
+With Python 3.7, and `virtualenv <https://virtualenv.pypa.io>`_ installed on your system:
 
-#. Create a virtual environment
+
+#. Create a virtual python3.7 environment
 
     .. code-block:: console
 
-        python3.7 -m venv .venv
+        virtualenv -p python3.7 .venv
 
     Python packages, including RedGrease that you install within this virtual environment will not interfere with the rest of your system.
 
@@ -135,7 +157,7 @@ With Python 3.7 installed on your system:
 
     .. tabs::
 
-        .. tab:: Linux, BSD, OSX and POSIX
+        .. tab:: POSIX (Linux, BSD, OSX, etc)
 
             .. code-block:: console
 
@@ -169,13 +191,13 @@ Basic Commands
 
 In this section we'll walk through some of the basic commands and interactions with the RedGrease Gears client, including executing some very basic Gear functions.
 
-The next chapter ":ref:`Redgrease Client <client>`", goes into each command in more details, but for now we'll just look at the most important thing.
+The next chapter ":ref:`client`", goes into all commands in more details, but for now we'll just look at the most important things.
 
-You can take a sneak-peek at the full code we'll walk through in this section, by expanding the block below (click "▶ Show").
+You can take a sneak-peek at the full code thtat we will walk through in this section, by expanding the block below (click "▶ Show").
 
-If you find this rather selfself-explanatory, then you can probably jump directly to the next section where we :ref:`compare examples of Gear functions, with and without using RedGrease <quick_example_gears_comparisons>`.
+If you find this rather selfself-explanatory, then you can probably jump directly to the next section where we do some  :ref:`quick_example_gears_comparisons` with "vanilla" RedisGears functions.
 
-Otherwise just contiue reading and well, go it through step-by-step.
+Otherwise just contiue reading and we'll, go through it step-by-step.
 
 .. container:: toggle
 
@@ -193,7 +215,7 @@ Let's look at some code examples of how to use RedGrease, warming up with the ba
 Instantiation
 ~~~~~~~~~~~~~
 
-Naturally, the first thing is to import of the RedgGrease package and instantiate  Redis Gears client / connection object
+Naturally, the first thing is to import of the RedgGrease package and :ref:`instantiate Redis Gears client / connection object <client_gears_instantiation>`:
 
 .. literalinclude:: ../../examples/basics.py
     :end-before: # Normal Redis Commands
@@ -213,13 +235,7 @@ The imported ``add`` function from the ``operator`` module is not part of the Re
 
         import redgrease
 
-        r = redgrease.RedisGears(
-                startup_nodes=[
-                {"host":"localhost", "port":30001},
-                {"host":"localhost", "port":30002},
-                {"host":"localhost", "port":30003},
-            ]
-        )
+        r = redgrease.RedisGears(port=30001)
 
 
 Redis Commands
@@ -238,7 +254,7 @@ The subsequent lines populate the Redis instance it with some data.
 Gears Commands
 ~~~~~~~~~~~~~~
 
-The client / connection also has a ``gears`` attribute that gives access to Redis Gears specific commands.
+The client / connection also has a ``gears`` attribute that gives access to :ref:`client_gears_commands`.
 
 .. literalinclude:: ../../examples/basics.py
     :language: python
@@ -248,7 +264,7 @@ The client / connection also has a ``gears`` attribute that gives access to Redi
     :caption: Some Redis Gears commands:    
     :emphasize-lines: 2,6,10,14,21-22
 
-The highligthed lines show the commands ``pystats``, ``dumpregistrations`` and ``pyexecute`` respectively and the output sould look something like this:
+The highligthed lines show the commands :meth:`.Gears.pystats`, :meth:`.Gears.dumpregistrations` and :meth:`.Gears.pyexecute` respectively and the output sould look something like this:
 
 .. code-block:: console
     
@@ -264,25 +280,25 @@ The highligthed lines show the commands ``pystats``, ``dumpregistrations`` and `
     ]
     Total number of keys: 5
 
-The command ``pystats`` gets some memory usage statistics about the Redis Gears Python runtime environment on the server.
+The command :meth:`.Gears.pystats` gets some memory usage statistics about the Redis Gears Python runtime environment on the server.
 
-The command ``dumpregistrations`` gets information about any registered Gears functions, in this cas none.
+The command :meth:`.Gears.dumpregistrations` gets information about any registered Gears functions, in this cas none.
 
-And finally, the commmand ``pyexecute`` is the most important command, which sends a Gears function to the server for execution or registration.
+And finally, the commmand :meth:`.Gears.pyexecute` is the most important command, which sends a Gears function to the server for execution or registration.
 In the above example, we are invoking it three times:
 
-- Firstly (line 31) - We pass nothing, i.e. no function at all, which naturally doesn't do anything, but is perfectly valid, and the call thus just returns ``True``.
+- Firstly (line 35) - We pass nothing, i.e. no function at all, which naturally doesn't do anything, but is perfectly valid, and the call thus just returns ``True``.
 
-- Secondly (line 35) - We pass a Gear function string, that reads through the Redis keys (indicated by the ``KeysReader``) and just returns the result by running the function as a batch job (indicated by the ``run()`` operation). The result is consequently a list of dicts, representing the keys and their respective values and types in the Redis keyspace, I.e. the keys we added just before.
+- Secondly (line 39) - We execute a :ref:`exe_gear_function_str`, that reads through the Redis keys (indicated by the ``'KeysReader'``) and just returns the result by running the function as a batch job (indicated by the ``run()`` operation). The result is consequently a list of dicts, representing the keys and their respective values and types in the Redis keyspace, I.e. the keys we added just before.
 
-- Thirdly (lines 42-43) - We pass a very similar function, but with an additional ``count()`` operation, which is a Gear operation that simply aggregates and counts the incoming records, in this case all key-space records on the server. The result is simply the number or keys in the database: ``5``.
+- Thirdly (lines 46-47) - We pass a very similar function, but with an additional ``count()`` operation, which is a Gear operation that simply aggregates and counts the incoming records, in this case all key-space records on the server. The result is simply the number or keys in the database: ``5``.
 
-There are other Gears commands too, and the next chapter, ":ref:`Redgrease Client <client>`", will run through them, and the full specifications can be found in the API reference documentation on the :class:`Gears <.Gears>` class.
+There are other Gears commands too, and the next chapter, ":ref:`Redgrease Client <client>`", will run through all of them.
 
 GearFunctions
 ~~~~~~~~~~~~~
 
-Composing Gear functions by using strings is not at all very practical, so RedGrease provides a more convenient way of constructing Gear funtctions programmatically, using ``GearFunction`` objects. 
+Composing Gear functions by using strings is not at all very practical, so RedGrease provides a more convenient way of constructing Gear funtctions programmatically, using various :ref:`gearfun` objects. 
 
 
 .. literalinclude:: ../../examples/basics.py
@@ -323,12 +339,12 @@ And indeed, the result is:
 Here is a quick run down of how it works: 
 
 - Firstly, the :class:`KeysReader <.KeysReader>` is parameterized with a key pattern ``*-fighter`` meaning it will only read the matching keys.
-- Secondly, the ``map()`` operation uses a simple lambda function, to lift out the ``value`` and ensure it is an integer, on each of the keys.
-- Thirdly, the ``aggregate()`` operation is used to add the values together, using the imporded ``add`` function, starting with the value 0.
-- Lastly, the ``run()`` operation is used te run the function as a batch job. The ``on`` argument states that we want to run it immediately on our client / connection, ``r``.
+- Secondly, the :meth:`map() <.OpenGearFunction.map>` operation uses a simple `lambda function <https://realpython.com/python-lambda/>`_, to lift out the ``value`` and ensure it is an integer, on each of the keys.
+- Thirdly, the :meth:`aggregate() <.OpenGearFunction.aggregate>` operation is used to add the values together, using the imported ``add`` function, starting from the value 0.
+- Lastly, the :meth:`run() <.OpenGearFunction.run>` operation is used to specify that the function should run as a batch job. The ``on`` argument states that we want to run it immediately on our client / connection, ``r``.
 
 
-The chapter :ref:`Readers <readers>` will go through the various types of readers, ant the chapter :ref:`Operations <operations>` will go through the various types of operations, and how to use them.
+The chapter ":ref:`gearfun_readers`" will go through the various types of readers, and the chapter :ref:`operations` will go through the various types of operations, and how to use them.
 
 
 .. _quick_example_gears_comparisons:
@@ -455,7 +471,7 @@ This example demonstrates a two-step process that:
 
 Assumptions
 ...........
-The example assumes there is a ``process`` funtion defined, that does the actual processing of the deleted records. For the purpose of the exaple we can assume that it just outputs the name of the expired keys to the Redis logs, as follows:
+The example assumes there is a ``process`` function defined, that does the actual processing of the deleted records. For the purpose of the exaple we can assume that it just outputs the name of the expired keys to the Redis logs, as follows:
 
 .. literalinclude:: ../../tests/gear_scripts/redislabs_example_keyspacenotificationprocessing.py
     :lines: -9
@@ -581,7 +597,7 @@ Lets now go for the core of the solution; The code that we want to run on Redis 
     :lines: 14-
     :end-before: Test caching on some images
     :caption: Cache handling function:
-    :emphasize-lines: 1, 7, 18, 20
+    :emphasize-lines: 1, 6, 17, 19
     :lineno-match:
 
 
@@ -590,12 +606,10 @@ Look at the highligthed lines, and notice:
 - The logic of handling requests with caching is simply put in a normal function, much like we would if the caching logic was handled by each client.
 - The argument of the function is what we could expect, the ``url`` to the resource to get.
 - The function return value is either:
-    - The contents of the response to requests to the URL (line 33), or
-    - A cached value (line 20)
+    - The contents of the response to requests to the URL (line 32), or
+    - A cached value (line 19)
 
-Which is exactly what you would expect from a cached feching function. 
-
-The rest of the logic is mostly for ensuring that only one of the requests trigger the download and storing in the cache, while blocking new requests until the data is stored (or timed out or failed).
+Which is exactly what you would expect from a cached fetching function. 
 
 The really intersting part, however, is this little line, on top of the function. 
 
@@ -608,11 +622,11 @@ The really intersting part, however, is this little line, on top of the function
 
 All the Redis Gears magic is hidden in this function decorator, and it does a couple of important things:
 
-- It embeds the function in a ``CommandReader`` Gear function.
+- It embeds the function in a :class:`.CommandReader` Gear function.
 - It ensures that the function is redgistered on our Redis server(s).
 - It captures the relevant requirements, for the function to work.
 - It ensures that we only register this function once. 
-- It creates a new function, with the same name that, when called, triggers the corresponding registered Gear function, and returns the result from the server.
+- It creates a new function, with the same name, which when called, triggers the corresponding registered Gear function, and returns the result from the server.
 
 This means that you can now call the decorated function, just as if it was a local function:
 
@@ -630,18 +644,22 @@ In our case, using `redis-cli` as an example:
 
     > RG.TRIGGER cache_get http://images.cocodataset.org/train2017/000000169188.jpg
 
-The arguments for the :func:`redgrease.command <.command>` decorator, are the same as to the :meth:`register <.CommandReader.register>` method of the :class:`CommandReader <.CommandReader>` class.
+The arguments for the :func:`@command <redgrease.command>` decorator, are the same as to the :meth:`OpenGearFunction.register` method, inherited by the :class:`CommandReader` class.
 
 .. note:: 
 
-    This simplistic cache function is only for demonstrating the command function decorator. The design choices of this particular cache implementation is far from ideal for all use-cases. Fore example:
+    This simplistic cache function is only for demonstrating the command function decorator. 
+    The design choices of this particular caching implementation is far from ideal for all use-cases. 
+    
+    For example:
+
     - Only the response content data is returned, not response status or headers. 
     - Cache is never expiring.
     - If multiple requests for the same resource is made in close successions, there may be duplicate external requests.
     - The entire response contents is copied into memory before writing to cache.
     - ... etc ... 
 
-    Naturally, the solution could easily be modified to other behaviors.
+    Naturally, the solution could easily be modified to accomodate other behaviors.
 
 
 Testing the Cache

@@ -5,10 +5,12 @@
 Syntactic Sugar
 ===============
 
-.. _trigger_decorator:
+.. _command_decorator:
 
-Trigger Function decorator
+Command Function decorator
 --------------------------
+
+.. autofunction:: redgrease.command
 
 .. include :: wip.rst
 

@@ -24,7 +24,6 @@ RedGrease Documentation
    sugar
    cli
    advanced
-   redgrease
    help
 
 

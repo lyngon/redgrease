@@ -136,9 +136,9 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     * Can be :ref:`created without a Redis connection <exe_gear_function_obj_pyexcute>`.
 
-    * :class:`Requirements can be specified per step <redgrease.gears.OpenGearFunction>`, instead of only at execution.
+    * :ref:`Requirements can be specified per step <gearfun_open>`, instead of only at execution.
 
-    * Can be executed in a few different convenient ways.
+    * Can be :ref:`executed in a few different convenient ways <execution>`.
     
     
 
@@ -169,9 +169,9 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     * Various :ref:`Syntactic sugar <sugar>` and enum-like objects for common keywords etc.
 
-    * A ``trigger`` :ref:`Function decorator <trigger_decorator>`, that makes creation and execution of ``CommandReader`` GearFunctions trivial, and providing a straight forward way of adding bespoke serverside Redis commands.
+    * A :ref:`command_decorator`, that makes creation and execution of :class:`redgrease.reader.CommandReader` :ref:`gearfun` trivial, and providing a straight forward way of adding bespoke serverside Redis commands.
 
-    * Reader-specific sugar operators, like `KeysReader.values` that automaticalls lifts out the values.
+    * Reader-specific sugar operators, like :class:`KeysReader.values <.KeysReader>` that automaticalls lifts out the values.
 
     * And more...
 
