@@ -55,8 +55,8 @@ The output of the final operation is then either, returned to the caller if it w
 
 .. _gearfun_open:
 
-OpenGearFunction 
-~~~~~~~~~~~~~~~~~~~
+Open GearFunction 
+~~~~~~~~~~~~~~~~~
 
 You would never instatiate a :class:`.gears.OpenGearFunction` yourself, but all "open" :ref:`GearFuctions <gearfun>` that has not yet been "closed" with the :ref:`op_action_run` or :ref:`op_action_register` :ref:`op_action`, inherits from this class. 
 
@@ -71,8 +71,8 @@ This includes both the :class:`.runtime.GearsBuilder` as well as the :ref:`gearf
 
 .. _gearfun_closed:
 
-ClosedGearFunction
-~~~~~~~~~~~~~~~~~~
+Closed GearFunction
+~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: redgrease.gears.ClosedGearFunction()
     :members:
