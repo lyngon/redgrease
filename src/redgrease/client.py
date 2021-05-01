@@ -118,7 +118,7 @@ class Gears:
     # NODES_FLAGS - (cluster only)
     # States how target node is selected for cluster commands:
     # - blocked : command is not allowed - Raises a RedisClusterException
-    # - random : excuted on one randomly selected node
+    # - random : executed on one randomly selected node
     # - all-masters : executed on all master node
     # - all-nodes : executed on all nodes
     # - slot-id : executed on the node defined by the second argument
@@ -145,7 +145,7 @@ class Gears:
     }
 
     def __init__(self, redis: redis.Redis):
-        """Instatiate a Gears client objeect
+        """Instantiate a Gears client object
 
         Args:
             redis (redis.Redis):
@@ -171,7 +171,7 @@ class Gears:
         self.config = redgrease.config.Config(redis)
 
     def _ping(self) -> bool:
-        """Test server liveness/connectivty
+        """Test server liveness/connectivity
 
         Returns:
             bool:
@@ -313,7 +313,7 @@ class Gears:
         registrations = self._redis.execute_command("RG.DUMPREGISTRATIONS")
 
         if reader or desc or mode or key or stream or trigger:
-            filtered_regsistrations = []
+            filtered_registrations = []
             for reg in registrations:
                 if trigger and (
                     "trigger" not in reg.RegistrationData.args
@@ -335,9 +335,9 @@ class Gears:
                 if mode and mode != reg.RegistrationData.mode:
                     continue
 
-                filtered_regsistrations.append(reg)
+                filtered_registrations.append(reg)
 
-            registrations = filtered_regsistrations
+            registrations = filtered_registrations
 
         return registrations
 
@@ -346,14 +346,14 @@ class Gears:
         id: ExecutionID,
         locality: Optional[redgrease.data.ExecLocality] = None,
     ) -> Mapping[bytes, redgrease.data.ExecutionPlan]:
-        """Get the executoin plan details for a function in the execution list.
+        """Get the execution plan details for a function in the execution list.
 
         Args:
             id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
                 Execution identifier for the function to fetch execution plan for.
 
             locality (Optional[redgrease.data.ExecLocality], optional):
-                Set to 'Shard' to get only local execution pland and set to 'Cluster'
+                Set to 'Shard' to get only local execution plan and set to 'Cluster'
                 to collect executions from all shards.
                 Defaults to 'Shard' in stand-alone mode, but "Cluster" in cluster mode.
 
@@ -376,7 +376,7 @@ class Gears:
 
         Args:
             id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
-                Execution identifier for the fuction to fetch the output for.
+                Execution identifier for the function to fetch the output for.
 
         Returns:
             redgrease.data.ExecutionResult:
@@ -400,7 +400,7 @@ class Gears:
 
         Args:
             id (Union[redgrease.data.ExecutionInfo, redgrease.data.ExecID, bytes, str]):
-                Execution identifier for the fuction to fetch the results and errors
+                Execution identifier for the function to fetch the results and errors
                 for.
 
         Returns:
@@ -420,7 +420,7 @@ class Gears:
         """Gets information about the cluster and its shards.
 
         Returns:
-            redgredase.data.ClusterInfo:
+            redgrease.data.ClusterInfo:
                 Cluster information or None if not in cluster mode.
         """
         return self._redis.execute_command("RG.INFOCLUSTER")
@@ -442,11 +442,11 @@ class Gears:
             gear_function (Union[str, redgrease.gears.GearFunction], optional):
                 Function to execute. Either:
 
-                - A `Raw Function String`_ containing a clear-text serialized Gears Python function as per the `examples in the official documentation <https://oss.redislabs.com/redisgears/intro.html#the-simplest-example>`_.
+                - A :ref:`raw function string <exe_gear_function_str>` containing a clear-text serialized Gears Python function as per the `examples in the official documentation <https://oss.redislabs.com/redisgears/intro.html#the-simplest-example>`_.
 
-                - A `Script File Path`_.
+                - A :ref:`script file path <exe_gear_function_file>`.
 
-                - A `GearFunction Object`_, e.g. :class:`.GearsBuilder` or either of the :class:`.Reader` types.
+                - A :ref:`GearFunction object <exe_gear_function_obj>`, e.g. :class:`.GearsBuilder` or either of the :ref:`gearfun_readers` types.
 
                 .. note::
 
@@ -459,7 +459,7 @@ class Gears:
                 Defaults to ``""``, i.e. no function.
 
             unblocking (bool, optional):
-                Execute function without waiting for it to finish before returnining.
+                Execute function without waiting for it to finish before returning.
 
                 Defaults to ``False``. I.e. block until the function returns or fails.
 
@@ -474,7 +474,7 @@ class Gears:
 
                 It can take several optional types:
 
-                    - ``None`` :  No enforcment. Requirements are passed through, with or without 'redgrease' runtime package.
+                    - ``None`` :  No enforcement. Requirements are passed through, with or without 'redgrease' runtime package.
 
                     - ``True`` : Enforces latest ``"redgrease[runtime]"`` package on PyPi,
 
@@ -490,12 +490,12 @@ class Gears:
 
                         d. Full requirement qualifier or source. E.g: ``"redgrease[all]>=1.2.3"`` or  ``"redgrease[runtime]@git+https://github.com/lyngon/redgrease.git@main"``
 
-                Defaults to ``None`` when ``gear_function`` is a `Script File Path`_ or a `Raw Function String`_, but ``True`` when it is a `GearFunction Object`_.
+                Defaults to ``None`` when ``gear_function`` is a :ref:`script file path <exe_gear_function_file>` or a :ref:`raw function string <exe_gear_function_str>`, but ``True`` when it is a :ref:`GearFunction object <exe_gear_function_obj>`.
 
         Returns:
             redgrease.data.ExecutionResult:
 
-                The returned :class:`ExecutionResult <redgrease.data.ExecutionResult>` has two properties: ``value`` and ``errors``, containing the result value and any potential errors, respectively.
+                The returned :class:`ExecutionResult <.data.ExecutionResult>` has two properties: ``value`` and ``errors``, containing the result value and any potential errors, respectively.
 
                 The value contains the result of the function, unless:
 

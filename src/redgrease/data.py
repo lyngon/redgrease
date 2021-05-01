@@ -129,13 +129,13 @@ class ExecutionResult(wrapt.ObjectProxy, Generic[T]):
 
     It is generic and walks and quacks just like the main result type (T) it wraps.
     With some notable exceptions:
-        - It has an additional property `errors` containing any acumulated errors
+        - It has an additional property `errors` containing any accumulated errors
         - Scalar results, behaves like scalars, but **also** like a single element list.
 
     This behavior isn't always perfect but gives for the most part an intuitive api
     experience.
 
-    If the behaviour in some situations are confusing, the raw wrapped value can be
+    If the behavior in some situations are confusing, the raw wrapped value can be
     accessed through the `value` property.
     """
 

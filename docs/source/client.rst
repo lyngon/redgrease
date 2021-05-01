@@ -5,7 +5,7 @@
 RedGrease Client
 ================
 
-The RedGrease client / connection object gives access to the various commands defineed by the RedisGears module.
+The RedGrease client / connection object gives access to the various commands defined by the RedisGears module.
 
 .. _client_gears_instantiation:
 
@@ -17,7 +17,7 @@ The RedGrease client can be instantiated in a few different ways.
 As a Redis Client
 ~~~~~~~~~~~~~~~~~
 
-This instantiation method is usuful if you are working with Redis from scratch and are not working on a legacy application that already has a bunch of Redis objects instantiated.
+This instantiation method is useful if you are working with Redis from scratch and are not working on a legacy application that already has a bunch of Redis objects instantiated.
 
 .. code-block::
 
@@ -38,12 +38,12 @@ It also means that if you are running a Redis instance on the default Redis port
 
     The constructor takes all the same arguments as the normal Redis client, and naturally it exposes all the same Redis command methods as well.
 
-    If you want to be explicit which class to instaniate, then you can use :class:`redgrease.Redis` and :class:`redgrease.RedisCluster` for single and cluster mode respectively.
+    If you want to be explicit which class to instantiate, then you can use :class:`redgrease.Redis` and :class:`redgrease.RedisCluster` for single and cluster mode respectively.
 
 As a Gears object
 ~~~~~~~~~~~~~~~~~
 
-If you already have code with intantiated Redis client objects, and you don't want to create more connections, then you can instaniate only the ``redgrease.Gears`` object directly, using your existing Redis connection.
+If you already have code with instantiated Redis client objects, and you don't want to create more connections, then you can instantiate only the ``redgrease.Gears`` object directly, using your existing Redis connection.
 
 .. code-block::
 
@@ -58,7 +58,7 @@ If you already have code with intantiated Redis client objects, and you don't wa
     gears = redgrease.Gears(r)
 
 
-This instaniates a Gears object, which only exposes the :ref:`RedisGears commands can be accessed <client_gears_commands>`, and not the normal Redis commands.
+This instantiates a Gears object, which only exposes the :ref:`RedisGears commands can be accessed <client_gears_commands>`, and not the normal Redis commands.
 This object is the same object that the above RedisGears client exposes through its ``gears`` property.
 
 
@@ -68,8 +68,8 @@ This object is the same object that the above RedisGears client exposes through 
 RedisGears Commands
 -------------------
 
-The the commands introduced by the RedisGears Redis module can be invoked through the ``Gears`` object, instantiates as per above. 
-This section gives a run-down of the various commands and what they do, in the order of usefulnes to most people. 
+The commands introduced by the RedisGears Redis module can be invoked through the ``Gears`` object, instantiates as per above. 
+This section gives a run-down of the various commands and what they do, in the order of usefulness to most people. 
 
 You can find all the methods and functions in the :ref:`API Reference <api_reference>`, and in this section, we specifically look at the :class:`redgrease.Gears` class.
 
@@ -98,7 +98,7 @@ Executing Gear Functions
 :meth:`redgrease.Gears.pyexecute`
 
 
-This is the most iportant RedGrease command, as it is the command for executing Gear functions. There are other ways, as we will go through in the next section :ref:`Executing Gear Functions <execution>`, but under the hood they all call this method.
+This is the most important RedGrease command, as it is the command for executing Gear functions. There are other ways, as we will go through in the next section :ref:`Executing Gear Functions <execution>`, but under the hood they all call this method.
 
 **RedisGears Command:**  `RG.PYEXECUTE <https://oss.redislabs.com/redisgears/1.0/commands.html#rgpyexecute>`_
 
@@ -120,8 +120,8 @@ Get List of Executions
 
 .. _client_gears_command_getresults:
 
-Get Result of Asyncronous Execution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Get Result of Asynchronous Execution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :meth:`redgrease.Gears.getresults`
 
@@ -138,7 +138,7 @@ Get List of Registered Event-Based Functions
 
 :meth:`redgrease.Gears.dumpregistrations`
 
-**RedisGears Command:**  `RG.DUMPREGISTATIONS <https://oss.redislabs.com/redisgears/1.0/commands.html#rgdumpregistrations>`_
+**RedisGears Command:**  `RG.DUMPREGISTRATIONS <https://oss.redislabs.com/redisgears/1.0/commands.html#rgdumpregistrations>`_
 
 .. automethod:: redgrease.Gears.dumpregistrations
 
@@ -146,8 +146,8 @@ Get List of Registered Event-Based Functions
 
 .. _client_gears_command_unregister:
 
-Unregister an Event-Based Function
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Un-register an Event-Based Function
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :meth:`redgrease.Gears.unregister`
 
@@ -203,7 +203,7 @@ Get List of Registered Dependencies
 
 :meth:`redgrease.Gears.pydumpreqs`
 
-**RedisGears Command:**  `RG.PYDUPREQS <https://oss.redislabs.com/redisgears/1.0/commands.html#rgpydumpreqs>`_
+**RedisGears Command:**  `RG.PYDUMPREQS <https://oss.redislabs.com/redisgears/1.0/commands.html#rgpydumpreqs>`_
 
 .. automethod:: redgrease.Gears.pydumpreqs
 
@@ -268,7 +268,7 @@ Get and Set Gears Configurations
 
 The above mentioned :ref:`Gears <client_gears_commands>` object contains a property ``config`` of type :class:`redgrease.config.Config`, through which various pre-defined and custom configuration setting can be read an written.
 
-This object contains readable, and for certain options also writable, properties for the predefined RedisGears confgurations.
+This object contains readable, and for certain options also writable, properties for the predefined RedisGears configurations.
 It also contains :meth:`getter <redgrease.config.Config.get>` and :meth:`setter <redgrease.config.Config.set>` methods that allows access to both the pre-defined as well as user defined configurations, in bulk.
 
 

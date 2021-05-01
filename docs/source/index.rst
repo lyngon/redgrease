@@ -25,6 +25,7 @@ RedGrease Documentation
    cli
    advanced
    help
+..   redgrease
 
 
 .. Indices and tables

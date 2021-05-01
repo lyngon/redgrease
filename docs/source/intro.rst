@@ -23,7 +23,7 @@ It may help you create:
 
 ... all written in Python and running distributed ON your Redis nodes.
 
-The Gear functions may include and use third party dependecies like for example ``numpy``, ``requests``, ``gensim`` or pretty much any other Python package distribution you may need for your use-case.
+The Gear functions may include and use third party dependencies like for example ``numpy``, ``requests``, ``gensim`` or pretty much any other Python package distribution you may need for your use-case.
 
 
 If you are already familiar with Redis and RedisGears, then you can jump directly to the :ref:`intro_redgrease` overview or the :ref:`quickstart`, otherwise you can read on to get up to speed on these technologies.
@@ -51,7 +51,7 @@ From the `official Redis Gears site <https://redislabs.com/modules/redis-gears/>
 
 When the Redis Gears module is loaded onto the Redis engines, the Redis engine command set is extended with new commands to register, distribute, manage and run so called :ref:`Gear Functions <intro_gear_functions>`, written in Python, across across the shards of the Redis database. 
 
-Client applications can define and submit such Python Gear Functions, either to run immedeately as 'batch jobs', or to be registered to be triggered on events, such as Redis keyspace changes, stream writes or external triggers. The Redis Gears module handles all the complexities of distribution, coordination, scheduling, execution and result collection and aggregation, of the Gear Functions.
+Client applications can define and submit such Python Gear Functions, either to run immediately as 'batch jobs', or to be registered to be triggered on events, such as Redis keyspace changes, stream writes or external triggers. The Redis Gears module handles all the complexities of distribution, coordination, scheduling, execution and result collection and aggregation, of the Gear Functions.
 
 .. figure:: ../images/Gear_Function6_white.png
     :width: 512
@@ -77,15 +77,15 @@ The first step / operation of any Gear Function is always one of six available "
 - :ref:`gearfun_reader_streamreader` : Redis Stream messages.
 - :ref:`gearfun_reader_pythonreader` : Arbitrary Python generator.
 - :ref:`gearfun_reader_shardsidreader` : Shard ID. 
-- :ref:`gearfun_reader_commandreader` : Command aguments from application client.
+- :ref:`gearfun_reader_commandreader` : Command arguments from application client.
 
 Readers can be parameterized to narrow down the subset of data it should operate on, for example by specifying a pattern for the keys or streams it should read. 
 
-Depending on the reader type, Gear Functions can either be run immedeately, on demand, as batch jobs or in an event-driven manner by registering it to trigger automatically on various types of events.
+Depending on the reader type, Gear Functions can either be run immediately, on demand, as batch jobs or in an event-driven manner by registering it to trigger automatically on various types of events.
 
-Each shard of the Redis Cluster executes its own 'instance' of the Gear Function in parallell on the relevant local shard data, unless expliclt collected, or until it is implicitly reduced to its final global result at the end of the function.
+Each shard of the Redis Cluster executes its own 'instance' of the Gear Function in parallel on the relevant local shard data, unless explicit collected, or until it is implicitly reduced to its final global result at the end of the function.
 
-You can find more details about the interals of Gear Functions in the `official Documentation <https://oss.redislabs.com/redisgears/master/functions.html>`_.
+You can find more details about the internals of Gear Functions in the `official Documentation <https://oss.redislabs.com/redisgears/master/functions.html>`_.
 
 
 .. _intro_redgrease:
@@ -98,7 +98,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
 #. :ref:`Redis / Redis Gears client(s) <client>`.
 
-    Extended versions of the `redis <https://pypi.org/project/redis/>`_ and `redis-py_cluster <https://github.com/Grokzen/redis-py-cluster>`_ clients, but with additional pythonic functions, mapping closely (1-to-1) to the :ref:`Redis Gears command set <client_gears_commands>` (e.g. ``RG.PYEXECUTE``, ``RG.GETRESULT``, ``RG.TRIGGER``, ``RG.DUMPREGISTRATIONS`` etc), outlined in the `official Gears documentation <https://oss.redislabs.com/redisgears/commands.html>`_.
+    Extended versions of the `redis <https://pypi.org/project/redis/>`_ and `redis-py_cluster <https://github.com/Grokzen/redis-py-cluster>`_ clients, but with additional pythonic functions, mapping closely (1-to-1) to the :ref:`Redis Gears command set <client_gears_commands>` (e.g. ``RG.PYEXECUTE``, ``RG.GETRESULTS``, ``RG.TRIGGER``, ``RG.DUMPREGISTRATIONS`` etc), outlined in the `official Gears documentation <https://oss.redislabs.com/redisgears/commands.html>`_.
 
     .. code-block:: python
         :emphasize-lines: 6
@@ -112,7 +112,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
 #. :ref:`Runtime functions <runtime>` wrappers. 
 
-    The Redis Gears server `runtime environment <https://oss.redislabs.com/redisgears/runtime.html>`_ automatically loads a number of special functions into the top leve scope (e.g. :class:`.GearsBuilder`, :func:`.execute`, :func:`.log` etc). 
+    The Redis Gears server `runtime environment <https://oss.redislabs.com/redisgears/runtime.html>`_ automatically loads a number of special functions into the top level scope (e.g. :class:`.GearsBuilder`, :func:`.execute`, :func:`.log` etc). 
     RedGrease provides placeholder versions that provide **docstrings**, **auto completion** and **type hints** during development, and does not clash with the actual runtime.
 
     .. image:: ../images/basic_usage_hints.jpg
@@ -120,7 +120,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
 #. :ref:`Server-side Redis commands <red_commands>`.
 
-    Allowing for *most* Redis (v.6) commands to be executed in the serverside function, against the local shard, as if using a Redis 'client' class, instead of *explicitly* invoking the corresponding commmand string using :func:`execute() <redgrease.runtime.execute>`. 
+    Allowing for *most* Redis (v.6) commands to be executed in the server-side function, against the local shard, as if using a Redis 'client' class, instead of *explicitly* invoking the corresponding command string using :func:`execute() <redgrease.runtime.execute>`. 
     It is basically the `redis <https://pypi.org/project/redis/>`_ client, but with ``redis.Redis.execute_command()`` rewired to use the Gears-native :func:`redgrease.runtime.execute` instead under the hood. 
 
     .. literalinclude:: ../../examples/serverside_redis_commands.py
@@ -134,7 +134,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     * Supports reuse of :ref:`gearfun_open`, i.e. partial or incomplete Gear functions.
 
-    * Can be :ref:`created without a Redis connection <exe_gear_function_obj_pyexcute>`.
+    * Can be :ref:`created without a Redis connection <exe_gear_function_obj_pyexecute>`.
 
     * :ref:`Requirements can be specified per step <gearfun_open>`, instead of only at execution.
 
@@ -154,7 +154,7 @@ The RedGrease package provides a number of functionalities that facilitates writ
     Helps running and/or loading of Gears script files onto a Redis Gears instance. 
     Particularly useful for "trigger-based" CommandReader Gears.
 
-    It also provides a simple form of 'hot-reloading' of Redis Gears scripts, by continously monitoring directories containing Redis Gears scripts and automatically 'pyexecute' them on a Redis Gear instance if it detects modifications. 
+    It also provides a simple form of 'hot-reloading' of Redis Gears scripts, by continuously monitoring directories containing Redis Gears scripts and automatically 'pyexecute' them on a Redis Gear instance if it detects modifications. 
 
     The purpose is mainly to streamline development of 'trigger-style' Gear scripts by providing a form of hot-reloading functionality.
 
@@ -169,9 +169,9 @@ The RedGrease package provides a number of functionalities that facilitates writ
 
     * Various :ref:`Syntactic sugar <sugar>` and enum-like objects for common keywords etc.
 
-    * A :ref:`command_decorator`, that makes creation and execution of :class:`redgrease.reader.CommandReader` :ref:`gearfun` trivial, and providing a straight forward way of adding bespoke serverside Redis commands.
+    * A :ref:`command_decorator`, that makes creation and execution of :class:`redgrease.reader.CommandReader` :ref:`gearfun` trivial, and providing a straight forward way of adding bespoke server-side Redis commands.
 
-    * Reader-specific sugar operators, like :class:`KeysReader.values <.KeysReader>` that automaticalls lifts out the values.
+    * Reader-specific sugar operators, like :class:`KeysReader.values <.KeysReader>` that automatically lifts out the values.
 
     * And more...
 
@@ -190,7 +190,7 @@ The possible use-cases for Redis Gears, and subsequently RedGrease, is virtually
 
 * Automatic batched write-through / write-behind.
     
-    Make Redis automatically write back updates to slower, high latency datastore, efficently using batch writes. Allowing clients to write high velocity updates uninterupted to Redis, without bothering with the slow data store.
+    Make Redis automatically write back updates to slower, high latency datastore, efficiently using batch writes. Allowing clients to write high velocity updates uninterrupted to Redis, without bothering with the slow data store.
 
     .. figure:: ../images/Gears_Example_2_white.png
 
@@ -206,7 +206,7 @@ The possible use-cases for Redis Gears, and subsequently RedGrease, is virtually
 
 * Custom commands.
     
-    Create custom Redis commands with arbitrarily sophisticated logic, enabling featuers to virtually any platform with a Redis client implementation. 
+    Create custom Redis commands with arbitrarily sophisticated logic, enabling features to virtually any platform with a Redis client implementation. 
 
 
 .. _glossary:
@@ -217,13 +217,13 @@ Glossary
 .. glossary::
 
     Gear Function
-        Gear Function, written as two separate words, refer to any valid `Gear function, as defined in the Redis Gears Documentation <https://oss.redislabs.com/redisgears/master/functions.html>`_, regardless if it was constructed as a pure string, loaded from a file, or programattially built using RedGrease's ``GearFunction`` constuctors.
+        Gear Function, written as two separate words, refer to any valid `Gear function, as defined in the Redis Gears Documentation <https://oss.redislabs.com/redisgears/master/functions.html>`_, regardless if it was constructed as a pure string, loaded from a file, or programmatically built using RedGrease's ``GearFunction`` constructors.
     
 
     GearFunction
         GearFunction, written as one word, refers specifically to RedGrease objects of type ``redgrease.GearFunction``.
         
-        These are constucted programmatically using either ``redgrease.GearsBuilder``, any of the Reader clases such as ``redgrease.KeysReader``, ``redgrease.StreamReader``, ``redgrease.CommandReader`` etc, or function decorators such as ``redgrease.trigger`` and so on.
+        These are constructed programmatically using either ``redgrease.GearsBuilder``, any of the Reader classes such as ``redgrease.KeysReader``, ``redgrease.StreamReader``, ``redgrease.CommandReader`` etc, or function decorators such as ``redgrease.trigger`` and so on.
         
         It does **not** refer to Gear Functions that are loaded from strings, either explicitly or from files.
 

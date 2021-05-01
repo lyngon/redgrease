@@ -22,7 +22,9 @@ There are some subtleties and variations the three types that we'll go through i
     print(result.value)
     print(result.errors)
 
-    
+
+.. # TODO: Should talk about the ExecutionResult
+
 
 .. _exe_gear_function_str:
     
@@ -43,7 +45,7 @@ The most basic way of creating and executing Gear Functions is by passing a raw 
 
 .. note:: 
 
-    You would rarely construct Gear functions this way, but it is fundamentally what happens under the hood for all the other methods of exetution, and corresponds directly to the underlying RedisGears protocol.
+    You would rarely construct Gear functions this way, but it is fundamentally what happens under the hood for all the other methods of execution, and corresponds directly to the underlying RedisGears protocol.
 
 .. _exe_gear_function_file:
 
@@ -68,18 +70,18 @@ In this case the `redgrease` package does not need to be installed on the runtim
 
 If the function is importing and using any RedGrease construct from the ``redgrease`` package, then when calling :meth:`redgrease.Gears.pyexecute` method, the ``enforce_redgrease`` must be set in order to ensure that the package is installed on the RedisGears runtime.
 
-In most cases you would just set it to ``True`` to get the latest stable RedGrease runtime package, but you may specify a specific version or even redpository.
+In most cases you would just set it to ``True`` to get the latest stable RedGrease runtime package, but you may specify a specific version or even repository.
 
 A notable special case is when functions in the script are only importing RedGrease modules that do not require any 3rd party dependencies (see list in the :ref:`adv_extras` section). 
 If this is the case then you may want to set ``enforce_redgrease="redgrease"`` (without the extras `"[runtime]"`), when calling :meth:`redgrease.Gears.pyexecute`, as this is a version of redgrease without any external dependencies. 
 
 Another case is when you are only using explicitly imported :ref:`runtime` (e.g. ``from redgrease.runtime import GB, logs, execute``) , and nothing else, as you in this case do not need any version of RedGrease on your RedisGears server runtime. In this case you can actually set ``enforce_redgrease=False``.
 
-More details about the various runtime installation options, which modules and functions are impacted, as well as the respective 3rd party dependecies can be found in the :ref:`adv_extras` sectoin.
+More details about the various runtime installation options, which modules and functions are impacted, as well as the respective 3rd party dependencies can be found in the :ref:`adv_extras` section.
 
 .. Note::
 
-    By default all Gear functions run in a shared runtime environment, and as a consequence all requirements / dependencies from differnt Gear functions are all installed in the same Python enviornment.
+    By default all Gear functions run in a shared runtime environment, and as a consequence all requirements / dependencies from different Gear functions are all installed in the same Python environment.
 
 
 .. _exe_gear_function_obj:
@@ -89,7 +91,7 @@ GearFunction Object
 
 You can dynamically create a GearFunction object, directly in the same application as your Gears client / connection, by using any of the constructs well talk about in the :ref:`gearfun` section, such as for example :ref:`gearfun_builder` or the "Reader" classes such as :ref:`gearfun_reader_keysreader` and :ref:`gearfun_reader_streamreader` etc.
 
-GearFunction objects can be executed in three different ways; Using :ref:`pyexecute <exe_gear_function_obj_pyexcute>`, the :ref:`on-method <exe_gear_function_obj_on_meth>` or directly in :ref:`run or execute <exe_gear_function_obj_on_closing>`.
+GearFunction objects can be executed in three different ways; Using :ref:`pyexecute <exe_gear_function_obj_pyexecute>`, the :ref:`on-method <exe_gear_function_obj_on_meth>` or directly in :ref:`run or execute <exe_gear_function_obj_on_closing>`.
 
 .. note::
 
@@ -97,7 +99,7 @@ GearFunction objects can be executed in three different ways; Using :ref:`pyexec
 
     #. The Python version of local application must match the the Python version in the RedisGears runtime (Python 3.7, at the time of writing this).
 
-        When executing Gear functions using either raw string, or by script file, it doesnt matter which version of Python the application is using, as long as it is Python 3.6 or later and the the code in the raw string is compatible with the Python version in the RedisGears runtime, 
+        When executing Gear functions using either raw string, or by script file, it doesn't matter which version of Python the application is using, as long as it is Python 3.6 or later and the the code in the raw string is compatible with the Python version in the RedisGears runtime, 
 
     #. The ``redgrease[runtime]`` package must be installed on the RedisGears Runtime environment.
 
@@ -106,7 +108,7 @@ GearFunction objects can be executed in three different ways; Using :ref:`pyexec
         When executing Gear functions using either raw string, or by script file, `redgrease` only have to be installed if the function is importing any redgrease modules, of course.
 
 
-As an example let's assume, that we have instanitated a Gear client and created a very simple "open" Gear function as follows:
+As an example let's assume, that we have instantiated a Gear client and created a very simple "open" Gear function as follows:
 
 .. literalinclude:: ../../examples/exe_example.py
     :start-after: # # Open Function
@@ -120,7 +122,7 @@ The output from the last operation, here :meth:`countby() <redgrease.gears.OpenG
 
 Once an "open" function is terminated with either a :meth:`run() <redgrease.gears.OpenGearFunction.run>`  or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action, it is considered "closed", and it can be executed, but not further extended.
 
-The :ref:`gearfun` section, goes into more details of these concepts and the different classes of GearFuctions.
+The :ref:`gearfun` section, goes into more details of these concepts and the different classes of GearFunctions.
 
 
 RedGrease allows for open Gear functions, such as ``key_counter`` to be used as a starting point for other Gear functions, so lets create two "closed" functions from it:
@@ -130,21 +132,21 @@ RedGrease allows for open Gear functions, such as ``key_counter`` to be used as 
     :end-before: # #
     :emphasize-lines: 5, 12
 
-These two new functions, ``get_keys_by_type_dict`` and ``get_commones_type``, both extend the earlier ``get_keys_by_type`` function with more operations.
+These two new functions, ``get_keys_by_type_dict`` and ``get_commonest_type``, both extend the earlier ``get_keys_by_type`` function with more operations.
 The former function collates the results in a dictionary.
 The latter finds the key-type that is most common in the keyspace.
 
-Note that both functions end with the :meth:`run() <redgrease.gears.OpenGearFunction.run>` action, which indicates that the functions will run as an on-demand batch-job, but also that it is 'closed' and cannot be exteded further. 
+Note that both functions end with the :meth:`run() <redgrease.gears.OpenGearFunction.run>` action, which indicates that the functions will run as an on-demand batch-job, but also that it is 'closed' and cannot be extended further. 
 
-Let's excute thes functions in some different ways.
+Let's execute these functions in some different ways.
 
 
-.. _exe_gear_function_obj_pyexcute:
+.. _exe_gear_function_obj_pyexecute:
 
 Execute with :meth:`.Gears.pyexecute` method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The most ideomatic way of executing GearFunction objects is just to pass it to :meth:`.Gears.pyexecute`:
+The most idiomatic way of executing GearFunction objects is just to pass it to :meth:`.Gears.pyexecute`:
 
 .. literalinclude:: ../../examples/exe_example.py
     :start-after: # # Method 1
@@ -203,11 +205,11 @@ Execute directly in :meth:`run() <.OpenGearFunction.run>` or :meth:`register() <
 
 An even more succinct way of executing GearFunction objects is to specify the target connection directly in the action that closes the function. I.e the :meth:`run() <redgrease.gears.OpenGearFunction.run>`  or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action.
 
-RedGrease has extended these methods with a couple additonal arguments, which are not in the standard RedisGears API:
+RedGrease has extended these methods with a couple additional arguments, which are not in the standard RedisGears API:
 
 - ``requirements`` - Takes a list of requirements / external packages that the function needs installed.
 
-- ``on`` - Takes a Gears (or RedisGears) client and immedeately executes the function on it.
+- ``on`` - Takes a Gears (or RedisGears) client and immediately executes the function on it.
 
 .. literalinclude:: ../../examples/exe_example.py
     :start-after: # # Method 4
@@ -216,7 +218,7 @@ RedGrease has extended these methods with a couple additonal arguments, which ar
 
 This approach only works with "closed" functions, but works regardless if the function has been closed with the :meth:`run() <redgrease.gears.OpenGearFunction.run>`  or  :meth:`register() <redgrease.gears.OpenGearFunction.register>` action.
 
-The result for our specific function should be identical to when we ran the function using :ref:`pyexecute <exe_gear_function_obj_pyexcute>`:
+The result for our specific function should be identical to when we ran the function using :ref:`pyexecute <exe_gear_function_obj_pyexecute>`:
 
 .. literalinclude:: ../../examples/exe_example.py
     :start-after: """result_4 =
@@ -229,9 +231,10 @@ The result for our specific function should be identical to when we ran the func
 .. automethod:: redgrease.Gears.pyexecute
 
 
-.. ``on`` API Reference
-.. ---------------------------
+``on`` API Reference
+---------------------------
 
+.. automethod:: redgrease.ClosedGearFunction.on
 
 
 .. include :: footer.rst

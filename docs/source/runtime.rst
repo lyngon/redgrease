@@ -18,13 +18,13 @@ These "builtin" runtime functions can be used in Gear Functions without importin
    - :ref:`runtime_gearsbuilder`
 
 .. note::
-   With the exception of the :ref:`runtime_gearsbuilder` neithe these functions **cannot** be used in normal application code outside Gear functions running in the RedisGears server runtime.
+   With the exception of the :ref:`runtime_gearsbuilder` neither these functions **cannot** be used in normal application code outside Gear functions running in the RedisGears server runtime.
 
 RedGrease expose its own wrapped versions of these RedisGears runtime functions which, for the most part, behave exactly like the originals, but require you to import them, either from the top level :mod:`redgrease` package, or from the :mod:`redgrease.runtime` module.
 
 But if these are the same, why would you bother with them?
 
-The main reason to use the RedGrease versions, is that they aid during develpent by enabling most Integrated Development Environment (IDE) access to the doc-strings and type-annotations that the RedGrease versions are providing. 
+The main reason to use the RedGrease versions, is that they aid during development by enabling most Integrated Development Environment (IDE) access to the doc-strings and type-annotations that the RedGrease versions are providing. 
 
 This alone can help greatly in developing gears faster (e.g. through auto-complete) and with less errors (e.g. with type checking).
 
@@ -32,7 +32,7 @@ This alone can help greatly in developing gears faster (e.g. through auto-comple
 
    If you are **only** using these wrapped runtime functions in your Gear Functions, and **no other** RedGrease features, then you actually don't need RedGrease to be installed on the RedisGears server runtime. Explicitly setting ``enforce_redgrease`` argument to ``False`` when executing a function script with to :meth:`.Gears.pyexecute`,  will not add any redgrease requirement to the function and simply ignore any explicit runtime imports.
 
-   The section, :ref:`adv_extras`, goes deeper into the detals of the various RedGrease extras options, and their limitations.
+   The section, :ref:`adv_extras`, goes deeper into the details of the various RedGrease extras options, and their limitations.
 
 Another reason to use the functions from RedGrease :mod:`runtime`, is that it contains some slightly enhanced variants of the defaults, like for example, the :ref:`runtime_log`, or have alternative versions, like :ref:`runtime_hashtag3`. 
 
