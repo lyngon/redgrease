@@ -24,8 +24,8 @@ RedGrease Documentation
    sugar
    cli
    advanced
-   redgrease
    help
+..   redgrease
 
 
 .. Indices and tables
