@@ -23,9 +23,9 @@ RedGrease Documentation
    serverside_commands
    sugar
    cli
+   misc
    advanced
    help
-..   redgrease
 
 
 .. Indices and tables
