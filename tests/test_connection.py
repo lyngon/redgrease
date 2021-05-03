@@ -33,7 +33,7 @@ from redis import Redis
 
 
 def test_server_connection_params(server_connection_params: Dict):
-    """Test that server parameters are defined, most importanty hostname and port"""
+    """Test that server parameters are defined, most importantly hostname and port"""
     assert server_connection_params
     assert server_connection_params.get("host")
     assert server_connection_params.get("port")
@@ -45,7 +45,7 @@ def test_basic_redis_functions(clean_redis_instance: Redis):
     """
     key = "TESTKEY"
     value = str(datetime.utcnow())
-    # Ensure the redis_instance fixture is sert
+    # Ensure the redis_instance fixture is set
     assert clean_redis_instance is not None
     # Ensure that we can set a key in the redis_instance
     assert clean_redis_instance.set(key, value)

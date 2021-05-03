@@ -40,7 +40,7 @@ import redgrease.runtime
 def deserialize_gear_function(
     serialized_gear: str, python_version: str
 ) -> redgrease.gears.GearFunction:
-    """Safely deserializes (unpickles) a serialized GearFunction.
+    """Safely de-serializes (unpickles) a serialized GearFunction.
 
     This function is only executed on the Gear server.
 
@@ -101,7 +101,7 @@ def serialize_gear_function(gear_function: redgrease.gears.GearFunction) -> str:
     return f"""
 import redgrease.gearialization
 import redgrease.runtime
-gear_function = redgrease.gearialization.deserialize_gear_function(
+gear_function = redgrease.gearialization.deseralize_gear_function(
     {cloudpickle.dumps(gear_function, protocol=4)},
     python_version={tuple(sys.version_info)},
 )
@@ -173,6 +173,7 @@ def get_function_string(
     return function_string, ctx
 
 
-# TODO: remove
+# TODO: remove. Also change "deseralize_gear_function" to "deserialize_gear_function"
+# in serialize_gear_function, above
 deseralize_gear_function = deserialize_gear_function
 seralize_gear_function = serialize_gear_function
