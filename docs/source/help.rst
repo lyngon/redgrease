@@ -16,9 +16,8 @@ These will be addressed on a best-effort basis.
 Professional Support
 --------------------
 
-RedGrease is backed by `Lyngon Pte. Ltd. <https://www.lyngon.com>`_ and professional support with SLA's can be provided. For inquiry please send a mail to `support@lyngon.com`_. 
+RedGrease is backed by `Lyngon Pte. Ltd. <https://www.lyngon.com>`_ and professional support with SLA's can be provided on request. For inquiries please send a mail to `support@lyngon.com <mailto:support@lyngon.com>`_. 
 
-.. _faq:
 
 FAQ
 ---
@@ -29,14 +28,13 @@ Q: Can I use RedGrease for Commercial Applications?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A: Yes
 
-RedGrease is licensed under the MIT license, which is a very permissive licence and allows for commercial use. 
-Note however that while Open Source Redis is licensed under the `3-Clause-BSD <https://opensource.org/licenses/BSD-3-Clause> licence`_, which is similarly permissive. The RedisGears module is however licensed under a custom `Redis Source Available License (RSAL) <https://redislabs.com/wp-content/uploads/2019/09/redis-source-available-license.pdf>`_, which limits usage to "non-database products". 
+RedGrease is licensed under the `MIT <https://mit-license.org/>`_ license, which is a very permissive licence and allows for commercial use. The same goes for Open Source Redis, which is licensed under the `3-Clause-BSD <https://opensource.org/licenses/BSD-3-Clause>`_ licence, and is similarly permissive. However, the RedisGears module is licensed under a custom `Redis Source Available License (RSAL) <https://redislabs.com/wp-content/uploads/2019/09/redis-source-available-license.pdf>`_, which limits usage to "non-database products". 
 
 
 
 .. _faq_elasticache:
 
-Q: Can I run Redis Gears / RedgGrease on AWS ElastiCache?
+Q: Can I run Redis Gears / RedGrease on AWS ElastiCache?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A: No
 
