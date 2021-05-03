@@ -1,11 +1,11 @@
 .. include :: banner.rst
 
-.. _operations:
+.. _op:
 
 Operations
 ==========
 
-This section goes through the various opertions available to :ref:`gearfun_open` in more detail.
+This section goes through the various operations available to :ref:`gearfun_open` in more detail.
 
 .. _op_map:
 

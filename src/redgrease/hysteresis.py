@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Handling of events that come in bursts, without unecessary duplicate handling.
+Handling of events that come in bursts, without unnecessary duplicate handling.
 
 In RedGrease this is used in the cli / loader, when watching a directory and
-'hot reloading' of scripts when a change is detedcted.
-To avoid scripts being loaded unesssearily often while being modified.
+'hot reloading' of scripts when a change is detected.
+To avoid scripts being loaded unnecessarily often while being modified.
 
-This module is however general enough to be used for other situatins where events occur
+This module is however general enough to be used for other situations where events occur
 in bursts.
 """
 __author__ = "Anders Åström"
@@ -44,7 +44,7 @@ def nop(*args, **kwargs):
 
 
 class ResettableTimer:
-    """Simple reresttable timer that will call a function when the timer elapses.
+    """Simple resesttable timer that will call a function when the timer elapses.
     Both the timer, as well as the function and its arguments can be reset
     when/if the timer is reset.
     """
@@ -115,7 +115,7 @@ class HysteresisHandlerIndex:
 
     This is useful for holding back some event handler as long as new events
     are still occuring, triggering only when the events stop.
-    For example loading a file when there hasnt been any modifications to it
+    For example loading a file when there hasn't been any modifications to it
     for a period of time
     """
 

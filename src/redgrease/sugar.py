@@ -97,7 +97,7 @@ class KeyType:
 
     @staticmethod
     def of(python_type: Any) -> str:
-        """Get the correspondig Redis key type string for a given Python type or value,
+        """Get the corresponding Redis key type string for a given Python type or value,
         if it exists.
         The only valid types are 'str', 'dict', 'list' and 'set'.
 
@@ -166,7 +166,7 @@ class LogLevel:
     Notice = "notice"
     """Notice"""
 
-    Warning = "warninig"
+    Warning = "warning"
     """Warning"""
 
     @staticmethod
@@ -175,7 +175,7 @@ class LogLevel:
 
         Args:
             rg_log_level ([type]):
-                Reis Gears log level
+                Redis Gears log level
 
         Returns:
             int:
@@ -188,6 +188,6 @@ class LogLevel:
         elif rg_log_level == LogLevel.Notice:
             return logging.WARNING
         elif rg_log_level == LogLevel.Warning:
-            return logging.ERROR  # Maybe a little unintuitive ;)
+            return logging.ERROR  # Maybe a little un-intuitive ;)
         else:
             return logging.INFO

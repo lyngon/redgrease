@@ -35,7 +35,7 @@ import redgrease.runtime
 
 def _runtime_execute_command(self, command_name, *args, **options):
     """Override replacement method for `redis.Redis.execute_command` in
-    Redis Geear server runtime.
+    Redis Gear server runtime.
 
     Args:
         command_name (str):
@@ -66,7 +66,7 @@ def get_runtime_client():
             Redis client
     """
     # By setting the connection pool to Elipsis, the client is 'tricked' to believe it
-    # alraeady has a set of connections.
+    # already has a set of connections.
     # Swapping out the `execute_command` method for a replacement that uses the global
     # `execute` internally instead of the connection pool.
 

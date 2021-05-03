@@ -127,7 +127,7 @@ args.add_argument(
     type=float,
     default=0.0,
     const=5.0,
-    help="If set, the directories will be continously montiored for updates/"
+    help="If set, the directories will be continuously monitored for updates/"
     "modifications to scripts and requirement files, and automatically loaded/"
     "rerun. The flag takes an optional value specifying the  duration, "
     "in seconds, to wait for further updates/modifications to files, before "

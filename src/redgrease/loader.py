@@ -45,7 +45,7 @@ from redgrease import RedisGears, formatting, hysteresis, requirements
 log = logging.getLogger(__name__)
 
 default_index_prefix = "/redgrease/scripts"
-"""The defaut prefix for the Redis keys that hold the Loader index data"""
+"""The default prefix for the Redis keys that hold the Loader index data"""
 
 default_script_pattern = "*.py"
 """The default pattern for scripts to monitor and load."""
@@ -106,7 +106,7 @@ class GearsLoader:
         observe: float = None,
         **redis_kwargs,
     ):
-        """Instatiate a Gears Loader
+        """Instantiate a Gears Loader
 
         Args:
             script_pattern (str, optional):
@@ -143,7 +143,7 @@ class GearsLoader:
                 Defaults to 6379.
 
             observe (float, optional):
-                If `True`, continously observe the files, and reload if there are any
+                If `True`, continuously observe the files, and reload if there are any
                 changes.
                 If `False`, the files will only be loaded when added to the Loader.
                 Defaults to None.
@@ -279,7 +279,7 @@ class GearsLoader:
             )
 
             # This is a quite unsafe way of checking for registrations
-            # Probabls Ok for dev situations in non-shared environments
+            # Probably Ok for dev situations in non-shared environments
             pre_reg = self.redis.gears.dumpregistrations()
             exec_res = self.redis.gears.pyexecute(script_content, unblocking=unblocking)
             ret = f"with return code '{exec_res}'."
@@ -306,8 +306,8 @@ class GearsLoader:
 
             if len(diff_reg) > 0:
                 log.warning(
-                    "Multiple registrations occured? "
-                    "Index migth be corrupt. "
+                    "Multiple registrations occurred? "
+                    "Index might be corrupt. "
                     "Is this a shared environment?"
                 )
 
@@ -325,7 +325,7 @@ class GearsLoader:
             script_path (str):
                 Script path
         """
-        log.debug(f"Unregistering script: '{script_path}'")
+        log.debug(f"De-registering script: '{script_path}'")
         reg_key = f"{self.index_prefix}{script_path}"
         reg_id = self.redis.hget(reg_key, "registration_id")
         if reg_id is not None:
@@ -337,8 +337,8 @@ class GearsLoader:
                 self.redis.gears.unregister(reg_id)
             except ResponseError as err:
                 log.warn(
-                    "Unregistration failed. "
-                    "Index migth be corrupt. "
+                    "De-registration failed. "
+                    "Index might be corrupt. "
                     "Is this a shared environment?"
                 )
                 log.error({err})
@@ -351,7 +351,7 @@ class GearsLoader:
             requirements_file_path (str):
                 File path of 'requirements.txt' file.
         """
-        log.debug(f"Updating dependecies as per '{requirements_file_path}'")
+        log.debug(f"Updating dependencies as per '{requirements_file_path}'")
         try:
             requirements_set = requirements.read_requirements(requirements_file_path)
             log.debug(f"Requirements to load: {', '.join(requirements_set)}")
@@ -364,7 +364,7 @@ class GearsLoader:
         """Watchdog event handler for events signalling that a
         script or requirement file has been deleted.
         Script files are unregistered (if present) and re-run,
-        after applying some hystersis.
+        after applying some hysteresis.
         Removed requirement files does not remove any installed packages.
 
         Args:
@@ -375,7 +375,7 @@ class GearsLoader:
         if fnmatch(file, self.script_pattern):
             log.debug(
                 f"Gears script '{file}' deleted. "
-                "Scheduling unregistration of script."
+                "Scheduling de-registration of script."
             )
             # Apply hysteresis in case additional events shortly follow,
             # before we actually unregister
@@ -417,7 +417,7 @@ class GearsLoader:
         """Watchdog event handler for events signalling that a
         script or requirement file has been moved.
         Script files are unregistered (if present) and re-run,
-        after applying some hystersis.
+        after applying some hysteresis.
         Removed requirement files does not remove any installed packages.
 
         Args:
@@ -430,7 +430,7 @@ class GearsLoader:
         if fnmatch(old_file, self.script_pattern):
             log.debug(
                 f"Gears script '{old_file}' moved to '{new_file}'. "
-                "Unregistering old script."
+                "De-registering old script."
             )
             # Apply hysteresis in case additional events shortly follow,
             # before we actually unregister the script.
@@ -462,7 +462,7 @@ class GearsLoader:
             self.file_index.signal(new_file, self.update_dependencies, new_file)
         else:
             log.warn(
-                f"File '{old_file}' moved to unknonwn type '{new_file}'. " "Ignoring."
+                f"File '{old_file}' moved to unknown type '{new_file}'. " "Ignoring."
             )
 
     def start(self):
