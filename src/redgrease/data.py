@@ -40,7 +40,7 @@ import cloudpickle
 import wrapt
 
 from redgrease.utils import (
-    REnum,
+    _REnum,
     bool_ok,
     list_parser,
     optional,
@@ -282,7 +282,7 @@ def parse_trigger_response(response) -> ExecutionResult:
     return ExecutionResult(response)
 
 
-class ExecutionStatus(REnum):
+class ExecutionStatus(_REnum):
     """Representation of the various states an execution could be in."""
 
     created = b"created"
@@ -313,7 +313,7 @@ class ExecutionStatus(REnum):
 
 
 # TODO: Isn't this sugar rather than data?
-class ExecLocality(REnum):
+class ExecLocality(_REnum):
     """Locality of execution: Shard or Cluster"""
 
     Shard = "Shard"

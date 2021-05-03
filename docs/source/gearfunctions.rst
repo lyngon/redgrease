@@ -35,6 +35,8 @@ Gear functions are "terminated" by either one of two special :ref:`op_action`. E
 
 Some Readers support both "batch-mode" and "event-mode", but some only support one of the modes.
 
+.. _gearfun_open_closed:
+
 GearFunctions that **have not** been "terminated" by either of the :ref:`op_action`, are referred to as an :ref:`gearfun_open`, as they **can be extended** with more operations, creating new GearFunctions. 
 
 GearFunctions that **have** been "terminated" by either of the :ref:`op_action`, are referred to as a :ref:`gearfun_closed`, as they **cannot be extended** with more operations, creating new GearFunctions, but they can be executed. 

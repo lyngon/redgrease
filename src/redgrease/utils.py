@@ -29,24 +29,13 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 import ast
 import functools
 from enum import Enum
-from typing import (
-    Any,
-    Callable,
-    Container,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any, Callable, Container, Dict, Iterable, List, Optional, Type, Union
 
 from redgrease.typing import Constructor, Filterer, Key, RedisType, T, Val
 
 
 # Not a parser
-class REnum(Enum):
+class _REnum(Enum):
     """Base Class for Redis-compatible enum values"""
 
     def __str__(self):
@@ -66,30 +55,15 @@ class REnum(Enum):
 
 
 # Not a parser
-def iteritems(d: Dict[Key, Val]) -> Iterable[Tuple[Key, Val]]:
-    """Iterate items in a dict
-    Just to le able to use CaseInsensitiveDict without modifications
-
-    Args:
-        d (Dict[Key, Val]):
-            Dict to iterate
-
-    Returns:
-        Iterable[Tuple[Key, Val]]:
-            Iterable of key-value tuples
-    """
-    return iter(d.items())
-
-
-# Not a parser
 class CaseInsensitiveDict(dict):
     """Case insensitive dict implementation.
     Assumes string keys only.
-    Heavily influenced from redis.client.
+    Heavily derived from redis.client
+    `https://github.com/andymccurdy/redis-py/blob/master/redis/client.py`_
     """
 
     def __init__(self, data):
-        for k, v in iteritems(data):
+        for k, v in data.items():
             self[safe_str_upper(k)] = v
 
     def __contains__(self, k):
@@ -176,8 +150,11 @@ def safe_str_upper(value: Any) -> str:
 
 def bool_ok(value: Any) -> bool:
     """Parse redis response as bool, such that:
-    'Ok' => True
-    Anything else => False
+
+        ``"Ok"`` => ``True``
+
+        Anything else => ``False``
+
     Same name as in redis.client but slightly different implementation.
     Should be better for long non-Ok replies, e.g. images, erroneously passed to it
 
@@ -196,7 +173,7 @@ def bool_ok(value: Any) -> bool:
 
 
 def optional(constructor: Constructor[T]) -> Constructor[Optional[T]]:
-    """Create parser that accepts `None` values, but otherwise behaves like the
+    """Create parser that accepts ``None`` values, but otherwise behaves like the
     provided parser.
 
     Args:
@@ -212,8 +189,9 @@ def optional(constructor: Constructor[T]) -> Constructor[Optional[T]]:
 
 def safe_bool(input: Any) -> bool:
     """Parse a bool, slightly more accepting
-    allowing for literal "True"/"False", integer 0/1,
-    as well as "Ok" and "yes"/"no" values
+
+    allowing for literal ``"True"``/``"False"``, integer 0 or1, as well as ``"Ok"`` and
+    ``"yes"``/``"no"`` values.
 
     Args:
         input (Any):
@@ -239,8 +217,10 @@ def safe_bool(input: Any) -> bool:
 def to_int_if_bool(value: Any) -> Union[int, Any]:
     """Transforms any boolean into an integer
     As booleans are not natively supported as a separate datatype in Redis
-    True => 1
-    False => 0
+
+        ``True`` => ``1``
+
+        ``False`` => ``0``
 
     Args:
         value (Union[bool,Any]):
@@ -258,7 +238,7 @@ def to_redis_type(value: Any) -> RedisType:
     """Attempts to serialize a value to a Redis-native type.
     I.e. either: bytes, int or float
     It will serialize most primitive types (str, bool, int, float),
-    as well as any complex type that implemens __bytes__ method
+    as well as any complex type that implements ``__bytes__`` method
 
     Args:
         value (Any):
@@ -385,17 +365,24 @@ def to_dict(
 ) -> Dict[Key, Val]:
     """Folds an iterable of values into a dict.
     This is useful for parsing Redis' list responseses into a more manageable structure.
-    It can be used on lists of following different structures:
+    It can be used on lists of alternating unnamed Key and values, i.e::
 
-    - Alternating unnamed Key and values, i.e:
-    [key_1, value_1, key_2, value_2, ... ]
-        eg:
-        - to_dict(["foo", 42, 13, 37]) == {"foo": 42, 13: 37}
-        - to_dict(["foo", 42, 13, 37], key_transform=str) == {"foo": 42, "13": 37}
-        - to_dict(["foo", 42, 13, 37], val_transform=str) == {"foo": "42", 13: "37"}
-        - to_dict(["foo", 42, 13, 37], val_transform={"foo":int, 13:float})
-            == {"foo": 42, 13: 37.0}
-        - to_dict(
+        [key_1, value_1, key_2, value_2, ... ]
+
+    eg::
+
+        to_dict(["foo", 42, 13, 37]) == {"foo": 42, 13: 37}
+
+        to_dict(["foo", 42, 13, 37], key_transform=str) == {"foo": 42, "13": 37}
+
+        to_dict(["foo", 42, 13, 37], val_transform=str) == {"foo": "42", 13: "37"}
+
+        to_dict(
+            ["foo", 42, 13, 37],
+            val_transform={"foo":int, 13:float}
+        ) == {"foo": 42, 13: 37.0}
+
+        to_dict(
             ["foo", 42, 13, 37],
             key_transform=str,
             val_transform={"foo":int, "13":float}
@@ -455,11 +442,14 @@ def to_kwargs(items: Iterable) -> Dict[str, Any]:
     of an intermediate kwargs dict that can be passed to for example a constructor.
     It behaves exactly as 'to_dict' but enforces keys to be parsed to strings.
 
-    - Alternating unnamed Key and values, i.e:
-    [key_1, value_1, key_2, value_2, ... ]
-        eg:
-            input:  ["foo", 42, 13, 37]
-            output: {"foo": 42, "13": 37}
+    - Alternating unnamed Key and values, i.e::
+        [key_1, value_1, key_2, value_2, ... ]
+
+    eg:
+
+        - input:  ``["foo", 42, 13, 37]``
+
+        - output: ``{"foo": 42, "13": 37}``
 
     Args:
         items (Iterable):
@@ -475,12 +465,12 @@ def to_kwargs(items: Iterable) -> Dict[str, Any]:
 # TODO: Should maybe be renamed to list_of or parse_list or something
 def list_parser(item_parser: Constructor[T]) -> Callable[[Iterable], List[T]]:
     """Creates a list parser for lists of objects created with a given constructor.
-    E.g:
+    E.g::
 
-    parser = list_parser(bool)
-    parser(['', 1, None])
+        parser = list_parser(bool)
+        parser(['', 1, None])
 
-    => [False, True, False]
+    => ``[False, True, False]``
 
     Args:
         item_parser (Constructor[T]):
@@ -521,11 +511,12 @@ def dict_of(
     name/key in the key list in the lookup dict.
     This key is also used as the key in the resulting dict.
 
-    E.g:
-    parser = dict_of({"b":bool, "i":int, "s":str, "f":float})
-    parser([0,1,0,1], ["b","f","s","i"])
+    E.g::
 
-    => {"b":False, "f":1.0, "i":1, "s":"0"}
+        parser = dict_of({"b":bool, "i":int, "s":str, "f":float})
+        parser([0,1,0,1], ["b","f","s","i"])
+
+    => ``{"b":False, "f":1.0, "i":1, "s":"0"}``
 
     Args:
         constructors (Dict[str, Constructor[Any]]):
@@ -665,9 +656,11 @@ def compose(*function: Callable) -> Callable:
     """Compose functions.
     I.e::
 
-        ``lambda x: f(g(x))``
-        can be written:
-        ``compose(f, g)``
+        lambda x: f(g(x))
+
+    can be written::
+
+        compose(f, g)``
 
     Args:
         *function (Callable):
@@ -694,15 +687,17 @@ def dict_filter(**kwargs) -> Filterer[Dict[str, Any]]:
 
     2. Depending on the value, V, of the keyword argument, either:
 
-        - V is Container type (excluding `str`) -> The dict value for the key is
-            present in V.
+        - V is Container type (**excluding** ``str``)
+            The dict value for the key is present in V
 
-        - V is a Type (e.g. `bool`) -> The dict value for the key is of type V.
+        - V is a Type (e.g. ``bool``)
+            The dict value for the key is of type V.
 
-        - V is any value, except `...` (Ellipsis) -> The dict value for the key
-            equals V.
+        - V is any value, except ``...`` (Ellipsis)
+            The dict value for the key equals V.
 
-        - V is `...` (Ellipsis) -> The dict value can be any value.
+        - V is ``...`` (Ellipsis)
+            The dict value can be any value.
     """
 
     def predicate(record):
