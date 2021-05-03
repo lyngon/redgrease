@@ -60,12 +60,9 @@ autodoc_type_aliases = {
 extensions: List[str] = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
-    # "sphinx_autodoc_typehints",
     "sphinx.ext.viewcode",
     "sphinx_tabs.tabs",
-    # "sphinxcontrib.osexample",
 ]
-# ["recommonmark"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

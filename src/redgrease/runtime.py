@@ -24,7 +24,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
  PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHsER LIABILITY, WHETHER IN AN ACTION OF
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
@@ -53,7 +53,7 @@ T = TypeVar("T")
 
 class GearsBuilder(redgrease.gears.OpenGearFunction):
     """The RedisGears :ref:`GearsBuilder` class is imported to the runtime's
-    environment by default, and this class is a RedgGrease wrapper of it.
+    environment by default, and this class is a RedGrease wrapper of it.
 
     It exposes the functionality of the function's `context builder
     <https://oss.redislabs.com/redisgears/1.0/functions.html#context-builder>`_.
@@ -65,7 +65,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
         The :class:`.GearsBuilder` is a subclass of :class:`.gears.OpenGearFunction`,
         but unlike other OpenGearFunctions, the GearsBuilder mutates an internal
         GearFunction instead of creating a new one for each operation.
-        This behaviour is deliberate, in order to be consistent with the original
+        This behavior is deliberate, in order to be consistent with the original
         GearsBuilder.
     """
 
@@ -149,7 +149,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
             **kwargs,
         )
 
-    def register(  # noqa: C901
+    def register(
         self,
         prefix: str = "*",
         convertToStr: bool = True,
@@ -162,7 +162,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
         readValue: bool = None,
         batch: int = None,
         duration: int = None,
-        onFailedPolcy: str = None,
+        onFailedPolicy: str = None,
         onFailedRetryInterval: int = None,
         trimStream: bool = None,
         trigger: str = None,  # Reader Specific: CommandReader
@@ -185,7 +185,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
             readValue=readValue,
             batch=batch,
             duration=duration,
-            onFailedPolcy=onFailedPolcy,
+            onFailedPolicy=onFailedPolicy,
             onFailedRetryInterval=onFailedRetryInterval,
             trimStream=trimStream,
             trigger=trigger,  # CommandReader specific
@@ -214,7 +214,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 return something as an output (output record).
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -249,7 +249,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 be expanded.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -283,7 +283,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 should not return anything.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -318,10 +318,10 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 return a bool. The input records evaluated to `True` will be kept as
                 output records.
                 Defaults to the 'identity-function', i.e. records are filtered based on
-                their own truiness or falsiness.
+                their own trueess or falseness.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -362,7 +362,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 all inputs.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -410,7 +410,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 all inputs, for each group.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -449,7 +449,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 Defaults to 0.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -500,10 +500,10 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The hash slot, and consequently the destination shard, is determined by
-                hthe value of the key.
+                the value of the key.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -544,7 +544,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
                 Defaults to addition, if 'zero' is a number and to a list accumulator
@@ -556,13 +556,13 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
                 Defaults to re-use the `seqOp` function.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -615,7 +615,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
                 Defaults to a list reducer.
@@ -626,13 +626,13 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
                 Defaults to re-use the `seqOp` function.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -684,7 +684,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 Defaults to a list reducer.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -759,11 +759,11 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
 
         Args:
             reverse (bool, optional):
-                Sort in descending order (higer to lower).
+                Sort in descending order (higher to lower).
                 Defaults to True.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -820,7 +820,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
         # Other Redis Gears args
         **kwargs,
     ) -> "GearsBuilder":
-        """Distributed :ref:`op_countby` operation countinig the records grouped by key.
+        """Distributed :ref:`op_countby` operation counting the records grouped by key.
 
         Args:
             extractor :data:`redgrease.typing.Extractor`):
@@ -831,7 +831,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 Defaults to 'lambda x: str(x)'.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -873,7 +873,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
                 Defaults to 'lambda x: float(x)'.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to None.
 
             **kwargs:
@@ -886,7 +886,7 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
 
                 Note that for GearBuilder this method does **not** return a new
                 GearFunction, but instead returns the same GearBuilder, but with its
-                internal function updaded.
+                internal function updated.
         """
         self._function = self._function.avg(
             extractor=extractor,
@@ -900,10 +900,10 @@ class GearsBuilder(redgrease.gears.OpenGearFunction):
 
 
 GB = GearsBuilder
-"""Convnenience shorthand for GearsBuilder."""
+"""Convenience shorthand for GearsBuilder."""
 
 
-# # Suppress warnings for missing redisgears packagae
+# # Suppress warnings for missing redisgears package
 # # As this package only lives on the Redis Gears server
 # pyright: reportMissingImports=false
 class atomic:
@@ -986,7 +986,7 @@ def log(message: str, level: str = "notice"):
                 - 'debug'
                 - 'verbose'
                 - 'notice'
-                - 'wartning'
+                - 'warning'
 
             Defaults to 'notice'.
     """

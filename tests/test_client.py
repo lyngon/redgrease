@@ -95,15 +95,15 @@ def test_pydumpreqs(rg: redgrease.RedisGears, package):
 )
 @pytest.mark.parametrize("mode", ["blocking", "unblocking"])
 def test_trigger(rg: redgrease.RedisGears, arg_list: List, mode: str):
-    triggger_name = "Bang"
+    trigger_name = "Bang"
     unblocking: bool = mode == "unblocking"
     fun_str = (
         """GB('CommandReader')"""
         """.flatmap(lambda x: x)."""
-        f"""register(trigger='{triggger_name}')"""
+        f"""register(trigger='{trigger_name}')"""
     )
     assert rg.gears.pyexecute(fun_str, unblocking=unblocking)
-    res = rg.gears.trigger(triggger_name, *arg_list)
+    res = rg.gears.trigger(trigger_name, *arg_list)
     assert isinstance(res, redgrease.data.ExecutionResult)
     # assert isinstance(res.value, list)
     assert len(res) == len(arg_list) + 1
@@ -115,12 +115,12 @@ def test_trigger(rg: redgrease.RedisGears, arg_list: List, mode: str):
 
 @pytest.mark.parametrize("mode", ["blocking", "unblocking"])
 def test_dumpregistrations(rg: redgrease.RedisGears, mode: str):
-    triggger_name = "Bang"
+    trigger_name = "Bang"
     unblocking: bool = mode == "unblocking"
     fun_str = (
         """GB('CommandReader')"""
         """.flatmap(lambda x: x)."""
-        f"""register(trigger='{triggger_name}')"""
+        f"""register(trigger='{trigger_name}')"""
     )
     assert rg.gears.pyexecute(fun_str, unblocking=unblocking)
     registrations_list = rg.gears.dumpregistrations()
@@ -135,7 +135,7 @@ def test_dumpregistrations(rg: redgrease.RedisGears, mode: str):
     assert reg.reader
     assert isinstance(
         reg.reader, str
-    )  # This should mabe be redgrease.Reader but as enum : Issue #4
+    )  # This should maybe be redgrease.Reader but as enum : Issue #4
     assert reg.desc is None  # Not sure when and how this field isr set
 
     # # Registration data
@@ -159,11 +159,11 @@ def test_dumpregistrations(rg: redgrease.RedisGears, mode: str):
     assert rdat.args
     assert isinstance(rdat.args, dict)
 
-    # # This is only true for CommandReader registrerd with a trigger
+    # # This is only true for CommandReader registered with a trigger
     assert "trigger" in rdat.args
-    assert str_if_bytes(rdat.args["trigger"]) == triggger_name
+    assert str_if_bytes(rdat.args["trigger"]) == trigger_name
 
-    # # Private Data. Not really impt how it is returned
+    # # Private Data. Not really important how it is returned
     # # But want to know if it changes for some reason
     assert reg.PD
     assert isinstance(reg.PD, dict)
@@ -173,7 +173,7 @@ def test_dumpregistrations(rg: redgrease.RedisGears, mode: str):
     assert reg.PD["depsList"] == []
 
     # # Chec that NumTriggered and NumSuccess increase after a trigger
-    assert rg.gears.trigger(triggger_name)
+    assert rg.gears.trigger(trigger_name)
     registrations_list_2 = rg.gears.dumpregistrations()
     reg2 = registrations_list_2[0]
     assert reg2.RegistrationData.numTriggered == reg.RegistrationData.numTriggered + 1
@@ -181,11 +181,11 @@ def test_dumpregistrations(rg: redgrease.RedisGears, mode: str):
 
 
 def test_unregister(rg: redgrease.RedisGears):
-    triggger_name = "Bang"
+    trigger_name = "Bang"
     fun_str = (
         """GB('CommandReader')"""
         """.flatmap(lambda x: x)."""
-        f"""register(trigger='{triggger_name}')"""
+        f"""register(trigger='{trigger_name}')"""
     )
     assert rg.gears.pyexecute(fun_str)
     registrations_list = rg.gears.dumpregistrations()
@@ -193,11 +193,11 @@ def test_unregister(rg: redgrease.RedisGears):
     for reg in registrations_list:
         if (
             "trigger" in reg.RegistrationData.args
-            and str_if_bytes(reg.RegistrationData.args["trigger"]) == triggger_name
+            and str_if_bytes(reg.RegistrationData.args["trigger"]) == trigger_name
         ):
             exec_id = reg.id
     assert exec_id
-    # TODO: Also test othe "ExecId"-like objects
+    # TODO: Also test other "ExecId"-like objects
     assert rg.gears.unregister(exec_id)
     registrations_list_2 = rg.gears.dumpregistrations()
     assert registrations_list_2 == []
@@ -215,7 +215,7 @@ def test_getexecution(rg: redgrease.RedisGears, fun_str: str):
     assert isinstance(exec.value, redgrease.data.ExecID)
     shard_id = exec.value.shard_id
 
-    # ! Possibly a race condition that executon is not complete. Ugly AF sln.
+    # ! Possibly a race condition that execution is not complete. Ugly AF sln.
     time.sleep(5)
 
     res = rg.gears.getexecution(exec)
@@ -259,7 +259,7 @@ def test_getresults(rg: redgrease.RedisGears):
     assert not exec.errors
     assert isinstance(exec.value, redgrease.data.ExecID)
 
-    # ! Possibly a race condition that executon is not complete. Ugly AF sln.
+    # ! Possibly a race condition that execution is not complete. Ugly AF sln.
     time.sleep(5)
 
     res = rg.gears.getresults(exec)

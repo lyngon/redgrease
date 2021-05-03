@@ -21,10 +21,10 @@ Example::
     Serverside Redis Commands have the following limitations:
 
     A. Only executes commands against the local shard. 
-        This is also the caser for both the :func:`redgrease.runtime.execute` function as well as the the RedisGears default builtin `execute()` function too.
+        This is also the case for both the :func:`redgrease.runtime.execute` function as well as the the RedisGears default builtin `execute()` function too.
 
     B. Blocking commands, such as "BRPOP" or "BLPOP" ect, are not supported. 
-        This is also the caser for both the :func:`redgrease.runtime.execute` function as well as the the RedisGears default builtin `execute()` function too.
+        This is also the case for both the :func:`redgrease.runtime.execute` function as well as the the RedisGears default builtin `execute()` function too.
 
 
 

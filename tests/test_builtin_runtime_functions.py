@@ -77,7 +77,7 @@ def read(file_pattern):
     "redgrease_import", ["import_none", "import_explicit", "import_all"]
 )
 @pytest.mark.parametrize(
-    "gears_script", read("buitin_runtime_func_*.py"), ids=lambda x: x[0]
+    "gears_script", read("builtin_runtime_func_*.py"), ids=lambda x: x[0]
 )
 def test_builtin_runtime_functions(
     redisgears_container, extras, gears_script, redgrease_import, base_packages
@@ -92,7 +92,7 @@ def test_builtin_runtime_functions(
         execute, atomic, configGet, gearsConfigGet, hashtag and log.
         see https://oss.redislabs.com/redisgears/runtime.html
         Note: This test is not testing if these functions are doing the right thing,
-        just that they dont cause errors at import or invovation.
+        just that they don't cause errors at import or invovation.
 
     b). The builtin functions should be callable regardless how they are imported:
     - Imported explicitly, e.g: 'from redgrease import GB, log'
@@ -102,7 +102,7 @@ def test_builtin_runtime_functions(
     - Without any redgrease imports as all.
 
     c). The builtin functions should always work regardles of which
-        redgrease extras are installed, icluding:
+        redgrease extras are installed, including:
         - No extras, which means that no third party packages are installed
         - 'runtime' extras, which install the 'runtime.client' dependencies,
             such for example redis.
@@ -110,7 +110,7 @@ def test_builtin_runtime_functions(
 
     Note: This Test is far from optimized, and is currently for every test-case
     (currently 72 in total!) spinning up a fresh redisgears container and installs
-    redgrease, beforer running the actual tests.
+    redgrease, before running the actual tests.
     This test takes several minutes to run.
     """
 

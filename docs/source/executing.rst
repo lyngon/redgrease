@@ -143,8 +143,8 @@ Let's execute these functions in some different ways.
 
 .. _exe_gear_function_obj_pyexecute:
 
-Execute with :meth:`.Gears.pyexecute` method
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Execute with :meth:`.Gears.pyexecute` Client method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The most idiomatic way of executing GearFunction objects is just to pass it to :meth:`.Gears.pyexecute`:
 
@@ -176,8 +176,8 @@ The result from our function might look something like:
 
 .. _exe_gear_function_obj_on_meth:
 
-Execute with :meth:`.ClosedGearFunction.on` method
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Execute with :meth:`.ClosedGearFunction.on` GearFunction method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Another short-form way of running a closed GearFunction is to call its its :meth:`on() <.ClosedGearFunction.on>` method.
 

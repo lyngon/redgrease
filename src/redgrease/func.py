@@ -42,7 +42,7 @@ def command(
     onRegistered: Registrator = None,
     **kargs,
 ) -> Callable[[Callable], ClosedGearFunction]:
-    """Decorator for creation of CommandReader + Tigger GearFunctions
+    """Decorator for creation of CommandReader + Trigger GearFunctions
 
     Args:
         trigger (str, optional):
@@ -68,7 +68,7 @@ def command(
 
         onRegistered (:data:`redgrease.typing.Registrator`, optional):
             A function callback thats called on each shard upon function registration.
-            It is a good place to initialize non-serializable objects such as
+            It is a good place to initialize non-serializeable objects such as
             network connections.
             Same as for the `register` operation.
             Defaults to None.

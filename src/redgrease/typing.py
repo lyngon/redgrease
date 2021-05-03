@@ -149,7 +149,7 @@ Expander = Callable[[InputRecord], Iterable[OutputRecord]]
     :Returns: An iterable sequence of values, for example a list, each of which becomes
         an input to the next operation.
 
-    :Return type: Iterable[OuntputRecord]
+    :Return type: Iterable[OutputRecord]
 """
 
 
@@ -183,9 +183,9 @@ Filterer = Callable[[InputRecord], bool]
     or ``False``.
 
     :Parameters: (InputRecord) - A single input-record, of the same type as the
-    opertations' input type.
+    operations' input type.
 
-    :Returns: ither ``True`` or ``False``.
+    :Returns: Either ``True`` or ``False``.
 
     :Return type: bool
 """
