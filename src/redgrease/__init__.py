@@ -177,5 +177,4 @@ __all__ += [
     "gearsFuture",
     "log",
     "GEARS_RUNTIME",
-    "GEARS_VERSION",
 ]
