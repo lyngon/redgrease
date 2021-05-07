@@ -128,9 +128,24 @@ if "redisgears" in sys.modules:
     from __main__ import gearsConfigGet as gearsConfigGet
     from redisgears import atomicCtx as atomic
     from redisgears import executeCommand as execute
-    from redisgears import gearsFutureCtx as gearsFuture
     from redisgears import getMyHashTag as hashtag
-#     from redisgears import log as log
+
+    try:
+        from redisgears import gearsFutureCtx as gearsFuture
+
+        GEARS_VERSION = 1.2
+    except ImportError as import_error:
+
+        ex = import_error
+
+        class gearsFuture:  # type: ignore
+            def __init__(self, *args, **kwargs) -> None:
+                raise NotImplementedError(
+                    "gearsFuture not defined. "
+                    "Verify that you are using RedisGears >= 1.2.0"
+                ) from ex
+
+        GEARS_VERSION = 1.0
 
 else:
     # Dev or Client environment
@@ -161,4 +176,5 @@ __all__ += [
     "gearsFuture",
     "log",
     "GEARS_RUNTIME",
+    "GEARS_VERSION",
 ]
