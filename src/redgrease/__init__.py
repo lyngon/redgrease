@@ -43,6 +43,7 @@ from .reader import (
     ShardsIDReader,
     StreamReader,
 )
+from .runtime import hashtag3, log
 from .sugar import FailurePolicy, KeyType, LogLevel, ReaderType, TriggerMode
 
 __all__ = [
@@ -51,6 +52,8 @@ __all__ = [
     "ClosedGearFunction",
     "GearFunction",
     "OpenGearFunction",
+    "hashtag3",
+    "log",
     "FailurePolicy",
     "KeyType",
     "LogLevel",
@@ -113,6 +116,9 @@ try:
 except ModuleNotFoundError:
     pass
 
+
+GEARS_RUNTIME = None
+
 # Use either the real or mock (placeholder) implementations of the
 # Redis Gears Python environment top level builtin functions
 # Depending on if the module is loaded in a 'redisgears' environment
@@ -149,8 +155,6 @@ if "redisgears" in sys.modules:
         GEARS_RUNTIME = (1, 0)
 
 else:
-    # Dev or Client environment
-    GEARS_RUNTIME = False  # type: ignore
     # Import placeholder functions and
     from .runtime import (
         GB,
@@ -163,7 +167,8 @@ else:
         hashtag,
     )
 
-from .runtime import hashtag3, log
+    GEARS_RUNTIME = False  # type: ignore
+
 
 __all__ += [
     "GB",
@@ -173,8 +178,6 @@ __all__ += [
     "execute",
     "gearsConfigGet",
     "hashtag",
-    "hashtag3",
     "gearsFuture",
-    "log",
     "GEARS_RUNTIME",
 ]
