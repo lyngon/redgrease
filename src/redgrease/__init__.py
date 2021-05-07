@@ -128,6 +128,7 @@ if "redisgears" in sys.modules:
     from __main__ import gearsConfigGet as gearsConfigGet
     from redisgears import atomicCtx as atomic
     from redisgears import executeCommand as execute
+    from redisgears import gearsFutureCtx as gearsFuture
     from redisgears import getMyHashTag as hashtag
 #     from redisgears import log as log
 
@@ -142,6 +143,7 @@ else:
         configGet,
         execute,
         gearsConfigGet,
+        gearsFuture,
         hashtag,
     )
 
@@ -156,6 +158,7 @@ __all__ += [
     "gearsConfigGet",
     "hashtag",
     "hashtag3",
+    "gearsFuture",
     "log",
     "GEARS_RUNTIME",
 ]
