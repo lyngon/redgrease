@@ -118,8 +118,7 @@ except ModuleNotFoundError:
 # Depending on if the module is loaded in a 'redisgears' environment
 # or not (e.g. dev or client)
 if "redisgears" in sys.modules:
-    # Server Gears runtime environment
-    GEARS_RUNTIME = True
+
     # Import the default functions and classes
     # pyright: reportMissingImports=false
     from __main__ import GB as GB
@@ -133,7 +132,8 @@ if "redisgears" in sys.modules:
     try:
         from redisgears import gearsFutureCtx as gearsFuture
 
-        GEARS_VERSION = 1.2
+        # Server Gears runtime environment
+        GEARS_RUNTIME = 1.2
     except ImportError as import_error:
 
         ex = import_error
@@ -145,7 +145,8 @@ if "redisgears" in sys.modules:
                     "Verify that you are using RedisGears >= 1.2.0"
                 ) from ex
 
-        GEARS_VERSION = 1.0
+        # Server Gears runtime environment
+        GEARS_RUNTIME = 1.0
 
 else:
     # Dev or Client environment
