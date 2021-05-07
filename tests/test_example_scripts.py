@@ -122,7 +122,7 @@ def test_example_deletebykeprefix(
     rg: RedisGears, script_file: str, vanilla: bool, enforce_redgrease
 ):
 
-    rg.set("delete_me:unimportant", "Merble!")
+    rg.set("delete_me:unimportant", "Merrble!")
     rg.set("keep_me:important", "Gerbil!")
     rg.hset("delete_me:data", mapping={"a": 1, "b": 2})
     rg.xadd("dont_delete_me:", {"some": "interesting", "data": "here"})
@@ -253,7 +253,7 @@ def test_example_reliablekeyspacenotification(
 
     assert not rg.exists("notifications-stream")
 
-    msg = {"gender": "male", "behavior": "naugty"}
+    msg = {"gender": "male", "behavior": "naughty"}
     rg.hset("person:anders", mapping=msg)
 
     time.sleep(0.5)

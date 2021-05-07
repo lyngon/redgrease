@@ -27,13 +27,15 @@ GearFunctions are created by "applying" :ref:`operations`, such as :ref:`op_map`
 
 With the exception of the :ref:`gearfun_builder`, "applying" an operation on a GearFunction, doesn't actually modify it, but instead creates a new function with that operation added. 
 
-All Gear functions therefore consists of a chain of zero or more :ref:`operations`, with some reader at the begining. 
+All Gear functions therefore consists of a chain of zero or more :ref:`operations`, with some reader at the beginning. 
 
 Some of the Reader types have additional reader-specific operations, that can only be "applied" as as their first operation.
 
 Gear functions are "terminated" by either one of two special :ref:`op_action`. Either :ref:`op_action_run`, for immediate "batch-mode" execution, or :ref:`op_action_register`, for registering the function for "event-mode" execution.
 
 Some Readers support both "batch-mode" and "event-mode", but some only support one of the modes.
+
+.. _gearfun_open_closed:
 
 GearFunctions that **have not** been "terminated" by either of the :ref:`op_action`, are referred to as an :ref:`gearfun_open`, as they **can be extended** with more operations, creating new GearFunctions. 
 
@@ -48,31 +50,30 @@ GearFunctions that **have** been "terminated" by either of the :ref:`op_action`,
 
 Every :ref:`gearfun_open`, including the :ref:`gearfun_builder`, implement the default set of :ref:`operations`.
 
-When a GearFuctions is executed, the Reader reads its data, and pass each record to its first operation, which modifies, filters or aggregates these records into some new output records, which in turn are passed to the next operation and so on, until the last operation.
+When a GearFunction is executed, the Reader reads its data, and pass each record to its first operation, which modifies, filters or aggregates these records into some new output records, which in turn are passed to the next operation and so on, until the last operation.
 
 The output of the final operation is then either, returned to the caller if it was a "batch-mode" execution **and** ``unblocking`` was not set to ``True`` in :meth:`.Gears.pyexecute`, or stored for later retrieval otherwise.
 
 
 .. _gearfun_open:
 
-OpenGearFunction 
-~~~~~~~~~~~~~~~~~~~
+Open GearFunction 
+~~~~~~~~~~~~~~~~~
 
-You would never instatiate a :class:`.gears.OpenGearFunction` yourself, but all "open" :ref:`GearFuctions <gearfun>` that has not yet been "closed" with the :ref:`op_action_run` or :ref:`op_action_register` :ref:`op_action`, inherits from this class. 
+You would never instantiate a :class:`.gears.OpenGearFunction` yourself, but all "open" :ref:`GearFunctions <gearfun>` that has not yet been "closed" with the :ref:`op_action_run` or :ref:`op_action_register` :ref:`op_action`, inherits from this class. 
 
-It is this class that under the hood is responsible for "applying" :ref:`operations` and :ref:`Actions <op_action>`, and thus creating new GearFuctions.
+It is this class that under the hood is responsible for "applying" :ref:`operations` and :ref:`Actions <op_action>`, and thus creating new GearFunctions.
 
 This includes both the :class:`.runtime.GearsBuilder` as well as the :ref:`gearfun_readers`:
 
 
-.. autoclass:: redgrease.gears.OpenGearFunction()
+.. autoclass:: redgrease.gears.OpenGearFunction
     :members:
-
 
 .. _gearfun_closed:
 
-ClosedGearFunction
-~~~~~~~~~~~~~~~~~~
+Closed GearFunction
+~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: redgrease.gears.ClosedGearFunction()
     :members:
@@ -84,7 +85,7 @@ ClosedGearFunction
 GearsBuilder
 ------------
 
-If you are familiar with RedisGears from before, then the :class:`.runtime.Gearsbuilder` should be very familiar. In fact the RedGrease version is designed to be backwards compatible with the `RedisGears's Context Builder <https://oss.redislabs.com/redisgears/1.0/functions.html#context-builder>`_, with the same name.
+If you are familiar with RedisGears from before, then the :class:`.runtime.Gearsbuilder` should be very familiar. In fact the RedGrease version is designed to be backwards compatible with the `Context Builder of RedisGears <https://oss.redislabs.com/redisgears/1.0/functions.html#context-builder>`_, with the same name.
 
 
 The the :ref:`runtime_gearsbuilder` is technically a part of on the :ref:`runtime` and is exposed both through  :class:`redgrease.runtime.GearsBuilder` as well as :class:`redgrease.GearsBuilder`. 

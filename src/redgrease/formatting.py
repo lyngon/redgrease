@@ -111,7 +111,7 @@ def initialize_logger(  # noqa: C901
     if not isinstance(fmt, logging.Formatter):
         msg_formatter = UTC_ISO8601_Formatter(fmt=str(fmt))
 
-    # Override with explicit opthions
+    # Override with explicit options
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
     root_logger.handlers[0].setFormatter(msg_formatter)
@@ -134,7 +134,7 @@ def initialize_logger(  # noqa: C901
 
     parse_error_string = "Unable to parse config file as {}: '{}'"
 
-    # assume yaml, unelss explicitly otherwise
+    # assume yaml, unless explicitly otherwise
     if suffix not in [".ini", ".json"]:
         logging.getLogger(__name__).debug(
             f"Attempting to parse '{conf_file}' as yaml file."

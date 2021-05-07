@@ -23,8 +23,8 @@ RedGrease Documentation
    serverside_commands
    sugar
    cli
+   misc
    advanced
-   redgrease
    help
 
 

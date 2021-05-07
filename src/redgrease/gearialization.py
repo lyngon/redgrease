@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Helper functions for searialization, de-serialization, reading and writing Gear
+Helper functions for serialization, de-serialization, reading and writing Gear
 functions.
 """
 __author__ = "Anders Åström"
@@ -37,10 +37,10 @@ import redgrease.gears
 import redgrease.runtime
 
 
-def deseralize_gear_function(
+def deserialize_gear_function(
     serialized_gear: str, python_version: str
 ) -> redgrease.gears.GearFunction:
-    """Safely deserializes (unpickles) a serialized GearFunction.
+    """Safely de-serializes (unpickles) a serialized GearFunction.
 
     This function is only executed on the Gear server.
 
@@ -81,7 +81,7 @@ def deseralize_gear_function(
         raise
 
 
-def seralize_gear_function(gear_function: redgrease.gears.GearFunction) -> str:
+def serialize_gear_function(gear_function: redgrease.gears.GearFunction) -> str:
     """Serializes a GearFunction into a wrapper code-string that can be sent to the
     Gear server to execute.
 
@@ -152,7 +152,7 @@ def get_function_string(
             # we assume it is meant to be closed with a 'run'
             gear_function = gear_function.run()
 
-        function_string = seralize_gear_function(gear_function)
+        function_string = serialize_gear_function(gear_function)
 
         # Special case for CommandReader functions:
         # return a new function that calls its "trigger" and returns the results.
@@ -171,3 +171,9 @@ def get_function_string(
         function_string = str(gear_function)
 
     return function_string, ctx
+
+
+# TODO: remove. Also change "deseralize_gear_function" to "deserialize_gear_function"
+# in serialize_gear_function, above
+deseralize_gear_function = deserialize_gear_function
+seralize_gear_function = serialize_gear_function

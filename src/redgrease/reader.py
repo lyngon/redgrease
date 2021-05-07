@@ -77,7 +77,7 @@ class GearReader(redgrease.gears.OpenGearFunction[OutputRecord]):
                 Defaults to None.
 
             requirements (Iterable[str], optional):
-                Package lependencies for the gear train.
+                Package dependencies for the gear train.
                 Defaults to None.
         """
         reader_op = redgrease.gears.Reader(reader, defaultArg, desc)
@@ -105,7 +105,7 @@ class KeysReader(GearReader[Record]):
                 Defaults to None.
 
             requirements (Iterable[str], optional):
-                Package lependencies for the gear train.
+                Package dependencies for the gear train.
                 Defaults to None.
         """
         super().__init__(
@@ -130,7 +130,7 @@ class KeysReader(GearReader[Record]):
             event (Union[str, Container[str]], optional):
                 A single string, or a container of several strings, representing the
                 Redis command or event `that .
-                Defaults to ... (Ellipsis), menaing any event.
+                Defaults to ... (Ellipsis), meaning any event.
 
         Returns:
             OpenGearFunction:
@@ -155,7 +155,7 @@ class KeysReader(GearReader[Record]):
             event (Union[str, Container[str]], optional):
                 A single string, or a container of several strings, representing the
                 Redis command or event `that .
-                Defaults to ... (Ellipsis), menaing any event.
+                Defaults to ... (Ellipsis), meaning any event.
 
         Returns:
             OpenGearFunction[str]:
@@ -186,7 +186,7 @@ class KeysReader(GearReader[Record]):
             event (Union[str, Container[str]], optional):
                 A single string, or a container of several strings, representing the
                 Redis command or event `that.
-                Defaults to ... (Ellipsis), menaing any event.
+                Defaults to ... (Ellipsis), meaning any event.
 
         Returns:
             OpenGearFunction[redgrease.utils.Record]:
@@ -219,7 +219,7 @@ class KeysOnlyReader(GearReader[str]):
                 Defaults to None.
 
             requirements (Iterable[str], optional):
-                Package lependencies for the gear train.
+                Package dependencies for the gear train.
                 Defaults to None.
         """
         super().__init__(
@@ -252,7 +252,7 @@ class StreamReader(GearReader[Record]):
                 Defaults to None.
 
             requirements (Iterable[str], optional):
-                Package lependencies for the gear train.
+                Package dependencies for the gear train.
                 Defaults to None.
         """
         super().__init__(
@@ -313,7 +313,7 @@ class PythonReader(GearReader):
                 Defaults to None.
 
             requirements (Iterable[str], optional):
-                Package lependencies for the gear train.
+                Package dependencies for the gear train.
                 Defaults to None.
         """
         super().__init__(
@@ -339,7 +339,7 @@ class ShardsIDReader(GearReader[str]):
                 Defaults to None.
 
             requirements (Iterable[str], optional):
-                Package lependencies for the gear train.
+                Package dependencies for the gear train.
                 Defaults to None.
         """
         super().__init__(
@@ -365,7 +365,7 @@ class CommandReader(GearReader):
                 Defaults to None.
 
             requirements (Iterable[str], optional):
-                Package lependencies for the gear train.
+                Package dependencies for the gear train.
                 Defaults to None.
         """
         super().__init__(

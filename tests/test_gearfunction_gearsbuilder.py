@@ -84,7 +84,7 @@ def test_foreach(rg: RedisGears):
         global counter
         counter += 1
 
-    # important to notice, the counte will increased
+    # important to notice, the counter will increased
     # on the server size and not on client side!!
     gear_fun = GearsBuilder().foreach(increase).map(lambda _: counter).run()
 

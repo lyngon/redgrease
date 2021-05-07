@@ -50,7 +50,7 @@ def get_set_by_name(
         new_val (Any): Another config value to write
         case (str): Either "upper", "lower" or anything Falsy.
             Indicates if the config name should be transformed
-            to upperccase, lowercase or not at all
+            to uppercase, lowercase or not at all
         read_only (bool): Indicates that write operations should
             be expected not to go through
 
@@ -88,9 +88,9 @@ def get_set_by_name(
 def raw(value):
     """Returns the expected raw (bytes) version of a value"""
 
-    # Bools are for some reason not supported by the Redis client,
+    # Booleans are for some reason not supported by the Redis client,
     # but the logical translation would be as if it was int, so
-    # that is how redgrease.client.Redis/RedisGears will handle bools
+    # that is how redgrease.client.Redis/RedisGears will handle booleans
     if isinstance(value, bool):
         value = int(value)
 

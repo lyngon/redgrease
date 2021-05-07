@@ -133,10 +133,10 @@ def read_requirements(
 def to_packages_dict(
     requirements: Iterable[Requirement],
 ) -> Dict[str, List[Requirement]]:
-    """Transforms a collection of requirements to a dict mapping packge names to
+    """Transforms a collection of requirements to a dict mapping package names to
     a list of requirements.
 
-    I.e. grouping the different versions of packages in the requiremnts by name.
+    I.e. grouping the different versions of packages in the requirements by name.
 
     E.g.
         ```
@@ -157,7 +157,7 @@ def to_packages_dict(
 
     Returns:
         Dict[str, List[Requirement]]:
-            A dict that maps packge names to a list of specific requirements.
+            A dict that maps package names to a list of specific requirements.
     """
     return {
         str(name): list(pkgs)
@@ -169,7 +169,7 @@ def from_packages_dict(
     packages: Mapping[Any, Iterable[Requirement]]
 ) -> Set[Requirement]:
     """Flattens any dict, where the values are collections of Requirements into a
-    set of thoes requirements.
+    set of those requirements.
 
     Args:
         packages (Mapping[str, Iterable[Requirement]]):
@@ -178,7 +178,7 @@ def from_packages_dict(
 
     Returns:
         Set[Requirement]:
-            The set of unique requirments.
+            The set of unique requirements.
             Note that if the dictionary contains multiple versions
             (i.e different version constraints and/or extras) of the same requirement,
             the resulting set will contain them all too, as they are thechically not
@@ -197,7 +197,7 @@ def resolve_requirements(
     Args:
         requirements (Iterable[Union[str, Requirement]]):
             Any iterable of requirements, encoded as either strings ('numpy',
-            'passlib[bcrypt]==1.7.4') or a packaging.requirements.Requiremnt object.
+            'passlib[bcrypt]==1.7.4') or a packaging.requirements.Requirement object.
 
         enforce_redgrease (PackageOption, optional):
             Indicates if, and potentially which version of, redgrease should be
@@ -205,12 +205,12 @@ def resolve_requirements(
 
             It can take several optional types::
 
-                - None : no enforcing. requirements are only deduplicated, with or
+                - None : no enforcing. requirements are only de-duplicated, with or
                     without 'redgrease'
 
                 - bool :
                     True, enforces latest 'redgrease' package on PyPi,
-                    False, enforces that 'redgrease' is NOT in the quirements set,
+                    False, enforces that 'redgrease' is NOT in the requirements set,
                         any redgrease requirements will be removed.
 
                 - str :
@@ -224,7 +224,7 @@ def resolve_requirements(
 
                 - Version : behaves just as string version (a.)
 
-                - Requirment : behaves just as string version (d.)
+                - Requirement : behaves just as string version (d.)
 
             Defaults to None.
 
@@ -236,7 +236,7 @@ def resolve_requirements(
         InvalidRequirement:
             If any of the requirements are not well-formed.
     """
-    # Parse requirments and, remove duplicates
+    # Parse requirements and, remove duplicates
     requirements_set = (
         {packaging.requirements.Requirement(str(req)) for req in set(requirements)}
         if requirements
@@ -245,7 +245,7 @@ def resolve_requirements(
 
     if enforce_redgrease is None:
         # If there is no requirement to keep nor remove redgrease,
-        # then the requirments are returned, as-is
+        # then the requirements are returned, as-is
         return requirements_set
 
     packages = to_packages_dict(requirements_set)
@@ -253,7 +253,7 @@ def resolve_requirements(
     if isinstance(enforce_redgrease, bool):
         if not enforce_redgrease:
             # enforce_redgrease is explicitly False, meaning we enforce that
-            # redgrease should NOT be in ther requirements set
+            # redgrease should NOT be in the requirements set
             # so we remove it
             packages.pop("redgrease", None)
             return from_packages_dict(packages)

@@ -2,7 +2,7 @@
 # from __future__ import annotations
 
 """
-GearsFunction and Operation definintions
+GearsFunction and Operation definitions
 """
 __author__ = "Anders Åström"
 __contact__ = "anders@lyngon.com"
@@ -205,7 +205,7 @@ class Reader(Operation):
 
         Args:
             builder (Type):
-                GearsBuilder class. Defines the constuctor to use to create the
+                GearsBuilder class. Defines the constructor to use to create the
                 Gear function.
 
         Returns:
@@ -321,7 +321,7 @@ class Register(Operation):
         mode (str):
             The execution mode of the triggered function.
 
-        onRegisered (Callable):
+        onRegistered (Callable):
             A function callback that's called on each shard upon function registration.s
     """
 
@@ -372,7 +372,7 @@ class Register(Operation):
             onRegistered (Registrator, optional):
                 A function callback that's called on each shard upon function
                 registration.
-                It is a good place to initialize non-serializable objects such as
+                It is a good place to initialize non-serializeable objects such as
                 network connections.
                 Defaults to ``None``.
 
@@ -393,7 +393,7 @@ class Register(Operation):
 
         Returns:
             ClosedGearFunction:
-                A closed "event-mode" Gear function that is ready to be regisetered on a
+                A closed "event-mode" Gear function that is ready to be registered on a
                 RedisGears system.
         """
         import cloudpickle
@@ -424,7 +424,7 @@ class Map(Operation):
     """
 
     def __init__(self, op: Mapper, **kwargs) -> None:
-        """Instaniate a Map operation.
+        """Instantiate a Map operation.
 
         Args:
             op (:data:`redgrease.typing.Mapper`):
@@ -465,7 +465,7 @@ class FlatMap(Operation):
     """
 
     def __init__(self, op: Expander, **kwargs) -> None:
-        """Instaniate a FlatMap operation.
+        """Instantiate a FlatMap operation.
 
         Args:
             op (:data:`redgrease.typing.Expander`):
@@ -505,7 +505,7 @@ class ForEach(Operation):
     """
 
     def __init__(self, op: Processor, **kwargs) -> None:
-        """Instaniate a ForEach operation.
+        """Instantiate a ForEach operation.
 
         Args:
             op (:data:`redgrease.typing.Processor`):
@@ -546,7 +546,7 @@ class Filter(Operation):
     """
 
     def __init__(self, op: Filterer, **kwargs) -> None:
-        """Instaniate a Filter operation.
+        """Instantiate a Filter operation.
 
         Args:
             op (:data:`redgrease.typing.Filterer`):
@@ -586,7 +586,7 @@ class Accumulate(Operation):
     """
 
     def __init__(self, op: Accumulator, **kwargs) -> None:
-        """Instaniate an Accumulate operation.
+        """Instantiate an Accumulate operation.
 
         Args:
             op (:data:`redgrease.typing.Accumulator`):
@@ -747,12 +747,12 @@ class Repartition(Operation):
     The operation then moves the record from its original shard to the new one.
 
         Attributes:
-            extractor (redgreas.typing.Extractor):
+            extractor (redgrease.typing.Extractor):
                 A function deciding the destination shard of an input record.
     """
 
     def __init__(self, extractor: Extractor, **kwargs) -> None:
-        """Instantiate a Repartition opertation
+        """Instantiate a Repartition operation
 
         Args:
             extractor (:data:`redgrease.typing.Extractor`):
@@ -831,7 +831,7 @@ class Aggregate(Operation):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
 
@@ -841,7 +841,7 @@ class Aggregate(Operation):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
         """
@@ -923,7 +923,7 @@ class AggregateBy(Operation):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
 
@@ -933,7 +933,7 @@ class AggregateBy(Operation):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
         """
@@ -1118,7 +1118,7 @@ class Sort(Operation):
 
     Attributes:
         reverse (bool):
-            Defines if the sorting orded is descending (``True``) or ascendinng
+            Defines if the sorting order is descending (``True``) or ascending
             (``False``).
     """
 
@@ -1127,7 +1127,7 @@ class Sort(Operation):
 
         Args:
             reverse (bool, optional):
-                Sort in descending order (higer to lower).
+                Sort in descending order (higher to lower).
                 Defaults to ``True``.
         """
         super().__init__(**kwargs)
@@ -1187,7 +1187,7 @@ class Count(Operation):
     """
 
     def __init__(self, **kwargs):
-        """Instantiate a Cound operation."""
+        """Instantiate a Count operation."""
         super().__init__(**kwargs)
 
     def add_to(self, function: "OpenGearFunction") -> "OpenGearFunction":
@@ -1218,7 +1218,7 @@ class CountBy(Operation):
     """
 
     def __init__(self, extractor: Extractor, **kwargs) -> None:
-        """Instaniate a CountBy operation.
+        """Instantiate a CountBy operation.
 
         Args:
             extractor (:data:`redgrease.typing.Extractor`):
@@ -1253,7 +1253,7 @@ class Avg(Operation):
 
         1. A aggregate operation locally reduces the records to tuples of sum and count
             that are globally combined.
-        2. A local map operation calculates the average from the global tupl
+        2. A local map operation calculates the average from the global tuple.
 
     Attributes:
         extractor (:data:`redgrease.typing.Extractor`):
@@ -1300,7 +1300,7 @@ class GearFunction(Generic[T]):
 
     Attributes:
         operation (Operation):
-            The last opertation in the functions chain of operations.
+            The last operation in the functions chain of operations.
 
         input_function (OpenGearFunction):
             The function (chain of operations) that provides the input records to the
@@ -1317,11 +1317,11 @@ class GearFunction(Generic[T]):
         input_function: "OpenGearFunction" = None,
         requirements: Optional[Iterable[str]] = None,
     ) -> None:
-        """Instaniate a GearFunction
+        """Instantiate a GearFunction
 
         Args:
             operation (Operation):
-                The last opertation in the functions chain of operations.
+                The last operation in the functions chain of operations.
 
             input_function (OpenGearFunction, optional):
                 The function (chain of operations) that provides the input records to
@@ -1427,11 +1427,11 @@ class ClosedGearFunction(GearFunction[T]):
                 Redis client / connection object.
 
             unblocking (bool, optional):
-                Execute function unblocking, i.e. asyncronous.
+                Execute function unblocking, i.e. asynchronous.
                 Defaults to ``False``.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
         Returns:
@@ -1539,11 +1539,11 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 Defaults to ``False``.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             on (redis.Redis):
-                Immedeately execute the function on this RedisGears system.
+                Immediately execute the function on this RedisGears system.
 
             **kwargs:
                 Additional parameters to the run operation.
@@ -1558,7 +1558,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 If the function does not support batch mode.
         """
         if not self.supports_batch_mode:
-            raise TypeError(f"Batch mode (run) is not supporterd for '{self.reader}'")
+            raise TypeError(f"Batch mode (run) is not supported for '{self.reader}'")
 
         gear_fun: ClosedGearFunction = ClosedGearFunction[InputRecord](
             Run(arg=arg, convertToStr=convertToStr, collect=collect, **kwargs),
@@ -1587,7 +1587,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
         readValue: bool = None,
         batch: int = None,
         duration: int = None,
-        onFailedPolcy: str = None,
+        onFailedPolicy: str = None,
         onFailedRetryInterval: int = None,
         trimStream: bool = None,
         trigger: str = None,  # Reader Specific: CommandReader
@@ -1640,7 +1640,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
 
             onRegistered (Registrator, optional):
                 A function that's called on each shard upon function registration.
-                It is a good place to initialize non-serializable objects such as
+                It is a good place to initialize non-serializeable objects such as
                 network connections.
                 Defaults to ``None``.
 
@@ -1689,7 +1689,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 size (0 for no duration).
                 Defaults to 0.
 
-            onFailedPolcy (str, optional):
+            onFailedPolicy (str, optional):
                 For StreamReader only.
                 The policy for handling execution failures.
                 May be one of:
@@ -1726,11 +1726,11 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 The trigger string that will trigger the function.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             on (redis.Redis):
-                Immedeately execute the function on this RedisGears system.
+                Immediately execute the function on this RedisGears system.
 
             **kwargs:
                 Additional parameters to the register operation.
@@ -1752,7 +1752,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
             kwargs["onRegistered"] = onRegistered
 
         if not self.supports_event_mode:
-            raise TypeError(f"Event mode (run) is not supporterd for '{self.reader}'")
+            raise TypeError(f"Event mode (run) is not supported for '{self.reader}'")
 
         if eventTypes is not None:
             kwargs["eventTypes"] = list(eventTypes)
@@ -1769,8 +1769,8 @@ class OpenGearFunction(GearFunction[InputRecord]):
         if duration is not None:
             kwargs["duration"] = duration
 
-        if onFailedPolcy is not None:
-            kwargs["onFailedPolicy"] = onFailedPolcy
+        if onFailedPolicy is not None:
+            kwargs["onFailedPolicy"] = onFailedPolicy
 
         if onFailedRetryInterval is not None:
             kwargs["onFailedRetryInterval"] = onFailedRetryInterval
@@ -1823,7 +1823,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 return something as an output (output record).
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -1860,7 +1860,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 be expanded.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -1895,7 +1895,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 should not return anything.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -1931,10 +1931,10 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 return a bool. The input records evaluated to ``True`` will be kept as
                 output records.
                 Defaults to the 'identity-function', i.e. records are filtered based on
-                their own truiness or falsiness.
+                their own trueness or falseness.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -1976,7 +1976,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 all inputs.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2026,7 +2026,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 all inputs, for each group.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2063,7 +2063,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 Defaults to 0.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2116,10 +2116,10 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 The function must take one argument as input (input record) and
                 return a string (key).
                 The hash slot, and consequently the destination shard, is determined by
-                hthe value of the key.
+                the value of the key.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2160,7 +2160,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
                 Defaults to addition, if 'zero' is a number and to a list accumulator
@@ -2172,13 +2172,13 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
                 Defaults to re-use the `seqOp` function.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2200,7 +2200,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 combOp = combOp or operator.add
             else:
                 raise ValueError(
-                    "No operatod provided, and unable to deduce a resonable default."
+                    "No operatod provided, and unable to deduce a reasonable default."
                 )
 
         seqOp = redgrease.utils.passfun(seqOp)
@@ -2244,7 +2244,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
                 Defaults to a list reducer.
@@ -2255,13 +2255,13 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 It must take two parameters:
                 - an accumulator value, from previous calls
                 - an input record
-                The functoin aggregates the input into the accumulator variable,
+                The function aggregates the input into the accumulator variable,
                 which stores the state between the function's invocations.
                 The function must return the accumulator's updated value.
                 Defaults to re-use the `seqOp` function.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2317,7 +2317,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 Defaults to a list reducer.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2397,11 +2397,11 @@ class OpenGearFunction(GearFunction[InputRecord]):
 
         Args:
             reverse (bool, optional):
-                Sort in descending order (higer to lower).
+                Sort in descending order (higher to lower).
                 Defaults to ``True``.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2460,7 +2460,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
         # Other Redis Gears args
         **kwargs,
     ) -> "OpenGearFunction[Dict[Hashable, int]]":
-        """Distributed :ref:`op_countby` operation countinig the records grouped by key.
+        """Distributed :ref:`op_countby` operation counting the records grouped by key.
 
         Args:
             extractor (:data:`redgrease.typing.Extractor`):
@@ -2471,7 +2471,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 Defaults to ``lambda x: str(x)``.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:
@@ -2511,7 +2511,7 @@ class OpenGearFunction(GearFunction[InputRecord]):
                 Defaults to ``lambda x: float(x)``.
 
             requirements (Iterable[str], optional):
-                Additional requirements / dedpendency Python packages.
+                Additional requirements / dependency Python packages.
                 Defaults to ``None``.
 
             **kwargs:

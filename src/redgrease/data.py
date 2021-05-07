@@ -2,8 +2,8 @@
 """
 Datatypes and parsers for the various structures, specific to Redis Gears.
 
-These datatypes are returend from various redgrease functions, merely for the purpose
-of providig more convenient structure, typing and documentation compared to the native
+These datatypes are returned from various redgrease functions, merely for the purpose
+of providing more convenient structure, typing and documentation compared to the native
 'list-based' structures.
 
 They are generally not intended to be instantiated by end-users.
@@ -40,7 +40,7 @@ import cloudpickle
 import wrapt
 
 from redgrease.utils import (
-    REnum,
+    _REnum,
     bool_ok,
     list_parser,
     optional,
@@ -89,7 +89,7 @@ class ExecID:
 
         Returns:
             redgrease.data.ExecID:
-                Theo parsed ExecID
+                The parsed ExecID
 
         Raises:
             ValueError:
@@ -129,13 +129,13 @@ class ExecutionResult(wrapt.ObjectProxy, Generic[T]):
 
     It is generic and walks and quacks just like the main result type (T) it wraps.
     With some notable exceptions:
-        - It has an additional property `errors` containing any acumulated errors
+        - It has an additional property `errors` containing any accumulated errors
         - Scalar results, behaves like scalars, but **also** like a single element list.
 
     This behavior isn't always perfect but gives for the most part an intuitive api
     experience.
 
-    If the behaviour in some situations are confusing, the raw wrapped value can be
+    If the behavior in some situations are confusing, the raw wrapped value can be
     accessed through the `value` property.
     """
 
@@ -218,7 +218,7 @@ def parse_execute_response(response) -> ExecutionResult:
             of errors  List[List[Union[T, Any]]].
 
             For some scenarios the response may take other forms, like a simple `Ok`
-            (e.g. in the absence of a closing `run()` operation) or an excecution ID
+            (e.g. in the absence of a closing `run()` operation) or an execution ID
             (e.g. for non-blocking executions).
 
     Returns:
@@ -231,7 +231,7 @@ def parse_execute_response(response) -> ExecutionResult:
     elif isinstance(response, list) and len(response) == 2:
         # The 'normal' list-of-lists response
         # Results are unpickled if they are pickled
-        # Note that the special case when the resiult only has one element,
+        # Note that the special case when the result only has one element,
         #   then the single value is used instread
         #   as the ExecutionResults would pretend it is a list anyway, if needed
         #   This way scalar results from for example `count` and `avg` will behave
@@ -250,7 +250,7 @@ def parse_execute_response(response) -> ExecutionResult:
         # Bytes response means ExecID
         return ExecutionResult(ExecID.parse(response))
     else:
-        # If the response doesnt fit any known pattern, its returned as-is
+        # If the response doesn't fit any known pattern, its returned as-is
         return ExecutionResult(response)
 
 
@@ -282,7 +282,7 @@ def parse_trigger_response(response) -> ExecutionResult:
     return ExecutionResult(response)
 
 
-class ExecutionStatus(REnum):
+class ExecutionStatus(_REnum):
     """Representation of the various states an execution could be in."""
 
     created = b"created"
@@ -313,8 +313,8 @@ class ExecutionStatus(REnum):
 
 
 # TODO: Isn't this sugar rather than data?
-class ExecLocality(REnum):
-    """Locality of exetution: Shard or Cluster"""
+class ExecLocality(_REnum):
+    """Locality of execution: Shard or Cluster"""
 
     Shard = "Shard"
     Cluster = "Cluster"
@@ -335,7 +335,7 @@ class RedisObject:
         It should be only be invoked on subclasses of RedisObjects.
 
         Returns:
-            RedisObect:
+            RedisObject:
                 Returns the RedisObject subclass if, and only if, its constructor
                 argument names and value types exactly match the names and values
                 in the input list.
@@ -343,7 +343,7 @@ class RedisObject:
         Raises:
             TypeError:
                 If either the input list contains attributes not defined in the
-                subclass consructor, or if the subclass defines mandatory constructor
+                subclass constructor, or if the subclass defines mandatory constructor
                 arguments that are not present in the input list.
         """
         return cls(**to_kwargs(params))  # type: ignore
@@ -442,7 +442,7 @@ class Registration(RedisObject):
 
 @attr.s(auto_attribs=True, frozen=True)
 class ExecutionStep(RedisObject):
-    """Object reprenting a 'step' in the `ExecutionPlan.steps`, attribut of
+    """Object reprenting a 'step' in the `ExecutionPlan.steps`, attribute of
     the return value of `redgrease.client.getexecution` command.
     """
 
@@ -461,8 +461,8 @@ class ExecutionStep(RedisObject):
 
 @attr.s(auto_attribs=True, frozen=True)
 class ExecutionPlan(RedisObject):
-    """Object representing the exetution plan for a given shard in the response from the
-    `redgrease.client.Redis.getexetution` command.
+    """Object representing the execution plan for a given shard in the response from the
+    `redgrease.client.Redis.getexecution` command.
     """
 
     status: ExecutionStatus = attr.ib(converter=ExecutionStatus)
@@ -493,7 +493,7 @@ class ExecutionPlan(RedisObject):
 
     @staticmethod
     def parse(res: Iterable[bytes]) -> Dict[str, "ExecutionPlan"]:
-        """Parse the raw results of `redgrease.client.Redis.getexetution` into a dict
+        """Parse the raw results of `redgrease.client.Redis.getexecution` into a dict
         that maps from shard identifiers to ExecutionStep objects.
 
         Returns:
@@ -510,12 +510,12 @@ class ExecutionPlan(RedisObject):
 
 @attr.s(auto_attribs=True, frozen=True)
 class ShardInfo(RedisObject):
-    """Object representing a shard in the `CluserInfo.shards` attribute in the response
+    """Object representing a shard in the `ClusterInfo.shards` attribute in the response
     from `redgrease.client.Redis.infocluster` command.
     """
 
     id: str = attr.ib(converter=safe_str)
-    """The shard's identifoer int the cluster."""
+    """The shard's identifier int the cluster."""
 
     ip: str = attr.ib(converter=safe_str)
     """The shard's IP address."""

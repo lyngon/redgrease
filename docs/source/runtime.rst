@@ -19,13 +19,13 @@ These "builtin" runtime functions can be used in Gear Functions without importin
    - :ref:`runtime_gearsbuilder`
 
 .. note::
-   With the exception of the :ref:`runtime_gearsbuilder` neithe these functions **cannot** be used in normal application code outside Gear functions running in the RedisGears server runtime.
+   With the exception of the :ref:`runtime_gearsbuilder` neither these functions **cannot** be used in normal application code outside Gear functions running in the RedisGears server runtime.
 
 RedGrease expose its own wrapped versions of these RedisGears runtime functions which, for the most part, behave exactly like the originals, but require you to import them, either from the top level :mod:`redgrease` package, or from the :mod:`redgrease.runtime` module.
 
 But if these are the same, why would you bother with them?
 
-The main reason to use the RedGrease versions, is that they aid during develpent by enabling most Integrated Development Environment (IDE) access to the doc-strings and type-annotations that the RedGrease versions are providing. 
+The main reason to use the RedGrease versions, is that they aid during development by enabling most Integrated Development Environment (IDE) access to the doc-strings and type-annotations that the RedGrease versions are providing. 
 
 This alone can help greatly in developing gears faster (e.g. through auto-complete) and with less errors (e.g. with type checking).
 
@@ -33,7 +33,7 @@ This alone can help greatly in developing gears faster (e.g. through auto-comple
 
    If you are **only** using these wrapped runtime functions in your Gear Functions, and **no other** RedGrease features, then you actually don't need RedGrease to be installed on the RedisGears server runtime. Explicitly setting ``enforce_redgrease`` argument to ``False`` when executing a function script with to :meth:`.Gears.pyexecute`,  will not add any redgrease requirement to the function and simply ignore any explicit runtime imports.
 
-   The section, :ref:`adv_extras`, goes deeper into the detals of the various RedGrease extras options, and their limitations.
+   The section, :ref:`adv_extras`, goes deeper into the details of the various RedGrease extras options, and their limitations.
 
 Another reason to use the functions from RedGrease :mod:`runtime`, is that it contains some slightly enhanced variants of the defaults, like for example, the :ref:`runtime_log`, or have alternative versions, like :ref:`runtime_hashtag3`. 
 
@@ -55,7 +55,7 @@ The RedGrease runtime functions can be imported in a few ways:
    import redgrease.runtime
 
 
-It is possible to load all symbols, using ``*``, although it's generally not a recomended practice, particularly not for the top level ``redgrease`` package.
+It is possible to load all symbols, using ``*``, although it's generally not a recommended practice, particularly not for the top level ``redgrease`` package.
 
 
 .. _runtime_execute:
@@ -65,7 +65,7 @@ execute
 
 RedGrease's version of :func:`.runtime.execute` behaves just like the default.
 
-This function executes an arbitrary Redis command insire Gear functions. 
+This function executes an arbitrary Redis command inside Gear functions. 
 
 .. note::
 
@@ -87,7 +87,7 @@ Example::
 
 In most cases, a more convenient approach is to use :ref:`red_commands` to execute Redis Commands inside Gear Functions.
 
-Longoer Example::
+Longer Example::
 
    from redgrease import GearsBuilder, execute
 
@@ -178,7 +178,7 @@ gearsConfigGet
 
 RedGrease's version of :func:`.runtime.gearsConfigGet` behaves just like the default.
 
-This function fetches the current value of a RedisGears `configuration <https://oss.redislabs.com/redisgears/1.0/configuration.html>`_ options, and returns a defualt value if that key does not exist.
+This function fetches the current value of a RedisGears `configuration <https://oss.redislabs.com/redisgears/1.0/configuration.html>`_ options, and returns a default value if that key does not exist.
 
 Example::
 
@@ -232,7 +232,7 @@ log
 ---
 
 RedGrease's version of :func:`.runtime.log` behaves almost like the default.
-It prints a message to Redis' log, but forces the the argment to a string before logging it. 
+It prints a message to Redis' log, but forces the the argument to a string before logging it. 
 
 (The built in default throws an error if the argument is not a string.)
 
@@ -326,19 +326,19 @@ The :class:`.runtime.GearsBuilder` (as well as its short-form alias ``GB``), beh
 
       fun = GearsBuilder()
       fun.map(...)
-      fun.aggreagateby(...)
+      fun.aggregateby(...)
 
    Creates one single function equivalent to::
 
-      fun = KeysReader().map(...).aggreagateby(...)
+      fun = KeysReader().map(...).aggregateby(...)
 
    Whereas::
 
       sad = KeysReader()
       sad.map(...)
-      sad.aggreagateby(...)
+      sad.aggregateby(...)
 
-   Creates three functions; One named ``sad`` that is just the :ref:`gearfun_reader_keysreader`, one which is ``sad`` with a :ref:`op_map` and one which is ``sad`` with a :ref:`op_aggregateby`. The latter two functions are also not bound to any varibles in this example.
+   Creates three functions; One named ``sad`` that is just the :ref:`gearfun_reader_keysreader`, one which is ``sad`` with a :ref:`op_map` and one which is ``sad`` with a :ref:`op_aggregateby`. The latter two functions are also not bound to any variables in this example.
 
 :class:`.GearsBuilder` API Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
