@@ -439,7 +439,7 @@ class Registration(RedisObject):
     PD: Dict[Any, Any] = attr.ib(converter=parse_PD, repr=False)
     """Private data"""
 
-    ExecutionThreadPool: str = attr.ib(converter=safe_str)
+    ExecutionThreadPool: Optional[str] = attr.ib(converter=safe_str, default=None)
 
 
 @attr.s(auto_attribs=True, frozen=True)
