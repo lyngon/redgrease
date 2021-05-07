@@ -66,7 +66,7 @@ __all__ = [
     "StreamReader",
 ]
 
-# Dynamic / Conditional imports below. (depends on installed packa)
+# Dynamic / Conditional imports below. (depends on installed package)
 
 try:
     # This will fail if redis package is not installed
@@ -133,7 +133,7 @@ if "redisgears" in sys.modules:
         from redisgears import gearsFutureCtx as gearsFuture
 
         # Server Gears runtime environment
-        GEARS_RUNTIME = 1.2
+        GEARS_RUNTIME = (1, 2)
     except ImportError as import_error:
 
         ex = import_error
@@ -146,11 +146,11 @@ if "redisgears" in sys.modules:
                 ) from ex
 
         # Server Gears runtime environment
-        GEARS_RUNTIME = 1.0
+        GEARS_RUNTIME = (1, 0)
 
 else:
     # Dev or Client environment
-    GEARS_RUNTIME = False
+    GEARS_RUNTIME = False  # type: ignore
     # Import placeholder functions and
     from .runtime import (
         GB,

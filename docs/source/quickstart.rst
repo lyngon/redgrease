@@ -78,7 +78,7 @@ Lets break the command down:
 
     .. code-block:: console
 
-        docker run --name redis_gears_cluster --rm -d -p 127.0.0.1:3001:30001 -p 127.0.0.1:3002:30002 -p 127.0.0.1:3003:30003 redislabs/rgcluster:1.0.6
+        docker run --name redis_gears_cluster --rm -d -p 127.0.0.1:30001:30001 -p 127.0.0.1:30002:30002 -p 127.0.0.1:30003:30003 redislabs/rgcluster:1.0.6
 
     This will run a 3-shard cluster exposed locally on ports 30001-30003.
 

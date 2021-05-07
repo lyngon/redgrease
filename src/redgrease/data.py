@@ -439,6 +439,8 @@ class Registration(RedisObject):
     PD: Dict[Any, Any] = attr.ib(converter=parse_PD, repr=False)
     """Private data"""
 
+    ExecutionThreadPool: str = attr.ib(converter=safe_str)
+
 
 @attr.s(auto_attribs=True, frozen=True)
 class ExecutionStep(RedisObject):

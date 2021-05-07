@@ -50,7 +50,7 @@ redgrease_version = os.getenv(
 redgrease_runtime_repo = "lyngon/redgrease"
 redgrease_runtime_image_name = f"{redgrease_runtime_repo}:{redgrease_version}"
 redis_port = "6379/tcp"
-redisgears_repo = os.getenv("REDISGEARS_IMAGE", "redislabs/redisgears:latest")
+redisgears_repo = os.getenv("REDISGEARS_IMAGE", "redislabs/redisgears:1.2.1")
 redisgears_image = docker.fetch(repository=redisgears_repo)
 
 # Note: function scope significantly slows down testing
