@@ -43,6 +43,7 @@ from .reader import (
     ShardsIDReader,
     StreamReader,
 )
+from .runtime import hashtag3, log
 from .sugar import FailurePolicy, KeyType, LogLevel, ReaderType, TriggerMode
 
 __all__ = [
@@ -51,6 +52,8 @@ __all__ = [
     "ClosedGearFunction",
     "GearFunction",
     "OpenGearFunction",
+    "hashtag3",
+    "log",
     "FailurePolicy",
     "KeyType",
     "LogLevel",
@@ -66,7 +69,7 @@ __all__ = [
     "StreamReader",
 ]
 
-# Dynamic / Conditional imports below. (depends on installed packa)
+# Dynamic / Conditional imports below. (depends on installed package)
 
 try:
     # This will fail if redis package is not installed
@@ -113,13 +116,15 @@ try:
 except ModuleNotFoundError:
     pass
 
+
+GEARS_RUNTIME = None
+
 # Use either the real or mock (placeholder) implementations of the
 # Redis Gears Python environment top level builtin functions
 # Depending on if the module is loaded in a 'redisgears' environment
 # or not (e.g. dev or client)
 if "redisgears" in sys.modules:
-    # Server Gears runtime environment
-    GEARS_RUNTIME = True
+
     # Import the default functions and classes
     # pyright: reportMissingImports=false
     from __main__ import GB as GB
@@ -129,11 +134,27 @@ if "redisgears" in sys.modules:
     from redisgears import atomicCtx as atomic
     from redisgears import executeCommand as execute
     from redisgears import getMyHashTag as hashtag
-#     from redisgears import log as log
+
+    try:
+        from redisgears import gearsFutureCtx as gearsFuture
+
+        # Server Gears runtime environment
+        GEARS_RUNTIME = (1, 2)
+    except ImportError as import_error:
+
+        ex = import_error
+
+        class gearsFuture:  # type: ignore
+            def __init__(self, *args, **kwargs) -> None:
+                raise NotImplementedError(
+                    "gearsFuture not defined. "
+                    "Verify that you are using RedisGears >= 1.2.0"
+                ) from ex
+
+        # Server Gears runtime environment
+        GEARS_RUNTIME = (1, 0)
 
 else:
-    # Dev or Client environment
-    GEARS_RUNTIME = False
     # Import placeholder functions and
     from .runtime import (
         GB,
@@ -142,10 +163,12 @@ else:
         configGet,
         execute,
         gearsConfigGet,
+        gearsFuture,
         hashtag,
     )
 
-from .runtime import hashtag3, log
+    GEARS_RUNTIME = False  # type: ignore
+
 
 __all__ += [
     "GB",
@@ -155,7 +178,6 @@ __all__ += [
     "execute",
     "gearsConfigGet",
     "hashtag",
-    "hashtag3",
-    "log",
+    "gearsFuture",
     "GEARS_RUNTIME",
 ]

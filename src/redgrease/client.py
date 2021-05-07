@@ -82,6 +82,19 @@ RegistrationID = Union[bytes, str, redgrease.data.ExecID, redgrease.data.Registr
 """Type alias for valid registration identifiers"""
 
 
+get_python_version = """
+import sys
+
+GearsBuilder("ShardsIDReader").map(lambda shard: tuple(sys.version_info)).run()
+"""
+
+get_gears_version = """
+import redgrease
+
+GearsBuilder("ShardsIDReader").map(lambda shard: redgrease.GEARS_RUNTIME or ()).run()
+"""
+
+
 class Gears:
     """Client class for Redis Gears commands.
 
@@ -169,6 +182,9 @@ class Gears:
 
         self._redis = redis
         self.config = redgrease.config.Config(redis)
+
+        self._python_version = None
+        self._gears_version = None
 
     def _ping(self) -> bool:
         """Test server liveness/connectivity
@@ -656,6 +672,24 @@ class Gears:
             id = id.id
 
         return self._redis.execute_command("RG.UNREGISTER", to_redis_type(id))
+
+    def python_version(self):
+        if self._python_version is None:
+            ver = self.pyexecute(get_python_version)
+            if isinstance(ver, list):
+                ver = ver[0]
+            self._python_version = ast.literal_eval(safe_str(ver))
+
+        return self._python_version
+
+    def gears_version(self):
+        if self._gears_version is None:
+            ver = self.pyexecute(get_gears_version, enforce_redgrease=True)
+            if isinstance(ver, list):
+                ver = ver[0]
+            self._gears_version = ast.literal_eval(safe_str(ver))
+
+        return self._gears_version
 
 
 class RedisGearsModule:

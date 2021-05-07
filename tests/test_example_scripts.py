@@ -31,6 +31,7 @@ import ast
 import os
 import re
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
@@ -264,3 +265,36 @@ def test_example_reliablekeyspacenotification(
     _, msg_envelope = events[0]
     assert safe_str(msg_envelope[b"key"]) == "person:anders"
     assert safe_str(msg_envelope[b"value"]) == safe_str(msg)
+
+
+@pytest.mark.parametrize("enforce_redgrease", [True])
+@pytest.mark.parametrize(
+    "script_file,vanilla",
+    [
+        (gear_script("redislabs_example_gearsFuture.py"), True),
+        (gear_script("redislabs_mod_example_gearsFuture.py"), False),
+    ],
+    ids=lambda arg: Path(arg).name
+    if isinstance(arg, str) and arg.endswith(".py")
+    else None,
+)
+@pytest.mark.xfail(
+    True,
+    reason="RedisGears Version??",
+    raises=Exception,
+)
+def test_example_gearsFuture(
+    rg: RedisGears, script_file: str, vanilla: bool, enforce_redgrease
+):
+    ttl = 3
+    res = rg.gears.pyexecute(script_file, enforce_redgrease=enforce_redgrease)
+    assert res.value is True
+
+    start_time = datetime.now()
+    rg.set("Foo", "bar")
+    rg.expire("Foo", ttl)
+    res = rg.gears.trigger("WaitForKeyExpiration", "Foo")
+    duration = datetime.now() - start_time
+    assert res
+    assert res == "Foo expired"
+    assert duration.seconds >= ttl
