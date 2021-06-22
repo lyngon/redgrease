@@ -51,7 +51,7 @@ import fnmatch
 import logging
 
 # import warnings
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 import redis
 
@@ -70,6 +70,7 @@ from redgrease.utils import (
     list_parser,
     safe_bool,
     safe_str,
+    to_dict,
     to_redis_type,
 )
 
@@ -183,8 +184,8 @@ class Gears:
         self._redis = redis
         self.config = redgrease.config.Config(redis)
 
-        self._python_version = None
-        self._gears_version = None
+        self._python_version: Optional[Tuple] = None
+        self._gears_version: Optional[Tuple] = None
 
     def _ping(self) -> bool:
         """Test server liveness/connectivity
@@ -673,7 +674,7 @@ class Gears:
 
         return self._redis.execute_command("RG.UNREGISTER", to_redis_type(id))
 
-    def python_version(self):
+    def python_version(self) -> Optional[Tuple]:
         if self._python_version is None:
             ver = self.pyexecute(get_python_version)
             if isinstance(ver, list):
@@ -682,12 +683,33 @@ class Gears:
 
         return self._python_version
 
-    def gears_version(self):
+    def gears_version(self) -> Optional[Tuple]:
         if self._gears_version is None:
-            ver = self.pyexecute(get_gears_version, enforce_redgrease=True)
-            if isinstance(ver, list):
-                ver = ver[0]
-            self._gears_version = ast.literal_eval(safe_str(ver))
+
+            module_list = [
+                to_dict(
+                    mod,
+                    key_transform=safe_str,
+                    val_transform=safe_str,
+                )
+                for mod in self._redis.execute_command("MODULE", "LIST")
+            ]
+
+            for module_info in module_list:
+                if module_info.get("name", None) == "rg":
+                    try:
+                        ver_int = int(module_info["ver"])
+                        major, minor_build = divmod(ver_int, 10000)
+                        minor, build = divmod(minor_build, 100)
+                        self._gears_version = (major, minor, build)
+
+                    except (KeyError, ValueError):
+                        pass
+
+            # ver = self.pyexecute(get_gears_version, enforce_redgrease=True)
+            # if isinstance(ver, list):
+            #     ver = ver[0]
+            # self._gears_version = ast.literal_eval(safe_str(ver))
 
         return self._gears_version
 
@@ -714,6 +736,16 @@ class RedisGearsModule:
 class RedisModules(RedisGearsModule):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
+
+    def module_list(self):
+        return [
+            to_dict(
+                mod,
+                key_transform=safe_str,
+                val_transform=safe_str,
+            )
+            for mod in self.execute_command("MODULE", "LIST")
+        ]
 
 
 class Redis(redis.Redis, RedisModules):

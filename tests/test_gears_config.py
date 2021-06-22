@@ -26,7 +26,6 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-
 import pytest
 import redis.exceptions
 
@@ -440,7 +439,13 @@ def test_UnknownConfigName(rg: RedisGears, var, new_val):
     attr_name = var(name)  # For setting/getting by string, well use a unique name
     assert rg.gears.config.set({attr_name: new_val})
 
-    assert rg.gears.config.get_single(attr_name) == raw(new_val)
+    # Special case for RedisGears version 1.2.0 due to bug (issue #554)
+    # Issue is fixed but Official Docker container does not seem to have been updated.
+    if rg.gears.gears_version != (1, 2, 0):
+        assert rg.gears.config.get_single(attr_name) == raw(new_val)
+    else:
+        with pytest.raises(redis.exceptions.ResponseError):
+            rg.gears.config.get_single(attr_name) == raw(new_val)
 
 
 # Interestingly, Gears settings are allowed to be empty strings,
