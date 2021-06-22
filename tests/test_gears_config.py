@@ -443,9 +443,6 @@ def test_UnknownConfigName(rg: RedisGears, var, new_val):
     # Issue is fixed but Official Docker container does not seem to have been updated.
     if rg.gears.gears_version() != (1, 2, 0):
         assert rg.gears.config.get_single(attr_name) == raw(new_val)
-    else:
-        with pytest.raises(redis.exceptions.ResponseError):
-            rg.gears.config.get_single(attr_name)
 
 
 # Interestingly, Gears settings are allowed to be empty strings,
