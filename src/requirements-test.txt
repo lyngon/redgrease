@@ -9,3 +9,5 @@ pytest-docker-tools
 pytest-sugar
 pytest-timeout
 pytest-xdist[psutil]==2.0.0
+types-PyYAML
+types-redis
