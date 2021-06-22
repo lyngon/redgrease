@@ -916,14 +916,14 @@ class atomic:
     def __init__(self):
         from redisgears import atomicCtx as redisAtomic
 
-        self.atomic = redisAtomic()
+        self._atomic = redisAtomic()
 
     def __enter__(self):
-        self.atomic.__enter__()
+        self._atomic.__enter__()
         return self
 
     def __exit__(self, *args, **kwargs):
-        self.atomic.__exit__(*args, **kwargs)
+        self._atomic.__exit__(*args, **kwargs)
 
 
 def execute(command: str, *args) -> bytes:
@@ -1022,6 +1022,60 @@ def gearsConfigGet(key: str, default=None) -> str:
     from __main__ import gearsConfigGet as redisGearsConfigGet
 
     return redisGearsConfigGet(key)
+
+
+class gearsFuture:
+    """The gearsFuture object allows another thread/process to process the
+    record.
+
+    Returning this object from a step's operation tells RedisGears to suspend execution
+    until background processing had finished/failed.
+
+    The gearsFuture object provides two control methods: ``continueRun()`` and
+    ``continueFailed()``. Both methods are thread-safe and can be called at any time to
+    signal that the background processing has finished.
+
+    ``continueRun()`` signals success and its argument is a record for the main process.
+    ``continueFailed()`` reports a failure to the main process and its argument is a
+    string describing the failure.
+
+    Calling gearsFuture() is supported only from the context of the following
+    operations:
+
+    * :ref:`Map`
+    * flatmap
+    * filter
+    * foreach
+    * aggregate
+    * aggregateby
+
+    An attempt to create a ``gearsFuture`` object outside of the supported contexts
+    will result in an exception.
+    """
+
+    def __init__(self):
+        from redisgears import gearsFutureCtx as redisGearsFuture
+
+        self._gearsFuture = redisGearsFuture()
+
+    def continueRun(self, record) -> None:
+        """Signals success and its argument is a record for the main process.
+
+        Args:
+            record (Any):
+                Record to yield to the blocked Gear function.
+        """
+        return self._gearsFuture.continueRun(record)
+
+    def continueFail(self, message: str):
+        """Reports a failure to the main process and its argument is a string describing
+        the failure.
+
+        Args:
+            message (str):
+                Message describing the failure.
+        """
+        return self._gearsFuture.continueFail(message)
 
 
 def run(

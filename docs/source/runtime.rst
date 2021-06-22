@@ -15,6 +15,7 @@ These "builtin" runtime functions can be used in Gear Functions without importin
    - :ref:`runtime_gearsConfigGet`
    - :ref:`runtime_hashtag`
    - :ref:`runtime_log`
+   - :ref:`runtime_gearsfuture`
    - :ref:`runtime_gearsbuilder`
 
 .. note::
@@ -244,9 +245,66 @@ Example::
 
 
 ``log`` API Reference
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: redgrease.runtime.log
+
+.. _runtime_gearsfuture:
+
+gearsFuture
+-----------
+
+The :class:`.gearsFuture` object allows another thread/process to process the
+record.
+
+Returning this object from a step's operation tells RedisGears to suspend execution
+until background processing had finished/failed.
+
+The gearsFuture object provides two control methods: :meth:`.gearsFuture.continueRun` and
+:meth:`.gearsFuture.continueFailed`. Both methods are thread-safe and can be called at any time to
+signal that the background processing has finished.
+
+:meth:`.gearsFuture.continueRun` signals success and its argument is a record for the main process.
+:meth:`.gearsFuture.continueFailed` reports a failure to the main process and its argument is a
+string describing the failure.
+
+Calling gearsFuture() is supported only from the context of the following
+operations:
+
+* :ref:`op_map`
+* :ref:`op_flatmap`
+* :ref:`op_filter`
+* :ref:`op_foreach`
+* :ref:`op_aggregate`
+* :ref:`op_aggregateby`
+
+An attempt to create a :class:`.gearsFuture` object outside of the supported contexts
+will result in an exception.
+
+.. note::
+
+   :class:`.gearsFuture` was introduced in RedisGears 1.0.2.
+
+Example:
+~~~~~~~~
+
+.. literalinclude:: ../../tests/gear_scripts/builtin_runtime_func_gearsFuture.py
+
+
+gearsFuture with Python Async Await
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:class:`.gearsFuture` is also integrated seamlessly with Python's async/await syntax,
+so it possible to do the following:
+
+.. literalinclude:: ../../tests/gear_scripts/builtin_runtime_func_await.py
+
+
+``gearsFuture`` API Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: redgrease.runtime.gearsFuture
+   :members:  
 
 
 .. _runtime_gearsbuilder:
