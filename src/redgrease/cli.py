@@ -42,7 +42,7 @@ args = configargparse.ArgParser(
     "executes them in a Redis Gears instance or cluster. "
     "Can optionally run continiously, montoring and re-loading scripts "
     "whenever changes are detected.",
-    default_config_files=["./*.conf", "/etc/redgrease/conf.d/*.conf"],
+    default_config_files=["./redgrease.conf", "/etc/redgrease/conf.d/*.conf"],
 )
 
 args.add_argument(
@@ -163,7 +163,7 @@ args.add_argument(
 )
 
 
-config = args.parse_args()
+config = args.parse_known_args()
 
 redgrease.formatting.initialize_logger(config=config.log_config)
 
