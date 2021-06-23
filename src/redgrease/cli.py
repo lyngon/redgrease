@@ -163,7 +163,7 @@ args.add_argument(
 )
 
 
-config = args.parse_known_args()
+config, unrecognized = args.parse_known_args()
 
 redgrease.formatting.initialize_logger(config=config.log_config)
 
@@ -172,6 +172,10 @@ log = logging.getLogger(__name__)
 
 def main():
     log.debug(config)
+
+    if unrecognized:
+        log.warn(f"Unrecognized configuration options: {len(unrecognized)}")
+
     loader = redgrease.loader.GearsLoader(
         script_pattern=config.script_pattern,
         requirements_pattern=config.requirements_pattern,
