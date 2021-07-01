@@ -46,11 +46,11 @@ args = configargparse.ArgParser(
 )
 
 args.add_argument(
-    "directories",
-    metavar="dir_path",
+    "paths",
+    metavar="path",
     nargs="+",
     type=pathlib.Path,
-    help="One or more directories containing Redis Gears scripts to watch",
+    help="One or more files or directories of Redis Gears scripts and/or requirements.",
 )
 
 args.add_argument(
@@ -70,6 +70,7 @@ args.add_argument(
     default=redgrease.loader.default_index_prefix,
     help="Redis key prefix added to the index of monitored/executed script " "files.",
 )
+
 args.add_argument(
     "-r",
     "--recursive",
@@ -186,8 +187,14 @@ def main():
         port=config.port,
         observe=config.watch,
     )
-    for directory in config.directories:
-        loader.add_directory(directory=directory, recursive=config.recursive)
+
+    for path in config.paths:
+        if path.is_directory:
+            loader.add_directory(directory=path, recursive=config.recursive)
+        elif path.is_file:
+            loader.add_file(file=path)
+        else:
+            raise FileNotFoundError(f"No such file or directory: {path}")
 
     if loader.observer:
         log.info("Starting directory observer!")
