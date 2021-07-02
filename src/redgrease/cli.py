@@ -189,9 +189,9 @@ def main():
     )
 
     for path in config.paths:
-        if path.is_directory:
+        if path.is_dir():
             loader.add_directory(directory=path, recursive=config.recursive)
-        elif path.is_file:
+        elif path.is_file():
             loader.add_file(file=path)
         else:
             raise FileNotFoundError(f"No such file or directory: {path}")
