@@ -56,7 +56,7 @@ default_requirements_pattern = "*requirements*.txt"
 default_unblocking_pattern = "unblock"
 """The default pattern (within script files) that indicate 'unblocking' load"""
 
-default_ignore_patterns: List[str] = []
+default_ignore_patterns: List[str] = ["_*"]
 """Default list of file patterns to ignore"""
 
 # Regex type changed
