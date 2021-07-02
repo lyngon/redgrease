@@ -213,17 +213,15 @@ class GearsLoader:
         if not isinstance(file, Path):
             file = Path(str(file))
 
-        for requirements_file_path in file.parent.glob(self.requirements_pattern):
-            self.update_dependencies(requirements_file_path)
+        if fnmatch(file.name, self.requirements_pattern):
+            self.update_dependencies(file)
+        else:
+            self.register_script(file)
 
-        # find and run/register all script files in the watch directory
-        for script_file_path in file.parent.glob(self.script_pattern):
-            self.register_script(script_file_path)
+            if self.observer is not None:
+                self.observer.schedule(self.event_handler, file)
 
-        if self.observer is not None:
-            self.observer.schedule(self.event_handler, file)
-
-        self.directories.append(file)
+            self.directories.append(file)
 
     def add_directory(
         self, directory: Union[Path, str], recursive: bool = False
