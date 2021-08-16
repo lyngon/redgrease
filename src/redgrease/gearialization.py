@@ -101,7 +101,7 @@ def serialize_gear_function(gear_function: redgrease.gears.GearFunction) -> str:
     return f"""
 import redgrease.gearialization
 import redgrease.runtime
-gear_function = redgrease.gearialization.deseralize_gear_function(
+gear_function = redgrease.gearialization.deserialize_gear_function(
     {cloudpickle.dumps(gear_function, protocol=4)},
     python_version={tuple(sys.version_info)},
 )
