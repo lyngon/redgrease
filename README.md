@@ -274,7 +274,7 @@ docker run -p 30001:30001 -p 30002:30002 -p 30003:30003 redislabs/rgcluster
 For more advanced deployments of Redis with Gears, please refer to the [official Gears installation documentation](https://docs.redislabs.com/latest/modules/redisgears/installing-redisgears/).
 
 ### Redgrease Runtime Package
-As for RedGrease, it is recommended to use the `redgreese[runtime]` package as a server side dependency. 
+As for RedGrease, it is recommended to use the `redgrease[runtime]` package as a server side dependency. 
 This installs dependencies for the all the server side features such as server side Redis commands and the runtime for gears constructed with the Remote Gears Builder.
 
 The easiest way of installing the latest stable runtime package is by simply setting the `enforce_redgrease` argument of `pyexecute` to `True`.
